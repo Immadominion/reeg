@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fromHex } from '@mysten/sui/utils';
@@ -62,54 +70,65 @@ export function registerCheckpoint(program: Command): void {
       return;
     }
 
-    // The bundle sits beside the workdir, not inside it, so the snapshot never captures itself.
-    const bundlePath = join(dirname(machine.workdir), 'checkpoint.bundle');
-    // Capture the agent memory directory only when it holds something, so a memory-less run keeps
-    // the same manifest shape (memory_pointer null) and the filesystem story stands on its own.
-    const memory = memoryFor(machineId);
-    const captureMemory = existsSync(memory) && readdirSync(memory).length > 0;
-    const info = await engineCheckpoint(
-      config.engineBin,
-      machine.workdir,
-      bundlePath,
-      logFor(machineId),
-      captureMemory ? memory : undefined,
-    );
-    const bundleBytes = readFileSync(bundlePath);
+    // The bundle is the engine's PLAINTEXT snapshot. Stage it in a fresh owner-only temp dir
+    // (mkdtemp is mode 0700, so a co-tenant on a shared host cannot read it) and delete it as
+    // soon as it is encrypted. It also never lives inside the workdir, so it cannot self-capture.
+    const bundleDir = mkdtempSync(join(tmpdir(), 'reeg-checkpoint-'));
+    try {
+      const bundlePath = join(bundleDir, 'checkpoint.bundle');
+      // Capture the agent memory directory only when it holds something, so a memory-less run keeps
+      // the same manifest shape (memory_pointer null) and the filesystem story stands on its own.
+      const memory = memoryFor(machineId);
+      const captureMemory = existsSync(memory) && readdirSync(memory).length > 0;
+      const info = await engineCheckpoint(
+        config.engineBin,
+        machine.workdir,
+        bundlePath,
+        logFor(machineId),
+        captureMemory ? memory : undefined,
+      );
+      const bundleBytes = readFileSync(bundlePath);
 
-    const signer = loadKeypair(operator);
-    const result = await checkpoint(
-      { data: bundleBytes, manifestHash: fromHex(info.manifestHashHex) },
-      {
-        machineId,
-        packageId: config.packageId,
-        // A shareable Machine encrypts under its policy identity so grantees can decrypt.
-        policyId: machine.policyId,
-        threshold: config.sealThreshold,
-        epochs: Number(options.epochs ?? '1'),
-        payloadHash: fromHex(info.payloadHashHex),
-      },
-      { crypto, storage, sui, signer },
-    );
+      const signer = loadKeypair(operator);
+      const result = await checkpoint(
+        { data: bundleBytes, manifestHash: fromHex(info.manifestHashHex) },
+        {
+          machineId,
+          packageId: config.packageId,
+          // A shareable Machine encrypts under its policy identity so grantees can decrypt.
+          policyId: machine.policyId,
+          threshold: config.sealThreshold,
+          epochs: Number(options.epochs ?? '1'),
+          payloadHash: fromHex(info.payloadHashHex),
+        },
+        { crypto, storage, sui, signer },
+      );
 
-    const epochs = Number(options.epochs ?? '1');
-    console.log(`Snapshot saved for ${machineId}`);
-    console.log(`  manifest: ${info.manifestHashHex}`);
-    if (info.memoryPointer) {
-      console.log(`  memory:   ${info.memoryPointer} (captured and verified with the environment)`);
+      const epochs = Number(options.epochs ?? '1');
+      console.log(`Snapshot saved for ${machineId}`);
+      console.log(`  manifest: ${info.manifestHashHex}`);
+      if (info.memoryPointer) {
+        console.log(
+          `  memory:   ${info.memoryPointer} (captured and verified with the environment)`,
+        );
+      }
+      console.log(`  blob:     ${result.blobId}`);
+      console.log(`  bytes:    ${info.bundleBytes}`);
+      console.log(`  tx:       ${result.digest}`);
+      // Retention is a Walrus storage-epoch policy you set with --epochs; the on-chain provenance
+      // head is permanent. Surfaced plainly so a compliance buyer sees the real window and cost.
+      console.log(
+        `  retention: ${epochs} Walrus epoch${epochs === 1 ? '' : 's'} (~${epochs * 2} weeks on testnet); EU AI Act Art. 12 wants >= ~6 months (~13 epochs, --epochs 13)`,
+      );
+      console.log('  cost: WAL for storage (scales with size x epochs) plus a little SUI gas');
+      // The backup key is the only way to recover the ciphertext if Seal access is lost. Never logged.
+      console.log(
+        '  (a disaster-recovery backup key was produced in memory; store it out of band)',
+      );
+      void result.backupKey;
+    } finally {
+      rmSync(bundleDir, { recursive: true, force: true });
     }
-    console.log(`  blob:     ${result.blobId}`);
-    console.log(`  bytes:    ${info.bundleBytes}`);
-    console.log(`  tx:       ${result.digest}`);
-    // Retention is a Walrus storage-epoch policy you set with --epochs; the on-chain provenance
-    // head is permanent. Surfaced plainly so a compliance buyer sees the real window and cost.
-    console.log(
-      `  retention: ${epochs} Walrus epoch${epochs === 1 ? '' : 's'} (~${epochs * 2} weeks on testnet); EU AI Act Art. 12 wants >= ~6 months (~13 epochs, --epochs 13)`,
-    );
-    console.log('  cost: WAL for storage (scales with size x epochs) plus a little SUI gas');
-    // The backup key is the only way to recover the ciphertext if Seal access is lost. Never logged.
-    console.log('  (a disaster-recovery backup key was produced in memory; store it out of band)');
-    void result.backupKey;
   });
 }
 
@@ -143,22 +162,29 @@ export function registerRestore(program: Command): void {
       restore({ machineId, packageId: config.packageId }, { sui, storage, crypto, signer }),
     );
 
-    const bundlePath = join(
-      tmpdir(),
-      `reeg-restore-${machineId.replace(/[^a-zA-Z0-9]/g, '')}.bundle`,
-    );
-    writeFileSync(bundlePath, bundle);
-    // Rebuild agent memory beside the working directory (a sibling `memory` dir), matching how a
-    // Machine's workdir and memory sit side by side. The engine restores it only if the bundle
-    // carries a memory pointer, so a memory-less run is unaffected.
-    const memoryDest = join(dirname(dest), 'memory');
-    const info = await engineRestore(config.engineBin, bundlePath, dest, memoryDest);
+    // `bundle` is decrypted PLAINTEXT. Stage it in a fresh owner-only temp dir (mkdtemp is mode
+    // 0700) with an owner-only, must-not-exist file (mode 0600, flag 'wx' = O_CREAT|O_EXCL, which
+    // defeats a symlink/pre-create swap on a guessable path), and delete the whole dir afterwards.
+    // Without this the decrypted snapshot would sit world-readable at a predictable path in a
+    // shared /tmp, undoing Seal's encryption.
+    const bundleDir = mkdtempSync(join(tmpdir(), 'reeg-restore-'));
+    try {
+      const bundlePath = join(bundleDir, 'checkpoint.bundle');
+      writeFileSync(bundlePath, bundle, { mode: 0o600, flag: 'wx' });
+      // Rebuild agent memory beside the working directory (a sibling `memory` dir), matching how a
+      // Machine's workdir and memory sit side by side. The engine restores it only if the bundle
+      // carries a memory pointer, so a memory-less run is unaffected.
+      const memoryDest = join(dirname(dest), 'memory');
+      const info = await engineRestore(config.engineBin, bundlePath, dest, memoryDest);
 
-    console.log(`Restored ${machineId} into ${dest}`);
-    console.log(`  manifest: ${info.manifestHashHex}`);
-    console.log(`  root:     ${info.workdirRootHashHex}`);
-    if (info.memoryPointer) {
-      console.log(`  memory:   ${info.memoryPointer} -> ${memoryDest}`);
+      console.log(`Restored ${machineId} into ${dest}`);
+      console.log(`  manifest: ${info.manifestHashHex}`);
+      console.log(`  root:     ${info.workdirRootHashHex}`);
+      if (info.memoryPointer) {
+        console.log(`  memory:   ${info.memoryPointer} -> ${memoryDest}`);
+      }
+    } finally {
+      rmSync(bundleDir, { recursive: true, force: true });
     }
   });
 }
