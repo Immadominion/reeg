@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typescript:
+    name: TypeScript (build, lint, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm test
+
+  rust:
+    name: Rust engine (fmt, clippy, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+      - run: cargo fmt --manifest-path engine/Cargo.toml --check
+      - run: cargo clippy --manifest-path engine/Cargo.toml --workspace -- -D warnings
+      - run: cargo test --manifest-path engine/Cargo.toml --workspace
+
+  move:
+    name: Move package (build, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # Install the Sui CLI. Pin REEG_SUI_VERSION to track the toolchain we build against.
+      - name: Install Sui CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/MystenLabs/suiup/main/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          suiup install sui
+      - run: sui move build --path move
+      - run: sui move test --path move

@@ -1,0 +1,24 @@
+{
+  "name": "@reeg/indexer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Display-only indexer of Machine + provenance events. Rebuildable; never on the trust path.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mysten/sui": "^2.17.0",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

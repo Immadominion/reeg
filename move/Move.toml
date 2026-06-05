@@ -1,0 +1,8 @@
+[package]
+name = "reeg"
+edition = "2024"
+# The Sui framework is an implicit system dependency on current toolchains, so it is not
+# declared here. published-at is set after the first publish (scripts/publish-package).
+
+[addresses]
+reeg = "0x0"

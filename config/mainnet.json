@@ -1,0 +1,17 @@
+{
+  "network": "mainnet",
+  "sui": {
+    "rpcUrl": "https://fullnode.mainnet.sui.io:443"
+  },
+  "walrus": {
+    "aggregatorUrl": "https://aggregator.walrus-mainnet.walrus.space",
+    "publisherUrl": "https://publisher.walrus-mainnet.walrus.space"
+  },
+  "seal": {
+    "keyServerObjectIds": []
+  },
+  "reeg": {
+    "packageId": "0x0",
+    "machinePolicyId": "0x0"
+  }
+}

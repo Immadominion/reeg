@@ -1,0 +1,21 @@
+{
+  "network": "testnet",
+  "sui": {
+    "rpcUrl": "https://fullnode.testnet.sui.io:443"
+  },
+  "walrus": {
+    "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space",
+    "publisherUrl": "https://publisher.walrus-testnet.walrus.space",
+    "uploadRelayHost": "https://upload-relay.testnet.walrus.space"
+  },
+  "seal": {
+    "keyServerObjectIds": [
+      "0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75"
+    ],
+    "threshold": 1
+  },
+  "reeg": {
+    "packageId": "0x4c86e0c440c07c83c0b8372b90918f35380dc0a9ec830c77e0f172ff232b6f28",
+    "machinePolicyId": "0x0"
+  }
+}

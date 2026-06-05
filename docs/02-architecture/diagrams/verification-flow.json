@@ -1,0 +1,99 @@
+{
+    "$schema": "reeg-diagram/1.0",
+    "title": "Verification Flow",
+    "description": "How an auditor proves a run happened as claimed, with the Reeg server offline.",
+    "render_hint": "Flowchart. Decision diamonds for each check; all must pass.",
+    "premise": "Reeg holds no privileged secret. Every input to verification is public on Sui or Walrus.",
+    "inputs": [
+        {
+            "id": "machine",
+            "label": "Machine object (Sui)",
+            "fields": [
+                "provenance_head",
+                "checkpoint blob_id",
+                "manifest_hash",
+                "policy ref"
+            ]
+        },
+        {
+            "id": "blob",
+            "label": "Checkpoint blob (Walrus)",
+            "fields": [
+                "ciphertext",
+                "blob_id = content hash"
+            ]
+        },
+        {
+            "id": "manifest",
+            "label": "Manifest (in checkpoint)",
+            "fields": [
+                "workdir_root_hash",
+                "command log hash",
+                "parent pointer"
+            ]
+        }
+    ],
+    "steps": [
+        {
+            "n": 1,
+            "node": "start",
+            "type": "start",
+            "label": "Auditor has a Machine id + a claimed result"
+        },
+        {
+            "n": 2,
+            "node": "readchain",
+            "type": "process",
+            "label": "Read Machine object + walk provenance chain from head"
+        },
+        {
+            "n": 3,
+            "node": "checkchain",
+            "type": "decision",
+            "label": "Each entry hashes to its parent? (hash-chained head)",
+            "yes": "readblob",
+            "no": "fail"
+        },
+        {
+            "n": 4,
+            "node": "readblob",
+            "type": "process",
+            "label": "Read checkpoint blob from Walrus by blob_id"
+        },
+        {
+            "n": 5,
+            "node": "checkblob",
+            "type": "decision",
+            "label": "blob_id == hash(ciphertext)? (Walrus content-addressing)",
+            "yes": "decrypt",
+            "no": "fail"
+        },
+        {
+            "n": 6,
+            "node": "decrypt",
+            "type": "process",
+            "label": "If authorized: Seal decrypts (policy approves auditor); else verify hashes only"
+        },
+        {
+            "n": 7,
+            "node": "checkmanifest",
+            "type": "decision",
+            "label": "manifest_hash matches Machine object? workdir_root_hash matches files?",
+            "yes": "pass",
+            "no": "fail"
+        },
+        {
+            "n": 8,
+            "node": "pass",
+            "type": "end-ok",
+            "label": "VERIFIED: this exact state existed and is anchored on Sui"
+        },
+        {
+            "n": 9,
+            "node": "fail",
+            "type": "end-bad",
+            "label": "REJECTED: claim does not match the anchored record"
+        }
+    ],
+    "moat_note": "Reeg cannot forge a record after the fact and the auditor needs nothing from Reeg to check it."
+}

@@ -1,0 +1,6 @@
+# Pin the Rust toolchain so the snapshot engine builds identically everywhere.
+# Reproducible restore depends on a stable compiler; see docs/03-engineering/tech-stack.md.
+[toolchain]
+channel = "1.95.0"
+components = ["rustfmt", "clippy"]
+profile = "default"

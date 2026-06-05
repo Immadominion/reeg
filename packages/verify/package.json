@@ -1,0 +1,34 @@
+{
+  "name": "@reeg/verify",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Independent verifier for Reeg: re-walk a Machine's provenance and confirm its on-chain anchors from public Sui + Walrus data, with no Reeg backend.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mysten/bcs": "^2.0.5",
+    "@mysten/sui": "^2.17.0",
+    "@noble/hashes": "^2.2.0",
+    "@reeg/chain": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

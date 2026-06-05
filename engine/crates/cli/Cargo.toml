@@ -1,0 +1,18 @@
+[package]
+name = "reeg-engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "reeg-engine"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.102"
+clap = { version = "4.6.1", features = ["derive"] }
+hex = "0.4.3"
+reeg-runtime = { path = "../runtime" }
+serde_json = "1.0.150"
+tempfile = "3.27.0"

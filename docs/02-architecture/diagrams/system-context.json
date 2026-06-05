@@ -1,0 +1,104 @@
+{
+    "$schema": "reeg-diagram/1.0",
+    "title": "Reeg System Context",
+    "description": "Top-level view: who and what interacts with Reeg.",
+    "render_hint": "C4 system-context style. Boxes = systems/actors, edges = interactions.",
+    "nodes": [
+        {
+            "id": "agent",
+            "type": "actor",
+            "label": "AI Agent",
+            "note": "Any client agent doing real work"
+        },
+        {
+            "id": "operator",
+            "type": "actor",
+            "label": "Agent operator / team",
+            "note": "Owns the Machine, runs agents"
+        },
+        {
+            "id": "auditor",
+            "type": "actor",
+            "label": "Auditor / counterparty",
+            "note": "Verifies runs independently"
+        },
+        {
+            "id": "reeg",
+            "type": "system",
+            "label": "Reeg",
+            "note": "Owned, verifiable agent environments"
+        },
+        {
+            "id": "sui",
+            "type": "external",
+            "label": "Sui L1",
+            "note": "Machine objects, policies, provenance anchor"
+        },
+        {
+            "id": "walrus",
+            "type": "external",
+            "label": "Walrus",
+            "note": "Encrypted checkpoint blobs"
+        },
+        {
+            "id": "seal",
+            "type": "external",
+            "label": "Seal",
+            "note": "Client-side encryption + access policy"
+        },
+        {
+            "id": "memwal",
+            "type": "external",
+            "label": "MemWal",
+            "note": "Agent memory subsystem"
+        }
+    ],
+    "edges": [
+        {
+            "from": "agent",
+            "to": "reeg",
+            "label": "runs inside a Machine (exec, fs)"
+        },
+        {
+            "from": "operator",
+            "to": "reeg",
+            "label": "creates/forks/grants/revokes Machines"
+        },
+        {
+            "from": "auditor",
+            "to": "reeg",
+            "label": "verifies + restores a run (no Reeg server)"
+        },
+        {
+            "from": "reeg",
+            "to": "sui",
+            "label": "register Machine, anchor provenance"
+        },
+        {
+            "from": "reeg",
+            "to": "walrus",
+            "label": "store/read checkpoint blobs"
+        },
+        {
+            "from": "reeg",
+            "to": "seal",
+            "label": "encrypt/decrypt, evaluate policy"
+        },
+        {
+            "from": "reeg",
+            "to": "memwal",
+            "label": "agent memory read/write"
+        },
+        {
+            "from": "auditor",
+            "to": "sui",
+            "label": "read Machine object directly"
+        },
+        {
+            "from": "auditor",
+            "to": "walrus",
+            "label": "read blob directly"
+        }
+    ]
+}
+

@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# rust
+engine/target/
+target/
+
+# move
+move/build/
+
+# env and secrets (never commit keys)
+.env
+.env.*
+!.env.example
+*.key
+*.keystore
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# logs
+*.log
+npm-debug.log*
+
+# local scratch and unrelated tooling (never part of the published repo)
+tmp/
+gstack/
+evidence-*.json
+*.bundle

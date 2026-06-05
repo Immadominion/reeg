@@ -1,0 +1,34 @@
+{
+  "name": "@reeg/sdk",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Public TypeScript SDK for Reeg: create, run, checkpoint, restore, fork, verify.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mysten/sui": "^2.17.0",
+    "@reeg/chain": "workspace:*",
+    "@reeg/crypto": "workspace:*",
+    "@reeg/storage": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

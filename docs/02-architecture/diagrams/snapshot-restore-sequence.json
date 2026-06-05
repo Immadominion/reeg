@@ -1,0 +1,130 @@
+{
+    "$schema": "reeg-diagram/1.0",
+    "title": "Snapshot and Restore Sequence",
+    "description": "The core flow: an agent run is checkpointed, killed, and restored on another host.",
+    "render_hint": "UML sequence diagram. Order matters; render as lifelines.",
+    "participants": [
+        {
+            "id": "agent",
+            "label": "Agent"
+        },
+        {
+            "id": "runtime",
+            "label": "Reeg runtime (host A)"
+        },
+        {
+            "id": "engine",
+            "label": "Snapshot engine"
+        },
+        {
+            "id": "seal",
+            "label": "Seal"
+        },
+        {
+            "id": "walrus",
+            "label": "Walrus"
+        },
+        {
+            "id": "sui",
+            "label": "Sui (Machine pkg)"
+        },
+        {
+            "id": "runtimeB",
+            "label": "Reeg runtime (host B)"
+        }
+    ],
+    "steps": [
+        {
+            "n": 1,
+            "from": "agent",
+            "to": "runtime",
+            "msg": "do work (write files, run commands)"
+        },
+        {
+            "n": 2,
+            "from": "runtime",
+            "to": "engine",
+            "msg": "checkpoint()"
+        },
+        {
+            "n": 3,
+            "from": "engine",
+            "to": "engine",
+            "msg": "build manifest, compute workdir_root_hash + deltas, manifest_hash"
+        },
+        {
+            "n": 4,
+            "from": "engine",
+            "to": "seal",
+            "msg": "encrypt(checkpoint) client-side"
+        },
+        {
+            "n": 5,
+            "from": "seal",
+            "to": "engine",
+            "msg": "ciphertext"
+        },
+        {
+            "n": 6,
+            "from": "engine",
+            "to": "walrus",
+            "msg": "store(ciphertext)"
+        },
+        {
+            "n": 7,
+            "from": "walrus",
+            "to": "engine",
+            "msg": "blob_id (= content hash)"
+        },
+        {
+            "n": 8,
+            "from": "engine",
+            "to": "sui",
+            "msg": "PTB: register blob_id + manifest_hash, append provenance, update head"
+        },
+        {
+            "n": 9,
+            "from": "sui",
+            "to": "engine",
+            "msg": "Machine object updated (new provenance_head)"
+        },
+        {
+            "n": 10,
+            "from": "runtime",
+            "to": "runtime",
+            "msg": "KILL machine on host A"
+        },
+        {
+            "n": 11,
+            "from": "runtimeB",
+            "to": "sui",
+            "msg": "read Machine object (blob_id, manifest_hash, head)"
+        },
+        {
+            "n": 12,
+            "from": "runtimeB",
+            "to": "walrus",
+            "msg": "read(blob_id)"
+        },
+        {
+            "n": 13,
+            "from": "runtimeB",
+            "to": "seal",
+            "msg": "decrypt (policy approves owner)"
+        },
+        {
+            "n": 14,
+            "from": "runtimeB",
+            "to": "runtimeB",
+            "msg": "verify hashes vs Machine object, then mount + resume"
+        },
+        {
+            "n": 15,
+            "from": "agent",
+            "to": "runtimeB",
+            "msg": "continue exactly where it left off"
+        }
+    ],
+    "demo_note": "Steps 10-15 are the one undeniable moment. Host A is fully dead before host B restores."
+}
+

@@ -1,0 +1,161 @@
+{
+    "$schema": "reeg-diagram/1.0",
+    "title": "Reeg Component Architecture",
+    "description": "Internal components of Reeg and their dependencies.",
+    "render_hint": "C4 container style. Group by on-chain / off-chain / client.",
+    "groups": [
+        {
+            "id": "client",
+            "label": "Client side (user-controlled)",
+            "nodes": [
+                {
+                    "id": "runtime",
+                    "label": "Reeg runtime",
+                    "note": "Wraps a sandbox runtime; exposes exec + filesystem to the agent"
+                },
+                {
+                    "id": "snapshot",
+                    "label": "Snapshot/restore engine",
+                    "note": "Manifest + content-addressed deltas; Seal encrypt; Walrus store; restore on any host"
+                },
+                {
+                    "id": "cli",
+                    "label": "Reeg CLI / SDK",
+                    "note": "Developer entry point: create, run, checkpoint, restore, fork, verify"
+                }
+            ]
+        },
+        {
+            "id": "onchain",
+            "label": "On-chain (Sui, Move)",
+            "nodes": [
+                {
+                    "id": "machinepkg",
+                    "label": "Machine package",
+                    "note": "Machine object, fork, grant/revoke, provenance head"
+                },
+                {
+                    "id": "policypkg",
+                    "label": "Seal access policy",
+                    "note": "seal_approve* functions; owner-only, allowlist, time-limited"
+                }
+            ]
+        },
+        {
+            "id": "offchain",
+            "label": "Off-chain infra (stateless, optional)",
+            "nodes": [
+                {
+                    "id": "relay",
+                    "label": "Upload relay",
+                    "note": "Optional Walrus write helper"
+                },
+                {
+                    "id": "indexer",
+                    "label": "Custom indexer",
+                    "note": "Indexes Machine + provenance events for the Console"
+                },
+                {
+                    "id": "keyservers",
+                    "label": "Seal key servers",
+                    "note": "Threshold t-of-n; never see plaintext"
+                }
+            ]
+        },
+        {
+            "id": "presentation",
+            "label": "Presentation",
+            "nodes": [
+                {
+                    "id": "console",
+                    "label": "Console (Walrus Site)",
+                    "note": "Provenance timeline, verify, restore, grant/revoke, fork; no privileged backend"
+                }
+            ]
+        },
+        {
+            "id": "storage",
+            "label": "Storage / data",
+            "nodes": [
+                {
+                    "id": "walrus",
+                    "label": "Walrus",
+                    "note": "Encrypted checkpoint blobs (blob_id = content hash)"
+                },
+                {
+                    "id": "memwal",
+                    "label": "MemWal",
+                    "note": "Memory subsystem (one syscall)"
+                }
+            ]
+        }
+    ],
+    "edges": [
+        {
+            "from": "cli",
+            "to": "runtime",
+            "label": "drive agent"
+        },
+        {
+            "from": "runtime",
+            "to": "snapshot",
+            "label": "checkpoint/restore"
+        },
+        {
+            "from": "snapshot",
+            "to": "keyservers",
+            "label": "encrypt/decrypt (Seal)"
+        },
+        {
+            "from": "snapshot",
+            "to": "walrus",
+            "label": "store/read blob"
+        },
+        {
+            "from": "snapshot",
+            "to": "machinepkg",
+            "label": "register checkpoint, append provenance (PTB)"
+        },
+        {
+            "from": "machinepkg",
+            "to": "policypkg",
+            "label": "references policy"
+        },
+        {
+            "from": "keyservers",
+            "to": "policypkg",
+            "label": "dry-run seal_approve"
+        },
+        {
+            "from": "runtime",
+            "to": "memwal",
+            "label": "agent memory"
+        },
+        {
+            "from": "console",
+            "to": "indexer",
+            "label": "read indexed state"
+        },
+        {
+            "from": "console",
+            "to": "machinepkg",
+            "label": "read Machine object"
+        },
+        {
+            "from": "console",
+            "to": "walrus",
+            "label": "read blob / verify"
+        },
+        {
+            "from": "indexer",
+            "to": "machinepkg",
+            "label": "subscribe to events"
+        },
+        {
+            "from": "relay",
+            "to": "walrus",
+            "label": "write blobs"
+        }
+    ]
+}
+

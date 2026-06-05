@@ -1,0 +1,18 @@
+# Reeg snapshot/restore engine and runtime/sandbox core.
+# Rust is load-bearing here: byte-exact, reproducible state capture is what makes
+# verification mean anything (see docs/03-engineering/tech-stack.md). The engine never
+# imports a chain or storage client; it emits and consumes content-addressed artifacts.
+[workspace]
+resolver = "3"
+members = ["crates/cli", "crates/runtime", "crates/snapshot"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+
+[profile.release]
+# Deterministic, debuggable release builds for reproducible restore.
+lto = true
+codegen-units = 1
