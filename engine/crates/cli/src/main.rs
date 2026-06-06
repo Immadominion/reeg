@@ -8,6 +8,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+#[cfg(target_os = "linux")]
+mod guest_agent;
+
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use reeg_runtime::{
@@ -59,6 +62,13 @@ enum Command {
         #[arg(long)]
         memory: Option<PathBuf>,
     },
+    /// Run as the in-guest agent for the Firecracker microVM tier (Linux only).
+    /// Listens on vsock for exec and snapshot requests from the host FirecrackerRuntime.
+    GuestAgent {
+        /// vsock port to listen on. Must match the host-side `FirecrackerConfig::agent_port`.
+        #[arg(long, default_value = "52")]
+        port: u32,
+    },
 }
 
 fn main() -> ExitCode {
@@ -74,6 +84,7 @@ fn main() -> ExitCode {
 fn run() -> Result<()> {
     match Cli::parse().command {
         Command::Run { workdir, log, argv } => cmd_run(&workdir, &log, &argv),
+        Command::GuestAgent { port } => cmd_guest_agent(port),
         Command::Checkpoint {
             workdir,
             out,
@@ -152,4 +163,20 @@ fn load_log(path: &Path) -> Result<Vec<CommandEvent>> {
 
 fn print_json(value: &serde_json::Value) {
     println!("{value}");
+}
+
+/// Run as the in-guest agent for the Firecracker microVM tier. Listens on vsock for exec
+/// and snapshot requests from the host `FirecrackerRuntime`. The implementation is Linux-only
+/// because vsock is a Linux kernel interface; on other platforms the command is present in
+/// the help text but exits with an informative error.
+fn cmd_guest_agent(port: u32) -> Result<()> {
+    #[cfg(target_os = "linux")]
+    {
+        guest_agent::run(port).map_err(|e| anyhow::anyhow!("{e:#}"))
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = port;
+        anyhow::bail!("guest-agent requires Linux (vsock is a Linux kernel interface)")
+    }
 }

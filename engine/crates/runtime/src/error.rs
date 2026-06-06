@@ -27,6 +27,12 @@ pub enum RuntimeError {
 
     #[error("encoding error: {0}")]
     Encoding(#[from] serde_json::Error),
+
+    #[error("OCI container error: {0}")]
+    Oci(String),
+
+    #[error("Firecracker microVM error: {0}")]
+    MicroVm(String),
 }
 
 pub type Result<T> = std::result::Result<T, RuntimeError>;
