@@ -18,7 +18,11 @@ const WORKDIR: &str = "/work";
 const VMADDR_CID_ANY: u32 = u32::MAX;
 
 pub fn run(port: u32) -> Result<()> {
-    // Ensure the working directory exists so agents always have a place to write.
+    // Clean and recreate the working directory on every boot so each VM session starts
+    // with a fresh /work regardless of what a previous session may have left on disk.
+    if std::path::Path::new(WORKDIR).exists() {
+        std::fs::remove_dir_all(WORKDIR).context("clean /work")?;
+    }
     std::fs::create_dir_all(WORKDIR).context("create /work")?;
 
     let addr = vsock::VsockAddr::new(VMADDR_CID_ANY, port);

@@ -149,7 +149,10 @@ impl FirecrackerRuntime {
             }),
         )?;
 
-        // Read-only rootfs containing the OS + reeg-engine guest agent.
+        // Rootfs drive: read-write so the guest agent can create /work and write files there.
+        // In production a per-session tmpfs or scratch drive is preferred; for now a single
+        // read-write root is sufficient because the guest agent cleans /work at startup and
+        // tests run sequentially (--test-threads=1).
         fc_put(
             &api_socket,
             "/drives/rootfs",
@@ -157,9 +160,9 @@ impl FirecrackerRuntime {
                 "drive_id": "rootfs",
                 "path_on_host": config.rootfs_path.to_string_lossy(),
                 "is_root_device": true,
-                "is_read_only": true
+                "is_read_only": false
             }),
-        )?;
+        )?
 
         // vsock device: Firecracker multiplexes guest vsock connections over a host-side Unix
         // socket. To connect to the guest on port P, the host connects to vsock_uds and sends

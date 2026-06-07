@@ -62,8 +62,22 @@ mod fc_tests {
         let mut rt = FirecrackerRuntime::create(staging.path().join("machine"), config).unwrap();
 
         // Run commands inside the VM; the agent works at /work.
-        rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
-        rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
+        let o1 = rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
+        assert_eq!(
+            o1.exit_code, 0,
+            "exec 1 failed (exit {}):\nstdout: {}\nstderr: {}",
+            o1.exit_code,
+            String::from_utf8_lossy(&o1.stdout),
+            String::from_utf8_lossy(&o1.stderr),
+        );
+        let o2 = rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
+        assert_eq!(
+            o2.exit_code, 0,
+            "exec 2 failed (exit {}):\nstdout: {}\nstderr: {}",
+            o2.exit_code,
+            String::from_utf8_lossy(&o2.stdout),
+            String::from_utf8_lossy(&o2.stderr),
+        );
         assert_eq!(rt.event_log().len(), 2);
 
         // Checkpoint: guest agent tars /work, host snapshots it. The manifest_hash is computed
@@ -102,7 +116,14 @@ mod fc_tests {
         let fc_staging = tempdir().unwrap();
         let mut fc_rt =
             FirecrackerRuntime::create(fc_staging.path().join("m"), config).unwrap();
-        fc_rt.exec(&sh("printf 'same content' > file.txt")).unwrap();
+        let o = fc_rt.exec(&sh("printf 'same content' > file.txt")).unwrap();
+        assert_eq!(
+            o.exit_code, 0,
+            "FC exec failed (exit {}):\nstdout: {}\nstderr: {}",
+            o.exit_code,
+            String::from_utf8_lossy(&o.stdout),
+            String::from_utf8_lossy(&o.stderr),
+        );
         let fc_manifest = fc_rt.checkpoint(&cas, EnvironmentInputs::default()).unwrap();
 
         // Build identical content via the local tier.
