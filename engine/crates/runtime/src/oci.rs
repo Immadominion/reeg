@@ -79,6 +79,18 @@ impl OciRuntime {
             })?;
         }
 
+        // runc requires the bind-mount destination to exist in the rootfs before it sets up
+        // mounts. Alpine (and most minimal rootfs images) do not ship a /work directory, so
+        // we create it here. This is idempotent and leaves a single empty directory in the
+        // rootfs -- a negligible side effect of using a shared rootfs across sessions.
+        let work_mountpoint = config.rootfs.join("work");
+        if !work_mountpoint.exists() {
+            fs::create_dir_all(&work_mountpoint).map_err(|source| RuntimeError::Io {
+                path: work_mountpoint,
+                source,
+            })?;
+        }
+
         write_oci_spec(&bundle, &config.rootfs, &workdir)?;
 
         // `runc create` sets up namespaces and the init process without starting the user
