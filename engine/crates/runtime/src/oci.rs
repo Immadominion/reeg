@@ -136,12 +136,12 @@ impl Runtime for OciRuntime {
         // `runc exec` runs a new process inside the already-running container's namespaces.
         // The working directory inside the container is always /work, which is bind-mounted
         // from the host workdir so writes land on the host filesystem directly.
+        // Note: runc exec takes [options] <container-id> <command> [args...] -- no "--" separator.
         let mut args = vec![
             "exec".to_owned(),
             "--cwd".to_owned(),
             "/work".to_owned(),
             self.container_id.clone(),
-            "--".to_owned(),
             request.program.clone(),
         ];
         args.extend(request.args.clone());

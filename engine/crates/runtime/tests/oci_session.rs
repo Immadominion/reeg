@@ -72,8 +72,22 @@ mod oci_tests {
         let config = OciConfig { rootfs, ..OciConfig::default() };
         let mut rt = OciRuntime::create(work.path().join("machine"), config).unwrap();
 
-        rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
-        rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
+        let o1 = rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
+        assert_eq!(
+            o1.exit_code, 0,
+            "exec 1 failed (exit {}):\nstdout: {}\nstderr: {}",
+            o1.exit_code,
+            String::from_utf8_lossy(&o1.stdout),
+            String::from_utf8_lossy(&o1.stderr),
+        );
+        let o2 = rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
+        assert_eq!(
+            o2.exit_code, 0,
+            "exec 2 failed (exit {}):\nstdout: {}\nstderr: {}",
+            o2.exit_code,
+            String::from_utf8_lossy(&o2.stdout),
+            String::from_utf8_lossy(&o2.stderr),
+        );
         assert_eq!(rt.event_log().len(), 2);
 
         // Checkpoint mid-session; the container is still running.
