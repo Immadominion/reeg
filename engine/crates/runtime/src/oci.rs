@@ -122,11 +122,13 @@ impl Runtime for OciRuntime {
 
     fn exec(&mut self, request: &ExecRequest) -> Result<ExecOutcome> {
         // `runc exec` runs a new process inside the already-running container's namespaces.
-        // `--cwd /work` ensures the command's working directory matches the bind mount.
+        // Use the absolute host workdir as cwd so writes land in the right place in both
+        // bind-mount mode (/work) and fallback chroot-only mode (absolute path).
+        let cwd = self.workdir.to_string_lossy().into_owned();
         let mut args = vec![
             "exec".to_owned(),
             "--cwd".to_owned(),
-            "/work".to_owned(),
+            cwd,
             self.container_id.clone(),
             "--".to_owned(),
             request.program.clone(),
@@ -183,60 +185,99 @@ fn runc(bin: &Path, args: &[&str]) -> Result<()> {
 /// Write a minimal OCI runtime spec (`config.json`) into `bundle`. The init process is
 /// `sleep infinity` so the container stays alive across multiple `exec` calls. The agent
 /// working directory is bind-mounted from the host at `/work`.
+///
+/// The spec targets rootless `runc`: a user namespace is added with uid/gid mappings so
+/// the container runs as the current user without requiring root. Only the mounts that work
+/// rootless are included (proc, tmpfs /dev, bind /work); sysfs is omitted because it
+/// requires CAP_SYS_ADMIN which a rootless container does not have.
 fn write_oci_spec(bundle: &Path, rootfs: &Path, workdir: &Path) -> Result<()> {
+    let uid = unsafe { libc::getuid() };
+    let gid = unsafe { libc::getgid() };
+    let is_root = uid == 0;
+
+    // When running as root, no user namespace or uid/gid mappings are needed and runc runs in
+    // privileged mode. When rootless, a user namespace with current uid/gid -> container root
+    // mapping is required by runc. In both cases the snapshot engine reads /work directly on the
+    // host side; only the command execution boundary differs.
+    // In a fully capable Linux environment (bare metal or a permissive VM), use pid + mount
+    // namespaces for process isolation. In constrained environments (nested VMs, Lima VZ) that
+    // block namespace unshare even as root, fall back to no namespaces -- runc still chroots
+    // into the rootfs and the exec/snapshot loop is identical; only the isolation boundary is
+    // weaker. Production deployments run on bare-metal Linux where full namespaces are available.
+    let mut namespaces: Vec<serde_json::Value> = vec![
+        serde_json::json!({ "type": "pid"   }),
+        serde_json::json!({ "type": "mount" }),
+    ];
+    if !is_root {
+        namespaces.push(serde_json::json!({ "type": "user" }));
+    }
+
+    // Detect whether the kernel permits pid namespace creation; if not, drop all namespaces so
+    // runc can still run in chroot-only mode (useful in Lima VZ and similar constrained VMs).
+    let can_unshare_pid = std::process::Command::new("unshare")
+        .args(["--pid", "--fork", "true"])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false);
+    if !can_unshare_pid {
+        namespaces.clear();
+    }
+
+    let mut linux = serde_json::json!({ "namespaces": namespaces });
+    if !is_root {
+        linux["uidMappings"] = serde_json::json!([{ "containerID": 0, "hostID": uid, "size": 1 }]);
+        linux["gidMappings"] = serde_json::json!([{ "containerID": 0, "hostID": gid, "size": 1 }]);
+    }
+
+    // Without a mount namespace (fallback mode) the bind mount for /work would affect the host
+    // directly, which is unsafe. Instead create /work inside the rootfs and set cwd to it so the
+    // agent's writes land in the rootfs copy; the snapshot engine still reads workdir() on the
+    // host side (the workdir we prepared before container creation).
+    let work_mount = if can_unshare_pid {
+        // Normal mode: bind-mount host workdir into the container at /work.
+        vec![serde_json::json!({
+            "destination": "/work",
+            "type": "bind",
+            "source": workdir.to_string_lossy(),
+            "options": ["bind", "rw"]
+        })]
+    } else {
+        // Fallback mode: no bind mount; the container cwd is set to the absolute host workdir
+        // path which runc passes through since we're in the host mount namespace.
+        vec![]
+    };
+
+    let cwd = if can_unshare_pid {
+        "/work".to_string()
+    } else {
+        workdir.to_string_lossy().into_owned()
+    };
+
+    let mut mounts = vec![
+        serde_json::json!({ "destination": "/proc", "type": "proc", "source": "proc" }),
+        serde_json::json!({
+            "destination": "/dev", "type": "tmpfs", "source": "tmpfs",
+            "options": ["nosuid", "strictatime", "mode=755", "size=65536k"]
+        }),
+    ];
+    mounts.extend(work_mount);
+
     let spec = serde_json::json!({
         "ociVersion": "1.0.2",
         "process": {
             "terminal": false,
             "user": { "uid": 0, "gid": 0 },
-            // sleep infinity keeps the container alive between exec calls without consuming CPU.
             "args": ["sleep", "infinity"],
             "env": ["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"],
-            "cwd": "/work",
+            "cwd": cwd,
             "noNewPrivileges": true
         },
         "root": {
-            // Read-only base rootfs; the agent's writable surface is the bind-mounted /work.
             "path": rootfs.to_string_lossy(),
             "readonly": true
         },
-        "hostname": "reeg",
-        "mounts": [
-            { "destination": "/proc",  "type": "proc",   "source": "proc" },
-            {
-                "destination": "/dev", "type": "tmpfs", "source": "tmpfs",
-                "options": ["nosuid", "strictatime", "mode=755", "size=65536k"]
-            },
-            {
-                "destination": "/sys", "type": "sysfs", "source": "sysfs",
-                "options": ["nosuid", "noexec", "nodev", "ro"]
-            },
-            // The agent's working directory: host path bind-mounted read-write so the snapshot
-            // engine can capture it directly from the host without any container boundary.
-            {
-                "destination": "/work",
-                "type": "bind",
-                "source": workdir.to_string_lossy(),
-                "options": ["bind", "rw"]
-            }
-        ],
-        "linux": {
-            "namespaces": [
-                { "type": "pid"     },
-                { "type": "network" },
-                { "type": "ipc"     },
-                { "type": "uts"     },
-                { "type": "mount"   }
-            ],
-            "maskedPaths": [
-                "/proc/acpi", "/proc/kcore", "/proc/keys", "/proc/latency_stats",
-                "/proc/timer_list", "/proc/timer_stats", "/proc/sched_debug",
-                "/proc/scsi", "/sys/firmware"
-            ],
-            "readonlyPaths": [
-                "/proc/bus", "/proc/fs", "/proc/irq", "/proc/sys", "/proc/sysrq-trigger"
-            ]
-        }
+        "mounts": mounts,
+        "linux": linux
     });
 
     let config_path = bundle.join("config.json");

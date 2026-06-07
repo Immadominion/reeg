@@ -30,6 +30,58 @@ mod oci_tests {
             .is_ok()
     }
 
+    /// Probe whether runc can actually create a container on this kernel/VM. Returns false on
+    /// constrained environments (Lima VZ, some CI VMs) where namespace operations are blocked.
+    fn runc_functional(rootfs: &std::path::Path) -> bool {
+        let dir = match tempfile::tempdir() {
+            Ok(d) => d,
+            Err(_) => return false,
+        };
+        let bundle = dir.path().join("probe-bundle");
+        std::fs::create_dir_all(&bundle).ok();
+        let workdir = dir.path().join("probe-work");
+        std::fs::create_dir_all(&workdir).ok();
+
+        // Write a minimal spec that just tries to run true and exit.
+        let uid = unsafe { libc::getuid() };
+        let gid = unsafe { libc::getgid() };
+        let is_root = uid == 0;
+        let mut namespaces = vec![
+            serde_json::json!({"type":"pid"}),
+            serde_json::json!({"type":"mount"}),
+        ];
+        if !is_root { namespaces.push(serde_json::json!({"type":"user"})); }
+        let mut linux = serde_json::json!({"namespaces": namespaces});
+        if !is_root {
+            linux["uidMappings"] = serde_json::json!([{"containerID":0,"hostID":uid,"size":1}]);
+            linux["gidMappings"] = serde_json::json!([{"containerID":0,"hostID":gid,"size":1}]);
+        }
+        let spec = serde_json::json!({
+            "ociVersion": "1.0.2",
+            "process": {
+                "terminal": false,
+                "user": {"uid":0,"gid":0},
+                "args": ["true"],
+                "env": ["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"],
+                "cwd": "/",
+                "noNewPrivileges": true
+            },
+            "root": {"path": rootfs.to_string_lossy(), "readonly": true},
+            "mounts": [{"destination":"/proc","type":"proc","source":"proc"}],
+            "linux": linux
+        });
+        std::fs::write(bundle.join("config.json"), serde_json::to_string(&spec).unwrap()).ok();
+        let id = format!("reeg-probe-{}", std::process::id());
+        let ok = std::process::Command::new("runc")
+            .args(["run", "--bundle", &bundle.to_string_lossy(), &id])
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        // Clean up if it somehow started
+        let _ = std::process::Command::new("runc").args(["delete", "--force", &id]).status();
+        ok
+    }
+
     #[test]
     fn oci_agent_session_checkpoints_and_restores_byte_identical() {
         let rootfs = match rootfs() {
@@ -39,8 +91,8 @@ mod oci_tests {
                 return;
             }
         };
-        if !runc_on_path() {
-            eprintln!("skip: runc not found on PATH");
+        if !runc_functional(&rootfs) {
+            eprintln!("skip: runc not functional on this kernel/VM (namespace operations blocked)");
             return;
         }
 
@@ -81,7 +133,7 @@ mod oci_tests {
             Some(p) => p,
             None => return,
         };
-        if !runc_on_path() {
+        if !runc_functional(&rootfs) {
             return;
         }
 
