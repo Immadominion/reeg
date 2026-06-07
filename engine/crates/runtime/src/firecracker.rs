@@ -101,21 +101,33 @@ impl FirecrackerRuntime {
         let vsock_uds = run_dir.join("vsock.sock");
 
         // Firecracker creates the API socket on start; we wait for it before sending config.
+        // --log-path was removed from the Firecracker CLI in v1.x; logging is configured via
+        // the API after boot if needed. Redirect stderr to a file so startup failures are
+        // readable rather than silently lost.
+        let stderr_log = run_dir.join("firecracker.stderr");
+        let stderr_file = fs::File::create(&stderr_log).map_err(|source| RuntimeError::Io {
+            path: stderr_log.clone(),
+            source,
+        })?;
         let process = Command::new(&config.firecracker_bin)
             .arg("--api-sock")
             .arg(&api_socket)
-            .arg("--log-path")
-            .arg(run_dir.join("firecracker.log"))
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stderr(stderr_file)
             .spawn()
             .map_err(|source| RuntimeError::Launch {
                 program: config.firecracker_bin.to_string_lossy().into_owned(),
                 source,
             })?;
 
-        wait_for_path(&api_socket, Duration::from_secs(5))?;
+        // Wait for the API socket; on failure read the stderr log for a useful error message.
+        if let Err(e) = wait_for_path(&api_socket, Duration::from_secs(5)) {
+            let detail = fs::read_to_string(&stderr_log).unwrap_or_default();
+            return Err(RuntimeError::MicroVm(format!(
+                "{e}: firecracker stderr: {detail}"
+            )));
+        }
 
         // Configure the VM via the Firecracker REST API before booting.
         fc_put(
