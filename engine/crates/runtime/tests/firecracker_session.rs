@@ -21,8 +21,14 @@ mod fc_tests {
     }
 
     fn kvm_accessible() -> bool {
-        let path = std::path::Path::new("/dev/kvm");
-        path.exists()
+        // Check that we can actually open /dev/kvm read-write, not just that the node exists.
+        // A non-root user without kvm group membership will get EACCES here; the test skips
+        // rather than timing out waiting for a Firecracker socket that never appears.
+        std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open("/dev/kvm")
+            .is_ok()
     }
 
     fn fc_config() -> Option<FirecrackerConfig> {
