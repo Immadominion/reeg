@@ -162,7 +162,7 @@ impl FirecrackerRuntime {
                 "is_root_device": true,
                 "is_read_only": false
             }),
-        )?
+        )?;
 
         // vsock device: Firecracker multiplexes guest vsock connections over a host-side Unix
         // socket. To connect to the guest on port P, the host connects to vsock_uds and sends
