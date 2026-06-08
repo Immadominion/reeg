@@ -5,9 +5,16 @@ edition.workspace = true
 rust-version.workspace = true
 publish = false
 
+[features]
+# OCI container tier (Linux only): requires runc on PATH and a Linux rootfs directory.
+oci = []
+# Firecracker microVM tier (Linux only): requires /dev/kvm and the firecracker binary.
+firecracker = []
+
 [dependencies]
 blake3 = "1.8.5"
 hex = "0.4.3"
+libc = "0.2"
 reeg-snapshot = { path = "../snapshot" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
