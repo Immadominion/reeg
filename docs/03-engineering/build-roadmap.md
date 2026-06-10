@@ -13,21 +13,21 @@ on, never deferred because the product is incomplete without them.
 
 ## Status at a glance
 
-Updated 2026-06-10. Legend: ✅ done · 🟡 partial · ⚠️ merged but unproven · ⏸️ deferred.
+Updated 2026-06-11. Legend: ✅ done · 🟡 partial · 🔵 in scope for June 21 (in progress) · ⏸️ out of scope.
 Each phase header below carries its own **Status** line; this is the summary:
 
 - ✅ **A–H** — foundation, snapshot engine, OCI tier, Move/provenance, client adapters, verifier, CLI/SDK, Console/indexer
-- 🟡 **I** — owner-only + allowlist + time-lock Seal policies present; committee/t-of-n deferred
+- 🔵 **I** — owner-only + allowlist + time-lock Seal done; **committee/t-of-n now in scope for June 21** (config + `--threshold` surfacing; validated on the mainnet multi-operator set)
 - ✅ **J** — cross-host acceptance demo (run → checkpoint → kill → restore → verify → grant → revoke)
-- 🟡 **K** — backend-agnostic memory seam in place; MemWal SDK not yet wired
+- 🔵 **K** — memory seam done; **MemWal wiring now in scope for June 21** (`env` on `ExecRequest` across all tiers + optional SDK wrapper)
 - ✅ **L** — evidence export + offline audit
-- 🟢 **M** — Firecracker tier hardened + verified on AWS KVM (2026-06-10): 18/19 punch-list items closed (+ the umask determinism fix), adversarially re-reviewed; only #14 (jailer) deferred
-- ⏸️ **N, O** — Nautilus attestation and mainnet/scale, deferred
+- ✅/🔵 **M** — Firecracker tier hardened + verified on AWS KVM (18/19); **#14 jailer now in scope for June 21** (additive, sudo-gated)
+- 🔵 **N** — **Nautilus TEE attestation now in scope for June 21** (enclave attests results; additive to provenance, offline-verifiable)
+- 🔵 **O** — **mainnet cutover now in scope for June 21** (publish, real Seal operator set, per-checkpoint cost benchmark, mainnet acceptance loop) — gated on a funded wallet
 
-The product is functionally complete on testnet through phase L; the June 21 acceptance bar is met by
-the OCI tier (phase C). **Phase M (Firecracker) is the active front:** it merged with 19 logged defects
-and had never run on real hardware, so it is being stood up and proven on an AWS KVM host — see the
-[AWS Firecracker runbook](aws-firecracker-runbook.md). Status reflects code present in the repo; the
+**The "after the hackathon" split is removed:** everything ships before June 21. CI is green on `main`.
+The remaining critical-path input is a **funded mainnet wallet** (operator + grantee, SUI + WAL) for
+phases I-validation and O. Status reflects code present in the repo; the
 phase-M `run` bar is re-confirmed by that runbook, not assumed.
 
 ## How to read this
@@ -365,9 +365,9 @@ OCI/runc + in-guest agent tiers merged in PR #1 (`14ae8c7`) with 19 logged defec
 real hardware. They were stood up on an AWS KVM host (`c8i.2xlarge`), which first surfaced a 20th defect
 (the umask determinism leak, now fixed), then took a full hardening pass: in-process tar extraction
 (symlink/traversal-safe), real VM Drop-reaping, RAII partial-init cleanup, read-only rootfs + per-VM
-tmpfs `/work` (cross-tenant isolation), u64 framing with allocation caps, OCI network/ipc/uts namespaces
-+ all-caps-dropped + a seccomp denylist (incl. `io_uring`/`userfaultfd`/`AF_NETLINK`) + masked paths,
-and per-session path uniquification. The applied diff was then adversarially re-reviewed and its
+tmpfs `/work` (cross-tenant isolation), u64 framing with allocation caps, OCI network/ipc/uts
+namespaces with all caps dropped, a seccomp denylist (incl. `io_uring`/`userfaultfd`/`AF_NETLINK`)
+and masked paths, and per-session path uniquification. The applied diff was then adversarially re-reviewed and its
 findings closed. **Verified on KVM:** lib unit 10/10, `firecracker_session` 8/8, `oci_session` 3/3,
 clippy `-D warnings` clean, no leaked VMs — including tests proving traversal/symlink rejection,
 per-session isolation, read-only rootfs, and the EC2 metadata service being unreachable. Closure detail
@@ -447,17 +447,18 @@ Advances: FR-6, NFR-6, NFR-7, NFR-9; the full product at scale.
 
 ## Mapping to the product roadmap
 
-The product [roadmap.md](../01-product/roadmap.md) groups these by ship window:
+As of 2026-06-11 the ship windows are collapsed: **everything below lands before June 21.**
 
-- **Phase 0 (foundations):** build phases A, B.
-- **Phase 1 (the product, end to end):** build phases C, D, E, F, G, H, the owner-only and
-  allowlist parts of I, and J. This is the full own/share/fork/move/prove loop.
-- **Phase 2 (mainnet and daily-driver):** committee policies in I, MemWal (K), the evidence
-  export in L, honest cost surfacing, and mainnet in O.
-- **Phase 3 (trust and depth):** the deeper compliance and retention work in L, verifiable
-  compute (N), and retire/lifecycle controls.
-- **Phase 4 (scale and distribution):** the Firecracker tier (M) and the team accounts,
-  integrations, and scale work in O.
+- **Done (A–L, J):** the full own/share/fork/move/prove loop, evidence export, and the hardened
+  Firecracker tier (M, 18/19).
+- **In scope for June 21 (this program):** committee t-of-n (rest of I), MemWal wiring (K), the
+  Firecracker jailer (#14 of M), Nautilus attestation (N), and the mainnet cutover (O) — publish, the
+  real Seal operator set, the per-checkpoint cost benchmark, and the mainnet acceptance loop.
+- **Out of scope (non-goals):** live sub-second mirroring, a regulated-data vault, our own agent
+  framework (see [roadmap.md](../01-product/roadmap.md)).
+
+The only critical-path input that isn't code is a **funded mainnet wallet** (operator + grantee, SUI +
+WAL) for the I-validation and O work.
 
 ## Risk gates carried from feasibility
 

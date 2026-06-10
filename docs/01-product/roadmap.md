@@ -100,20 +100,25 @@ Ships (directional):
 - Compliance-evidence exports aligned to the EU AI Act high-risk logging duties (in force 2 Aug 2026).
 - Self-serve onboarding and pricing (see [business-model.md](../05-business/business-model.md)).
 
-## What we are deliberately sequencing later
+## Pulled into the June 21 scope (no longer deferred)
 
-These are scope choices, not admissions that the June product is incomplete. Each is
-a real feature that real users will want eventually; none of them is needed for Reeg
-to be a genuine product on June 21.
+As of 2026-06-10 the "after the hackathon" split is removed: committee (t-of-n) Seal policies,
+MemWal-backed memory, the Firecracker jailer (#14), TEE-attested compute (Nautilus), and the mainnet
+cutover all ship **before June 21**. They are production-ready and the core loop already stands
+without them, so they are additive — but they ship now, not later. Sequencing and the funded-wallet
+inputs are in the engineering [build-roadmap.md](../03-engineering/build-roadmap.md).
+
+## What remains genuinely out of scope
+
+Still scope choices, not gaps — these are different products or non-goals:
 
 - Live sub-second state mirroring across hosts. Reeg checkpoints; it does not stream (NFR-3). Different product, later if ever.
-- Committee (t-of-n) Seal policies and TEE-attested compute (Nautilus): real upside and now production-ready (committee GA, Nautilus on mainnet); we still sequence them after the core loop by scope.
 - Positioning as a regulated PHI / classified-data vault. Out of scope by design (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)).
 - Building our own agent framework. Reeg is the environment, not the agent's brain.
 
-## Risk gates between phases
+## Risk gates
 
 - Before Phase 1 close: confirm restore is reproducible enough that verify is meaningful. If not, narrow the runtime surface until it is.
-- Before mainnet (Phase 2): confirm cost per checkpoint is acceptable for a realistic run, and that Walrus storage epochs are managed.
-- Before leaning on a newer tier (Nautilus, committee Seal): re-confirm its current status in [sui-tech-reference.md](../02-architecture/sui-tech-reference.md) and keep the core loop independent of it.
+- Before the **June 21 mainnet cutover**: confirm per-checkpoint cost is acceptable on a realistic run (measured on a funded benchmark), and that Walrus storage epochs are managed.
+- Committee Seal and Nautilus are kept **additive** — the own/share/move/prove loop stays correct and offline-verifiable whether or not a run uses them — and are validated on a funded mainnet run.
 </content>
