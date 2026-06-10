@@ -1,0 +1,24 @@
+# Vercel does not read .gitignore, so the deploy upload is trimmed here. Only the Console
+# (apps/console) and its TypeScript workspace deps (packages/*) are needed to build the preview.
+# Everything else — the Rust engine (455 MB of target), Move, docs, and unrelated tooling — is
+# excluded so the upload stays small and never aborts.
+
+node_modules
+.vercel
+
+# heavy / irrelevant to the Console build
+engine
+move
+gstack
+tmp
+docs
+scripts
+.github
+
+# build artifacts (the Console and its deps are rebuilt on Vercel)
+**/dist
+**/target
+.turbo
+**/.turbo
+**/*.tsbuildinfo
+*.log

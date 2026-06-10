@@ -37,3 +37,8 @@ tmp/
 gstack/
 evidence-*.json
 *.bundle
+# personal/local notes and checklists (never committed)
+*.local.md
+
+# vercel link/local settings
+.vercel
