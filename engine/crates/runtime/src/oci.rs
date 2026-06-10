@@ -97,7 +97,15 @@ impl OciRuntime {
 
         // `runc create` sets up namespaces and the init process without starting the user
         // process; `runc start` transitions the container to running.
-        runc(&config.runc_bin, &["create", "--bundle", &bundle.to_string_lossy(), &container_id])?;
+        runc(
+            &config.runc_bin,
+            &[
+                "create",
+                "--bundle",
+                &bundle.to_string_lossy(),
+                &container_id,
+            ],
+        )?;
         runc(&config.runc_bin, &["start", &container_id])?;
 
         Ok(OciRuntime {
@@ -375,9 +383,18 @@ mod tests {
             assert!(ns.contains(t), "namespace {t} missing from {ns:?}");
         }
 
-        for set in ["bounding", "effective", "permitted", "inheritable", "ambient"] {
+        for set in [
+            "bounding",
+            "effective",
+            "permitted",
+            "inheritable",
+            "ambient",
+        ] {
             assert!(
-                cfg["process"]["capabilities"][set].as_array().unwrap().is_empty(),
+                cfg["process"]["capabilities"][set]
+                    .as_array()
+                    .unwrap()
+                    .is_empty(),
                 "capability set {set} should be empty"
             );
         }
@@ -398,8 +415,16 @@ mod tests {
             })
             .collect();
         for s in [
-            "ptrace", "mount", "pivot_root", "bpf", "io_uring_setup", "io_uring_enter",
-            "userfaultfd", "keyctl", "setns", "kexec_load",
+            "ptrace",
+            "mount",
+            "pivot_root",
+            "bpf",
+            "io_uring_setup",
+            "io_uring_enter",
+            "userfaultfd",
+            "keyctl",
+            "setns",
+            "kexec_load",
         ] {
             assert!(denied.contains(s), "seccomp must deny {s}");
         }
@@ -412,6 +437,9 @@ mod tests {
             .iter()
             .map(|p| p.as_str().unwrap().to_string())
             .collect();
-        assert!(masked.contains("/proc/kcore"), "maskedPaths must hide /proc/kcore");
+        assert!(
+            masked.contains("/proc/kcore"),
+            "maskedPaths must hide /proc/kcore"
+        );
     }
 }

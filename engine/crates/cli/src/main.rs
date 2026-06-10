@@ -116,7 +116,12 @@ fn cmd_run(workdir: &Path, log: &Path, argv: &[String]) -> Result<()> {
     Ok(())
 }
 
-fn cmd_checkpoint(workdir: &Path, out: &Path, log: Option<&Path>, memory: Option<&Path>) -> Result<()> {
+fn cmd_checkpoint(
+    workdir: &Path,
+    out: &Path,
+    log: Option<&Path>,
+    memory: Option<&Path>,
+) -> Result<()> {
     let scratch = tempfile::tempdir()?;
     let cas = CasStore::open(scratch.path())?;
     // Only capture a memory directory that actually exists; the TS client passes one only when the

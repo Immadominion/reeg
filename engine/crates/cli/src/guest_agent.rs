@@ -98,14 +98,18 @@ fn handle(stream: &mut vsock::VsockStream) -> Result<()> {
     // Read request: 8-byte big-endian length prefix + JSON payload. Cap the length before
     // allocating so a bogus prefix cannot OOM the guest (#19).
     let mut len_buf = [0u8; 8];
-    stream.read_exact(&mut len_buf).context("read request length")?;
+    stream
+        .read_exact(&mut len_buf)
+        .context("read request length")?;
     let req_len = u64::from_be_bytes(len_buf);
     if req_len > MAX_REQ_FRAME {
         anyhow::bail!("request frame {req_len} exceeds cap {MAX_REQ_FRAME}");
     }
 
     let mut req_bytes = vec![0u8; req_len as usize];
-    stream.read_exact(&mut req_bytes).context("read request payload")?;
+    stream
+        .read_exact(&mut req_bytes)
+        .context("read request payload")?;
 
     let req: serde_json::Value = serde_json::from_slice(&req_bytes).context("parse request")?;
     match req["type"].as_str() {
@@ -157,7 +161,12 @@ fn handle_snapshot(stream: &mut vsock::VsockStream) -> Result<()> {
 
 /// Write an 8-byte big-endian length prefix followed by `payload`, refusing to send more than
 /// `cap` bytes. Mirrors the host's framing in `firecracker.rs`.
-fn write_frame(stream: &mut vsock::VsockStream, payload: &[u8], cap: u64, what: &str) -> Result<()> {
+fn write_frame(
+    stream: &mut vsock::VsockStream,
+    payload: &[u8],
+    cap: u64,
+    what: &str,
+) -> Result<()> {
     if payload.len() as u64 > cap {
         anyhow::bail!("{what} frame {} exceeds cap {cap}", payload.len());
     }

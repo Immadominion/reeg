@@ -185,9 +185,10 @@ impl FirecrackerRuntime {
         let mut guard = VmGuard::new(process, run_dir.clone());
 
         // Wait for the API socket; on failure read the stderr log for a useful error message.
-        if let Err(e) =
-            wait_for_path(&api_socket, Duration::from_secs(config.api_socket_timeout_secs))
-        {
+        if let Err(e) = wait_for_path(
+            &api_socket,
+            Duration::from_secs(config.api_socket_timeout_secs),
+        ) {
             let detail = fs::read_to_string(&stderr_log).unwrap_or_default();
             return Err(RuntimeError::MicroVm(format!(
                 "{e}: firecracker stderr: {detail}"
@@ -313,7 +314,12 @@ impl Runtime for FirecrackerRuntime {
             "args": request.args,
             "cwd": "/work"
         });
-        let resp = vsock_json(&self.vsock_uds, self.agent_port, &req, Duration::from_secs(300))?;
+        let resp = vsock_json(
+            &self.vsock_uds,
+            self.agent_port,
+            &req,
+            Duration::from_secs(300),
+        )?;
 
         // Strict response parsing: a missing exit code or malformed hex is a protocol error, not a
         // silently-wrong provenance record.
@@ -335,7 +341,12 @@ impl Runtime for FirecrackerRuntime {
     fn checkpoint(&self, cas: &CasStore, inputs: EnvironmentInputs) -> Result<Manifest> {
         // Ask the guest agent to tar up `/work` and stream it back.
         let req = serde_json::json!({ "type": "snapshot" });
-        let tar_bytes = vsock_tar(&self.vsock_uds, self.agent_port, &req, Duration::from_secs(600))?;
+        let tar_bytes = vsock_tar(
+            &self.vsock_uds,
+            self.agent_port,
+            &req,
+            Duration::from_secs(600),
+        )?;
 
         // Atomic staging: extract into a temp dir, then rename into place only on success, so a
         // failed extraction never leaves `staging` half-populated for the snapshot engine. The temp
@@ -420,7 +431,10 @@ fn fc_put(socket: &Path, path: &str, body: &serde_json::Value) -> Result<()> {
         match stream.read(&mut buf) {
             Ok(0) => break,
             Ok(n) => resp_bytes.extend_from_slice(&buf[..n]),
-            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock || e.kind() == std::io::ErrorKind::TimedOut => {
+            Err(e)
+                if e.kind() == std::io::ErrorKind::WouldBlock
+                    || e.kind() == std::io::ErrorKind::TimedOut =>
+            {
                 return Err(RuntimeError::MicroVm(format!(
                     "Firecracker API {path}: read timeout"
                 )));
@@ -627,7 +641,9 @@ fn wait_for_path(path: &Path, timeout: Duration) -> Result<()> {
 /// this only bites on a tampered or malicious archive.
 fn validate_tar_name(name: &str) -> Result<()> {
     if name.is_empty() || name == "." || name == ".." || name.contains('/') || name.contains('\0') {
-        return Err(RuntimeError::MicroVm(format!("unsafe tar entry name: {name:?}")));
+        return Err(RuntimeError::MicroVm(format!(
+            "unsafe tar entry name: {name:?}"
+        )));
     }
     Ok(())
 }
@@ -651,8 +667,7 @@ fn unpack_tar(archive: &[u8], dest: &Path) -> Result<()> {
         .entries()
         .map_err(|e| RuntimeError::MicroVm(format!("read tar archive: {e}")))?
     {
-        let mut entry =
-            entry.map_err(|e| RuntimeError::MicroVm(format!("read tar entry: {e}")))?;
+        let mut entry = entry.map_err(|e| RuntimeError::MicroVm(format!("read tar entry: {e}")))?;
 
         match entry.header().entry_type() {
             tar::EntryType::Regular | tar::EntryType::Directory => {}
@@ -747,7 +762,10 @@ mod tests {
             b.append_data(&mut h, "./file.txt", &data[..]).unwrap();
         });
         unpack_tar(&archive, dir.path()).unwrap();
-        assert_eq!(std::fs::read(dir.path().join("file.txt")).unwrap(), b"hello");
+        assert_eq!(
+            std::fs::read(dir.path().join("file.txt")).unwrap(),
+            b"hello"
+        );
     }
 
     #[test]

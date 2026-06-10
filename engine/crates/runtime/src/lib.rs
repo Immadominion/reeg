@@ -18,10 +18,10 @@ mod process;
 mod runtime;
 mod umask;
 
-#[cfg(all(target_os = "linux", feature = "oci"))]
-mod oci;
 #[cfg(all(target_os = "linux", feature = "firecracker"))]
 mod firecracker;
+#[cfg(all(target_os = "linux", feature = "oci"))]
+mod oci;
 
 pub use error::{Result, RuntimeError};
 pub use log::{CommandEvent, EventLog, digest_of};
@@ -29,10 +29,10 @@ pub use process::LocalRuntime;
 pub use runtime::{ExecOutcome, ExecRequest, Runtime};
 pub use umask::{CANONICAL_UMASK, apply_canonical_umask};
 
-#[cfg(all(target_os = "linux", feature = "oci"))]
-pub use oci::{OciConfig, OciRuntime};
 #[cfg(all(target_os = "linux", feature = "firecracker"))]
 pub use firecracker::{FirecrackerConfig, FirecrackerRuntime};
+#[cfg(all(target_os = "linux", feature = "oci"))]
+pub use oci::{OciConfig, OciRuntime};
 
 // Restore, drift, and bundle pack/unpack reuse the snapshot engine directly; re-exported so a
 // runtime caller has one import surface for the full create/run/checkpoint/restore loop.

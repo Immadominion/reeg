@@ -62,9 +62,12 @@ mod fc_tests {
         let mut rt = FirecrackerRuntime::create(staging.path().join("machine"), config).unwrap();
 
         // Run commands inside the VM; the agent works at /work.
-        let o1 = rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
+        let o1 = rt
+            .exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs"))
+            .unwrap();
         assert_eq!(
-            o1.exit_code, 0,
+            o1.exit_code,
+            0,
             "exec 1 failed (exit {}):\nstdout: {}\nstderr: {}",
             o1.exit_code,
             String::from_utf8_lossy(&o1.stdout),
@@ -72,7 +75,8 @@ mod fc_tests {
         );
         let o2 = rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
         assert_eq!(
-            o2.exit_code, 0,
+            o2.exit_code,
+            0,
             "exec 2 failed (exit {}):\nstdout: {}\nstderr: {}",
             o2.exit_code,
             String::from_utf8_lossy(&o2.stdout),
@@ -114,28 +118,32 @@ mod fc_tests {
 
         // Build identical content via the Firecracker tier.
         let fc_staging = tempdir().unwrap();
-        let mut fc_rt =
-            FirecrackerRuntime::create(fc_staging.path().join("m"), config).unwrap();
+        let mut fc_rt = FirecrackerRuntime::create(fc_staging.path().join("m"), config).unwrap();
         let o = fc_rt.exec(&sh("printf 'same content' > file.txt")).unwrap();
         assert_eq!(
-            o.exit_code, 0,
+            o.exit_code,
+            0,
             "FC exec failed (exit {}):\nstdout: {}\nstderr: {}",
             o.exit_code,
             String::from_utf8_lossy(&o.stdout),
             String::from_utf8_lossy(&o.stderr),
         );
-        let fc_manifest = fc_rt.checkpoint(&cas, EnvironmentInputs::default()).unwrap();
+        let fc_manifest = fc_rt
+            .checkpoint(&cas, EnvironmentInputs::default())
+            .unwrap();
 
         // Build identical content via the local tier.
         let local_work = tempdir().unwrap();
-        let mut local_rt =
-            reeg_runtime::LocalRuntime::create(local_work.path().join("m")).unwrap();
-        local_rt.exec(&sh("printf 'same content' > file.txt")).unwrap();
-        let local_manifest = local_rt.checkpoint(&cas, EnvironmentInputs::default()).unwrap();
+        let mut local_rt = reeg_runtime::LocalRuntime::create(local_work.path().join("m")).unwrap();
+        local_rt
+            .exec(&sh("printf 'same content' > file.txt"))
+            .unwrap();
+        let local_manifest = local_rt
+            .checkpoint(&cas, EnvironmentInputs::default())
+            .unwrap();
 
         assert_eq!(
-            fc_manifest.workdir_root_hash,
-            local_manifest.workdir_root_hash,
+            fc_manifest.workdir_root_hash, local_manifest.workdir_root_hash,
             "Firecracker and local tiers produced different workdir_root_hash for identical content"
         );
     }
@@ -184,13 +192,17 @@ mod fc_tests {
         let staging = tempdir().unwrap();
         let mut rt = FirecrackerRuntime::create(staging.path().join("m"), config).unwrap();
         // /work is writable (tmpfs); a sibling path on the read-only root must not be.
-        let inside = rt.exec(&sh("echo ok > /work/canwrite && echo rc=$?")).unwrap();
+        let inside = rt
+            .exec(&sh("echo ok > /work/canwrite && echo rc=$?"))
+            .unwrap();
         assert!(
             String::from_utf8_lossy(&inside.stdout).contains("rc=0"),
             "writing inside /work should succeed: {inside:?}"
         );
         let outside = rt
-            .exec(&sh("touch /reeg-should-fail 2>/dev/null && echo WROTE || echo READONLY"))
+            .exec(&sh(
+                "touch /reeg-should-fail 2>/dev/null && echo WROTE || echo READONLY",
+            ))
             .unwrap();
         assert!(
             String::from_utf8_lossy(&outside.stdout).contains("READONLY"),
@@ -249,7 +261,9 @@ mod fc_tests {
         let cas = CasStore::open(store.path()).unwrap();
         let staging = tempdir().unwrap();
         let mut rt = FirecrackerRuntime::create(staging.path().join("m"), config).unwrap();
-        let w = rt.exec(&sh("yes reeg | head -c 4194304 > big.bin")).unwrap();
+        let w = rt
+            .exec(&sh("yes reeg | head -c 4194304 > big.bin"))
+            .unwrap();
         assert_eq!(w.exit_code, 0, "write failed: {w:?}");
         let manifest = rt.checkpoint(&cas, EnvironmentInputs::default()).unwrap();
         let fresh = tempdir().unwrap();
@@ -259,7 +273,9 @@ mod fc_tests {
             "large-output restore drifted"
         );
         assert_eq!(
-            std::fs::metadata(fresh.path().join("big.bin")).unwrap().len(),
+            std::fs::metadata(fresh.path().join("big.bin"))
+                .unwrap()
+                .len(),
             4_194_304
         );
     }
@@ -279,12 +295,10 @@ mod fc_tests {
         let mut fc = FirecrackerRuntime::create(staging.path().join("m"), config).unwrap();
         let local_work = tempdir().unwrap();
         let mut local = reeg_runtime::LocalRuntime::create(local_work.path().join("m")).unwrap();
-        for rt in [
-            &mut fc as &mut dyn Runtime,
-            &mut local as &mut dyn Runtime,
-        ] {
+        for rt in [&mut fc as &mut dyn Runtime, &mut local as &mut dyn Runtime] {
             rt.exec(&ExecRequest::new("echo", ["reeg"])).unwrap();
-            rt.exec(&ExecRequest::new("true", [] as [String; 0])).unwrap();
+            rt.exec(&ExecRequest::new("true", [] as [String; 0]))
+                .unwrap();
         }
         assert_eq!(
             fc.event_log().digest_hex().unwrap(),

@@ -20,7 +20,9 @@ mod oci_tests {
     }
 
     fn rootfs() -> Option<std::path::PathBuf> {
-        std::env::var("REEG_OCI_ROOTFS").ok().map(std::path::PathBuf::from)
+        std::env::var("REEG_OCI_ROOTFS")
+            .ok()
+            .map(std::path::PathBuf::from)
     }
 
     fn runc_on_path() -> bool {
@@ -69,12 +71,18 @@ mod oci_tests {
         let cas = CasStore::open(store.path()).unwrap();
         let work = tempdir().unwrap();
 
-        let config = OciConfig { rootfs, ..OciConfig::default() };
+        let config = OciConfig {
+            rootfs,
+            ..OciConfig::default()
+        };
         let mut rt = OciRuntime::create(work.path().join("machine"), config).unwrap();
 
-        let o1 = rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
+        let o1 = rt
+            .exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs"))
+            .unwrap();
         assert_eq!(
-            o1.exit_code, 0,
+            o1.exit_code,
+            0,
             "exec 1 failed (exit {}):\nstdout: {}\nstderr: {}",
             o1.exit_code,
             String::from_utf8_lossy(&o1.stdout),
@@ -82,7 +90,8 @@ mod oci_tests {
         );
         let o2 = rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
         assert_eq!(
-            o2.exit_code, 0,
+            o2.exit_code,
+            0,
             "exec 2 failed (exit {}):\nstdout: {}\nstderr: {}",
             o2.exit_code,
             String::from_utf8_lossy(&o2.stdout),
@@ -123,7 +132,10 @@ mod oci_tests {
         let work_oci = tempdir().unwrap();
         let work_local = tempdir().unwrap();
 
-        let config = OciConfig { rootfs, ..OciConfig::default() };
+        let config = OciConfig {
+            rootfs,
+            ..OciConfig::default()
+        };
         let mut oci = OciRuntime::create(work_oci.path().join("m"), config).unwrap();
         let mut local = LocalRuntime::create(work_local.path().join("m")).unwrap();
 
@@ -132,7 +144,8 @@ mod oci_tests {
             &mut local as &mut dyn reeg_runtime::Runtime,
         ] {
             rt.exec(&ExecRequest::new("echo", ["reeg"])).unwrap();
-            rt.exec(&ExecRequest::new("true", [] as [String; 0])).unwrap();
+            rt.exec(&ExecRequest::new("true", [] as [String; 0]))
+                .unwrap();
         }
 
         assert_eq!(
@@ -155,7 +168,10 @@ mod oci_tests {
             return;
         }
         let work = tempdir().unwrap();
-        let config = OciConfig { rootfs, ..OciConfig::default() };
+        let config = OciConfig {
+            rootfs,
+            ..OciConfig::default()
+        };
         let mut rt = OciRuntime::create(work.path().join("m"), config).unwrap();
         // busybox wget is in the Alpine rootfs; a 2s-timeout fetch of the metadata service must fail
         // (no route in the isolated netns). We assert on the explicit marker, not the exit code, so
