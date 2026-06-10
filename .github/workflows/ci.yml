@@ -26,6 +26,11 @@ jobs:
   rust:
     name: Rust engine (fmt, clippy, test)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Run from the engine workspace so cargo resolves the pinned toolchain and all members.
+        # `cargo fmt --manifest-path <virtual-workspace>` fails with "Failed to find targets".
+        working-directory: engine
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -34,9 +39,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: engine
-      - run: cargo fmt --manifest-path engine/Cargo.toml --check
-      - run: cargo clippy --manifest-path engine/Cargo.toml --workspace -- -D warnings
-      - run: cargo test --manifest-path engine/Cargo.toml --workspace
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace -- -D warnings
+      - run: cargo test --workspace
 
   move:
     name: Move package (build, test)
