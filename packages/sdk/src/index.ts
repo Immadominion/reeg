@@ -9,7 +9,7 @@
 // Re-export the typed chain readers and the sharing PTB builders so SDK consumers (including the
 // Console's wallet flow) have one import surface.
 export type { AccessPolicy, Grant, Machine } from '@reeg/chain';
-export { buildGrant, buildRevoke, readAccessPolicy, readMachine } from '@reeg/chain';
+export { buildFork, buildGrant, buildRevoke, readAccessPolicy, readMachine } from '@reeg/chain';
 export type {
   CheckpointBundle,
   CheckpointClients,

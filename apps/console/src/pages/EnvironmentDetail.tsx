@@ -1,8 +1,8 @@
+import { ActionsCard } from '../components/ActionsCard';
 import { Avatar } from '../components/Avatar';
 import { ShareCard } from '../components/ShareCard';
 import { ErrorState } from '../components/States';
 import { Timeline } from '../components/Timeline';
-import { Button } from '../components/ui/Button';
 import { Card, CardBody } from '../components/ui/Card';
 import { Skeleton } from '../components/ui/Skeleton';
 import { StatusPill } from '../components/ui/StatusPill';
@@ -50,22 +50,7 @@ export function EnvironmentDetail({ id }: { id: string }) {
             <Timeline events={events} nowMs={nowMs} />
           </CardBody>
         </Card>
-        <Card>
-          <CardBody className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">Actions</h2>
-            <p className="text-xs text-muted-foreground">
-              Resume and fork from a connected wallet arrive next.
-            </p>
-            <div className="flex flex-col gap-2">
-              <Button variant="secondary" size="sm" disabled>
-                Resume on another machine
-              </Button>
-              <Button variant="secondary" size="sm" disabled>
-                Fork
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
+        <ActionsCard machine={machine} />
       </div>
 
       <ShareCard machineId={id} nowMs={nowMs} />
