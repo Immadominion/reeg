@@ -42,6 +42,7 @@ impl Runtime for LocalRuntime {
     fn exec(&mut self, request: &ExecRequest) -> Result<ExecOutcome> {
         let mut command = Command::new(&request.program);
         command.args(&request.args).current_dir(&self.workdir);
+        command.envs(request.env.iter().map(|(k, v)| (k.as_str(), v.as_str())));
         // Pin the canonical umask in the child so captured file modes are deterministic across
         // tiers and hosts, not a function of the ambient login umask. See `crate::umask`.
         #[cfg(unix)]
@@ -99,6 +100,18 @@ mod tests {
         assert!(outcome.success());
         assert_eq!(outcome.stdout_utf8_lossy().trim(), "hello");
         assert_eq!(rt.event_log().len(), 1);
+    }
+
+    #[test]
+    fn exec_forwards_env_to_the_child() {
+        // The `env` on a request must reach the child — this is how REEG_MEMORY_DIR is exposed to
+        // the agent uniformly across tiers.
+        let (_dir, mut rt) = runtime();
+        let req = ExecRequest::new("sh", ["-c", "printf %s \"$REEG_MEMORY_DIR\""])
+            .with_env("REEG_MEMORY_DIR", "/memory");
+        let outcome = rt.exec(&req).unwrap();
+        assert!(outcome.success());
+        assert_eq!(outcome.stdout_utf8_lossy(), "/memory");
     }
 
     #[test]

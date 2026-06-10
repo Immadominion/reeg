@@ -5,12 +5,16 @@ use reeg_snapshot::{CasStore, EnvironmentInputs, Manifest};
 use crate::error::Result;
 use crate::log::EventLog;
 
-/// A command for the agent to run: a program and its arguments, executed in the Machine's
-/// working directory.
-#[derive(Debug, Clone)]
+/// A command for the agent to run: a program, its arguments, and extra environment variables,
+/// executed in the Machine's working directory. `env` is how the runtime exposes things like
+/// `REEG_MEMORY_DIR` to the agent uniformly across tiers (local, OCI, Firecracker) — a plain
+/// process-env inheritance only reaches the local tier, not the container or the microVM guest.
+#[derive(Debug, Clone, Default)]
 pub struct ExecRequest {
     pub program: String,
     pub args: Vec<String>,
+    /// Extra environment variables set on the child, in addition to whatever it inherits.
+    pub env: Vec<(String, String)>,
 }
 
 impl ExecRequest {
@@ -21,7 +25,14 @@ impl ExecRequest {
         ExecRequest {
             program: program.into(),
             args: args.into_iter().map(Into::into).collect(),
+            env: Vec::new(),
         }
+    }
+
+    /// Add an environment variable the child will see (e.g. `REEG_MEMORY_DIR`).
+    pub fn with_env(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.env.push((key.into(), value.into()));
+        self
     }
 }
 

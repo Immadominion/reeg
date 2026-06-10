@@ -147,13 +147,13 @@ impl Runtime for OciRuntime {
         // The working directory inside the container is always /work, which is bind-mounted
         // from the host workdir so writes land on the host filesystem directly.
         // Note: runc exec takes [options] <container-id> <command> [args...] -- no "--" separator.
-        let mut args = vec![
-            "exec".to_owned(),
-            "--cwd".to_owned(),
-            "/work".to_owned(),
-            self.container_id.clone(),
-            request.program.clone(),
-        ];
+        let mut args = vec!["exec".to_owned(), "--cwd".to_owned(), "/work".to_owned()];
+        // Forward request env (e.g. REEG_MEMORY_DIR) into the container process.
+        for (k, v) in &request.env {
+            args.push("--env".to_owned());
+            args.push(format!("{k}={v}"));
+        }
+        args.extend([self.container_id.clone(), request.program.clone()]);
         args.extend(request.args.clone());
 
         let mut command = Command::new(&self.runc_bin);

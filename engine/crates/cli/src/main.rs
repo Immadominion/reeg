@@ -104,7 +104,13 @@ fn cmd_run(workdir: &Path, log: &Path, argv: &[String]) -> Result<()> {
     let mut entries = load_log(log)?;
 
     let mut runtime = LocalRuntime::create(workdir)?;
-    let outcome = runtime.exec(&ExecRequest::new(program.clone(), args.iter().cloned()))?;
+    let mut request = ExecRequest::new(program.clone(), args.iter().cloned());
+    // Forward the agent-memory directory to the command in every tier (the local tier would inherit
+    // it from the process env, but the OCI/microVM tiers do not — `env` makes it uniform).
+    if let Ok(memory_dir) = std::env::var("REEG_MEMORY_DIR") {
+        request = request.with_env("REEG_MEMORY_DIR", memory_dir);
+    }
+    let outcome = runtime.exec(&request)?;
 
     // Carry the recorded entry into the persisted log, renumbering its seq to its position.
     let mut entry = runtime.event_log().entries()[0].clone();

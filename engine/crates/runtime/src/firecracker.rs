@@ -308,10 +308,16 @@ impl Runtime for FirecrackerRuntime {
     }
 
     fn exec(&mut self, request: &ExecRequest) -> Result<ExecOutcome> {
+        let env: serde_json::Map<String, serde_json::Value> = request
+            .env
+            .iter()
+            .map(|(k, v)| (k.clone(), serde_json::Value::String(v.clone())))
+            .collect();
         let req = serde_json::json!({
             "type": "exec",
             "program": request.program,
             "args": request.args,
+            "env": env,
             "cwd": "/work"
         });
         let resp = vsock_json(

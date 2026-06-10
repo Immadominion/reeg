@@ -127,11 +127,22 @@ fn handle_exec(stream: &mut vsock::VsockStream, req: &serde_json::Value) -> Resu
         .unwrap_or_default();
     let cwd = req["cwd"].as_str().unwrap_or(WORKDIR);
 
-    let output = Command::new(program)
+    let mut command = Command::new(program);
+    command
         .args(&args)
         .current_dir(cwd)
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::piped());
+    // Apply forwarded env vars (e.g. REEG_MEMORY_DIR) so memory and config reach the agent inside
+    // the microVM, matching the local and OCI tiers.
+    if let Some(env) = req["env"].as_object() {
+        for (key, value) in env {
+            if let Some(value) = value.as_str() {
+                command.env(key, value);
+            }
+        }
+    }
+    let output = command
         .output()
         .with_context(|| format!("launch {program}"))?;
 
