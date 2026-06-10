@@ -11,6 +11,25 @@ We are building the whole product, not an MVP and not a scripted demo. Phases la
 this list are real features real users will want, sequenced after the ones they depend
 on, never deferred because the product is incomplete without them.
 
+## Status at a glance
+
+Updated 2026-06-10. Legend: ✅ done · 🟡 partial · ⚠️ merged but unproven · ⏸️ deferred.
+Each phase header below carries its own **Status** line; this is the summary:
+
+- ✅ **A–H** — foundation, snapshot engine, OCI tier, Move/provenance, client adapters, verifier, CLI/SDK, Console/indexer
+- 🟡 **I** — owner-only + allowlist + time-lock Seal policies present; committee/t-of-n deferred
+- ✅ **J** — cross-host acceptance demo (run → checkpoint → kill → restore → verify → grant → revoke)
+- 🟡 **K** — backend-agnostic memory seam in place; MemWal SDK not yet wired
+- ✅ **L** — evidence export + offline audit
+- 🟢 **M** — Firecracker tier hardened + verified on AWS KVM (2026-06-10): 18/19 punch-list items closed (+ the umask determinism fix), adversarially re-reviewed; only #14 (jailer) deferred
+- ⏸️ **N, O** — Nautilus attestation and mainnet/scale, deferred
+
+The product is functionally complete on testnet through phase L; the June 21 acceptance bar is met by
+the OCI tier (phase C). **Phase M (Firecracker) is the active front:** it merged with 19 logged defects
+and had never run on real hardware, so it is being stood up and proven on an AWS KVM host — see the
+[AWS Firecracker runbook](aws-firecracker-runbook.md). Status reflects code present in the repo; the
+phase-M `run` bar is re-confirmed by that runbook, not assumed.
+
 ## How to read this
 
 - **Order is dependency order, easy to hard.** A phase assumes the ones before it.
@@ -42,6 +61,8 @@ possible, then deepen.
 
 ## Phase A - Repository and toolchain foundation
 
+**Status: ✅ done** — monorepo, pinned toolchains, config-per-network, frozen manifest spec.
+
 Goal: a monorepo where the on-chain package, the Rust engine, the TypeScript client,
 and the Console move together, with versions pinned and networks switchable by config.
 
@@ -70,6 +91,8 @@ Advances: foundations for everything; no FR yet.
 
 ## Phase B - Snapshot engine core (single host, no chain)
 
+**Status: ✅ done** — BLAKE3 CAS, Merkle capture, deterministic manifest, restore + drift.
+
 Goal: prove the gating risk first. Checkpoint and restore an environment on one host,
 byte-identically, with no chain, storage, or encryption involved yet.
 
@@ -97,6 +120,8 @@ Advances: C3 (portable) foundation, FR-3, FR-4, NFR-8.
 
 ## Phase C - Runtime adapter and isolation tier 1
 
+**Status: ✅ done** — `Runtime` trait + OCI/OverlayFS tier; this tier meets the June 21 bar.
+
 Goal: give an agent a real place to work, behind one interface, with a swappable
 isolation tier, and wire the snapshot engine to live state.
 
@@ -117,6 +142,8 @@ Advances: C2/C3 foundation, FR-1, FR-2.
 ---
 
 ## Phase D - On-chain Machine and provenance (Move)
+
+**Status: ✅ done** — `Machine` + hash-chained provenance + `seal_approve`, deployed to testnet.
 
 Goal: the ownership and tamper-evident-record layer, on Sui, in Move 2024.
 
@@ -143,6 +170,8 @@ Advances: C1 (owned), C4 foundation, FR-1, FR-5, FR-7, FR-10.
 
 ## Phase E - Client adapters: chain, storage, crypto (TypeScript)
 
+**Status: ✅ done** — chain/storage/crypto adapters; checkpoint is one atomic PTB.
+
 Goal: connect the engine to Sui, Walrus, and Seal, and make a checkpoint a single atomic
 on-chain action.
 
@@ -166,6 +195,8 @@ Advances: C1, C3, FR-3, FR-4, NFR-4, NFR-5.
 
 ## Phase F - Verification path (the soul)
 
+**Status: ✅ done** — independent verifier with negative tests; passes offline.
+
 Goal: an outsider can verify a run reading only public Sui and Walrus data, with Reeg
 offline. This is the product's reason to exist.
 
@@ -188,6 +219,8 @@ Advances: C4 (provable), FR-8, NFR-1, NFR-5.
 
 ## Phase G - CLI and public SDK
 
+**Status: ✅ done** — `reeg` CLI + public SDK drive the full loop.
+
 Goal: the operator-facing surface, so a person (and a script) can drive the whole loop.
 
 Produces:
@@ -205,6 +238,8 @@ Advances: C1, C2, C3, C4 made usable, FR-1 through FR-5, FR-8.
 ---
 
 ## Phase H - Console (Walrus Site) and indexer
+
+**Status: ✅ done** — rebuildable indexer + Console (Landing/Home/Detail/Preview) with offline Verify.
 
 Goal: the web presentation, as a static Walrus Site with no privileged backend, plus a
 display-only indexer that is never on the trust path.
@@ -230,6 +265,9 @@ Advances: C4 presented, FR-13, FR-14, FR-15, FR-16, FR-17, NFR-1.
 
 ## Phase I - Sharing and access depth
 
+**Status: 🟡 partial** — owner-only, `seal_approve_allowlist`, and `seal_approve_until` are in
+`move/sources/access.move`; committee / threshold (t-of-n) policies still deferred.
+
 Goal: real sharing, from owner-only to allowlist to higher-assurance committee policies.
 
 Produces:
@@ -249,6 +287,9 @@ Advances: C2 (shareable) deepened, FR-11, FR-12, FR-16.
 ---
 
 ## Phase J - Cross-host portability hardening
+
+**Status: ✅ done** — `test/live/acceptance.ts` runs the scripted kill-host → restore-elsewhere →
+verify-offline → grant → revoke demo end to end.
 
 Goal: make the kill-and-restore-elsewhere story robust, not just demoable once.
 
@@ -270,6 +311,9 @@ Advances: C3 (portable) hardened, FR-4, NFR-2, NFR-8.
 
 ## Phase K - Agent memory (MemWal)
 
+**Status: 🟡 partial** — the backend-agnostic seam exists (`REEG_MEMORY_DIR`, `memory_pointer` in the
+manifest, captured/verified with the workdir); wiring the shipped MemWal SDK as the backend remains.
+
 Goal: memory that is owned, checkpointed, and verified with the rest of the environment.
 
 Produces:
@@ -288,6 +332,8 @@ Advances: FR-18, deepens C3 and C4.
 ---
 
 ## Phase L - Compliance and evidence layer (elevated)
+
+**Status: ✅ done** — `reeg evidence` exports a portable record; `reeg audit` re-verifies it offline.
 
 Goal: turn the record we already produce into evidence a regulated buyer can keep and
 present. Elevated because compliance is the one concrete, budgeted demand (EU AI Act
@@ -314,6 +360,22 @@ Advances: C4 turned into evidence, FR-9, NFR-1, NFR-7.
 
 ## Phase M - Production isolation tier (Firecracker microVM)
 
+**Status: 🟢 hardened on KVM (2026-06-10); jailer (#14) the one tracked follow-up** — the microVM +
+OCI/runc + in-guest agent tiers merged in PR #1 (`14ae8c7`) with 19 logged defects and had never run on
+real hardware. They were stood up on an AWS KVM host (`c8i.2xlarge`), which first surfaced a 20th defect
+(the umask determinism leak, now fixed), then took a full hardening pass: in-process tar extraction
+(symlink/traversal-safe), real VM Drop-reaping, RAII partial-init cleanup, read-only rootfs + per-VM
+tmpfs `/work` (cross-tenant isolation), u64 framing with allocation caps, OCI network/ipc/uts namespaces
++ all-caps-dropped + a seccomp denylist (incl. `io_uring`/`userfaultfd`/`AF_NETLINK`) + masked paths,
+and per-session path uniquification. The applied diff was then adversarially re-reviewed and its
+findings closed. **Verified on KVM:** lib unit 10/10, `firecracker_session` 8/8, `oci_session` 3/3,
+clippy `-D warnings` clean, no leaked VMs — including tests proving traversal/symlink rejection,
+per-session isolation, read-only rootfs, and the EC2 metadata service being unreachable. Closure detail
+in [firecracker-impl-review.md](../reviews/firecracker-impl-review.md) Addendum 2; ops steps in the
+[AWS Firecracker runbook](aws-firecracker-runbook.md). **One item is deliberately deferred:** #14 — the
+Firecracker VMM is still launched unjailed; the microVM kernel boundary is the primary defense and
+jailing it is operational hardening for a later pass.
+
 Goal: hard multi-tenant isolation for running untrusted agent code at volume, behind the
 same runtime adapter, without touching the verification path.
 
@@ -335,6 +397,9 @@ Advances: hardens C1 through C4 for real multi-tenant use; T-I4 in
 
 ## Phase N - Verifiable compute (Nautilus, mainnet)
 
+**Status: ⏸️ deferred** — optional tier; the AWS host is launched with Nitro Enclaves enabled so it is
+ready when this is sequenced in. No guest code written yet.
+
 Goal: for the runs that need it, prove what code ran, not just the environment. Optional
 tier, sequenced here by scope; Nautilus is on mainnet, so this is no longer testnet upside.
 
@@ -354,6 +419,9 @@ Advances: extends C4 to execution; deepens phase L evidence for high-risk runs.
 ---
 
 ## Phase O - Mainnet, lifecycle, and scale
+
+**Status: ⏸️ deferred** — testnet is the current target; mainnet cutover is a config switch when phase 2
+ships.
 
 Goal: run as a real service, manage cost over time, and support teams at volume.
 

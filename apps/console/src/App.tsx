@@ -1,14 +1,23 @@
-import { ConnectButton } from '@mysten/dapp-kit';
-import { Button } from './components/ui/Button';
-import { matchEnvironment, navigate, useRoute } from './lib/router';
-import { useTheme } from './lib/theme';
+import { Header } from './components/Header';
+import { matchEnvironment, useRoute } from './lib/router';
 import { EnvironmentDetail } from './pages/EnvironmentDetail';
 import { Home } from './pages/Home';
+import { Sandbox } from './pages/Preview';
 
 export function App() {
   const route = useRoute();
-  const envId = matchEnvironment(route);
 
+  // The screen sandbox is a separate tool that wraps the product screens in its own chrome, so it
+  // takes over the whole page. It is on in a preview build (VITE_REEG_PREVIEW, e.g. the deploy we
+  // share with a designer) or at #/preview during local dev. A normal build never shows it.
+  const sandbox =
+    import.meta.env.VITE_REEG_PREVIEW === '1' ||
+    (import.meta.env.DEV && route.startsWith('/preview'));
+  if (sandbox) {
+    return <Sandbox />;
+  }
+
+  const envId = matchEnvironment(route);
   return (
     <div className="min-h-dvh">
       <Header />
@@ -16,28 +25,5 @@ export function App() {
         {envId ? <EnvironmentDetail id={envId} /> : <Home />}
       </main>
     </div>
-  );
-}
-
-function Header() {
-  const { theme, toggle } = useTheme();
-  return (
-    <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="text-lg font-semibold tracking-tight"
-        >
-          Reeg
-        </button>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={toggle} aria-label="Toggle theme">
-            {theme === 'dark' ? 'Light' : 'Dark'}
-          </Button>
-          <ConnectButton />
-        </div>
-      </div>
-    </header>
   );
 }

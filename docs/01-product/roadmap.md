@@ -8,6 +8,25 @@ add depth, scale, and enterprise features; they do not turn a fake into a real
 thing. When this doc defers something, it is deferring scope, never deferring "build
 a real product."
 
+## Current status (as of 2026-06-10)
+
+Phase 1's acceptance bar is **met on testnet**: a user can create/run/checkpoint/restore/fork a
+Machine, share and revoke, kill a host and restore elsewhere, and have an outsider verify the run in
+the Console with our backend stopped. That loop runs today on the container (OCI) isolation tier, so
+the product is real, not staged. The Console now drives the on-chain actions directly — **Verify**
+(offline), **Fork** (one wallet-signed click, opens the child with its lineage), and **Share/Revoke** —
+while restore stays a host operation (it rebuilds a working directory and re-runs the agent), so the
+Console hands the operator the exact `reeg restore` command rather than faking it in the browser. The
+operational walkthrough is in [docs/demo/RUNBOOK.md](../demo/RUNBOOK.md). The build detail is in
+[build-roadmap.md](../03-engineering/build-roadmap.md);
+phases A–H, J, and L are done, with allowlist/time-lock sharing (part of I) and the memory seam (part
+of K) in place.
+
+The one piece that needs hardware a Mac can't provide is the **Firecracker production isolation tier**
+(build-roadmap phase M, this doc's Phase 4): it requires Linux + KVM. It is being stood up and proven
+on an AWS host now — pulled forward only to validate it runs and to harden it, not because the June
+product depends on it. See the [AWS Firecracker runbook](../03-engineering/aws-firecracker-runbook.md).
+
 ## Guiding rule
 
 Ship the real product, then widen it. The thesis is: agent environments you own and

@@ -20,7 +20,9 @@ mod oci_tests {
     }
 
     fn rootfs() -> Option<std::path::PathBuf> {
-        std::env::var("REEG_OCI_ROOTFS").ok().map(std::path::PathBuf::from)
+        std::env::var("REEG_OCI_ROOTFS")
+            .ok()
+            .map(std::path::PathBuf::from)
     }
 
     fn runc_on_path() -> bool {
@@ -69,12 +71,18 @@ mod oci_tests {
         let cas = CasStore::open(store.path()).unwrap();
         let work = tempdir().unwrap();
 
-        let config = OciConfig { rootfs, ..OciConfig::default() };
+        let config = OciConfig {
+            rootfs,
+            ..OciConfig::default()
+        };
         let mut rt = OciRuntime::create(work.path().join("machine"), config).unwrap();
 
-        let o1 = rt.exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs")).unwrap();
+        let o1 = rt
+            .exec(&sh("mkdir -p src && printf 'fn main() {}' > src/main.rs"))
+            .unwrap();
         assert_eq!(
-            o1.exit_code, 0,
+            o1.exit_code,
+            0,
             "exec 1 failed (exit {}):\nstdout: {}\nstderr: {}",
             o1.exit_code,
             String::from_utf8_lossy(&o1.stdout),
@@ -82,7 +90,8 @@ mod oci_tests {
         );
         let o2 = rt.exec(&sh("printf 'hello reeg' > README")).unwrap();
         assert_eq!(
-            o2.exit_code, 0,
+            o2.exit_code,
+            0,
             "exec 2 failed (exit {}):\nstdout: {}\nstderr: {}",
             o2.exit_code,
             String::from_utf8_lossy(&o2.stdout),
@@ -123,7 +132,10 @@ mod oci_tests {
         let work_oci = tempdir().unwrap();
         let work_local = tempdir().unwrap();
 
-        let config = OciConfig { rootfs, ..OciConfig::default() };
+        let config = OciConfig {
+            rootfs,
+            ..OciConfig::default()
+        };
         let mut oci = OciRuntime::create(work_oci.path().join("m"), config).unwrap();
         let mut local = LocalRuntime::create(work_local.path().join("m")).unwrap();
 
@@ -132,13 +144,48 @@ mod oci_tests {
             &mut local as &mut dyn reeg_runtime::Runtime,
         ] {
             rt.exec(&ExecRequest::new("echo", ["reeg"])).unwrap();
-            rt.exec(&ExecRequest::new("true", [] as [String; 0])).unwrap();
+            rt.exec(&ExecRequest::new("true", [] as [String; 0]))
+                .unwrap();
         }
 
         assert_eq!(
             oci.event_log().digest_hex().unwrap(),
             local.event_log().digest_hex().unwrap(),
             "event log digest differs between OCI and local tiers"
+        );
+    }
+
+    /// Defect #4: with a fresh network namespace the container has no route to the host network,
+    /// so the EC2 instance metadata service (169.254.169.254) — a classic credential-theft target —
+    /// must be unreachable from inside the container.
+    #[test]
+    fn oci_network_isolation_blocks_metadata_service() {
+        let rootfs = match rootfs() {
+            Some(p) => p,
+            None => return,
+        };
+        if !runc_functional(&rootfs) {
+            return;
+        }
+        let work = tempdir().unwrap();
+        let config = OciConfig {
+            rootfs,
+            ..OciConfig::default()
+        };
+        let mut rt = OciRuntime::create(work.path().join("m"), config).unwrap();
+        // busybox wget is in the Alpine rootfs; a 2s-timeout fetch of the metadata service must fail
+        // (no route in the isolated netns). We assert on the explicit marker, not the exit code, so
+        // a missing wget doesn't masquerade as a pass.
+        let r = rt
+            .exec(&sh(
+                "wget -T 2 -q -O - http://169.254.169.254/latest/meta-data/ >/dev/null 2>&1 \
+                 && echo REACHED || echo BLOCKED",
+            ))
+            .unwrap();
+        let out = String::from_utf8_lossy(&r.stdout);
+        assert!(
+            out.contains("BLOCKED"),
+            "container reached the metadata service (network isolation broken): {out:?}"
         );
     }
 }

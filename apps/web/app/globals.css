@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* Reeg design tokens. Ported verbatim from the Console (apps/console/src/index.css) so the
+   marketing site and the product share one source of truth (see brand.md). Semantic names are
+   the contract; components never use raw hex. Light is the default. Dark is applied per-section
+   via a `.dark` wrapper (the dramatic proof/CTA/footer bands), so the variables cascade to the
+   tokens used inside that band. Tailwind v4 maps them in `@theme inline` below. */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
+  --card: #ffffff;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --accent: #2563eb;
+  --verified: #16a34a;
+  --warning: #b45309;
+  --destructive: #dc2626;
+  --ring: #2563eb;
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #fafafa;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --border: #27272a;
+  --card: #101012;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --accent: #3b82f6;
+  --verified: #22c55e;
+  --warning: #d97706;
+  --destructive: #ef4444;
+  --ring: #3b82f6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-verified: var(--verified);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+  --radius-default: var(--radius);
+  --font-sans: var(--font-montserrat), ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: var(--font-clash-display), var(--font-montserrat), ui-sans-serif, sans-serif;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+/* Headlines wear the display face (Clash Display); body and UI stay Montserrat. Setting it on the
+   elements keeps section components clean. Per-element `tracking-*` utilities still win over this. */
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--font-display);
+  }
+}
+
+/* A faint blueprint grid used behind hero/CTA. Uses the border token, so it flips with the
+   surrounding theme. Callers add a radial mask to fade it out at the edges. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* When motion is allowed, sections fade up on enter; honored by Motion via useReducedMotion too,
+   this is the CSS belt-and-braces for anything not driven by JS. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

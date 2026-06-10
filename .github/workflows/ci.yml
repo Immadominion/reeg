@@ -26,6 +26,11 @@ jobs:
   rust:
     name: Rust engine (fmt, clippy, test)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Run from the engine workspace so cargo resolves the pinned toolchain and all members.
+        # `cargo fmt --manifest-path <virtual-workspace>` fails with "Failed to find targets".
+        working-directory: engine
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -34,20 +39,26 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: engine
-      - run: cargo fmt --manifest-path engine/Cargo.toml --check
-      - run: cargo clippy --manifest-path engine/Cargo.toml --workspace -- -D warnings
-      - run: cargo test --manifest-path engine/Cargo.toml --workspace
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace -- -D warnings
+      - run: cargo test --workspace
 
   move:
     name: Move package (build, test)
     runs-on: ubuntu-latest
+    env:
+      # Pin the Sui CLI to a known release. Bump deliberately when the Move toolchain advances.
+      SUI_VERSION: testnet-v1.73.1
     steps:
       - uses: actions/checkout@v5
-      # Install the Sui CLI. Pin REEG_SUI_VERSION to track the toolchain we build against.
+      # Install the Sui CLI from a pinned release binary (no suiup curl-pipe, which is rate-limited
+      # without a token and frequently leaves `sui` off PATH).
       - name: Install Sui CLI
         run: |
-          curl -fsSL https://raw.githubusercontent.com/MystenLabs/suiup/main/install.sh | sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          suiup install sui
+          url="https://github.com/MystenLabs/sui/releases/download/${SUI_VERSION}/sui-${SUI_VERSION}-ubuntu-x86_64.tgz"
+          curl -fsSL -o sui.tgz "$url"
+          mkdir -p sui-bin && tar -xzf sui.tgz -C sui-bin
+          sudo install -m0755 "$(find sui-bin -maxdepth 2 -name sui -type f | head -1)" /usr/local/bin/sui
+          sui --version
       - run: sui move build --path move
       - run: sui move test --path move

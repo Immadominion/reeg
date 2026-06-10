@@ -87,7 +87,7 @@ impl CasStore {
                 objects.push((hash, self.get(&hash)?));
             }
         }
-        objects.sort_by(|a, b| a.0.cmp(&b.0));
+        objects.sort_by_key(|a| a.0);
         Ok(objects)
     }
 

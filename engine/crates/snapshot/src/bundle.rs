@@ -81,8 +81,9 @@ pub fn unpack(
         )));
     }
     for object in &bundle.objects {
-        let data = hex::decode(&object.data)
-            .map_err(|_| SnapshotError::Bundle(format!("object {} has non-hex data", object.hash)))?;
+        let data = hex::decode(&object.data).map_err(|_| {
+            SnapshotError::Bundle(format!("object {} has non-hex data", object.hash))
+        })?;
         let stored = scratch.put(&data)?;
         if stored.to_hex() != object.hash {
             return Err(SnapshotError::CorruptObject {
@@ -92,12 +93,11 @@ pub fn unpack(
         }
     }
     crate::restore(&bundle.manifest, scratch, dest)?;
-    if let Some(memory_dir) = memory_dest {
-        if let Some(pointer) = &bundle.manifest.memory_pointer {
-            if let Ok(memory_root) = ContentHash::from_hex(pointer) {
-                crate::tree::restore(&memory_root, scratch, memory_dir)?;
-            }
-        }
+    if let Some(memory_dir) = memory_dest
+        && let Some(pointer) = &bundle.manifest.memory_pointer
+        && let Ok(memory_root) = ContentHash::from_hex(pointer)
+    {
+        crate::tree::restore(&memory_root, scratch, memory_dir)?;
     }
     Ok(bundle.manifest)
 }
@@ -129,8 +129,15 @@ mod tests {
         let restored = unpack(&bundle, &unpack_cas, dest.path(), None).unwrap();
 
         assert_eq!(manifest.workdir_root_hash, restored.workdir_root_hash);
-        assert!(crate::drift(&restored, &unpack_cas, dest.path()).unwrap().is_clean());
-        assert_eq!(fs::read(dest.path().join("src/main.rs")).unwrap(), b"fn main() {}");
+        assert!(
+            crate::drift(&restored, &unpack_cas, dest.path())
+                .unwrap()
+                .is_clean()
+        );
+        assert_eq!(
+            fs::read(dest.path().join("src/main.rs")).unwrap(),
+            b"fn main() {}"
+        );
     }
 
     #[test]
@@ -176,17 +183,25 @@ mod tests {
         let mem_dest = tempfile::tempdir().unwrap();
         sample(work.path());
         fs::create_dir_all(memory.path().join("vectors")).unwrap();
-        fs::write(memory.path().join("vectors/index.bin"), b"semantic-memory-state").unwrap();
+        fs::write(
+            memory.path().join("vectors/index.bin"),
+            b"semantic-memory-state",
+        )
+        .unwrap();
 
         let pack_cas = CasStore::open(packdir.path()).unwrap();
-        let (bundle, manifest) =
-            pack(work.path(), Some(memory.path()), &pack_cas, EnvironmentInputs::default()).unwrap();
+        let (bundle, manifest) = pack(
+            work.path(),
+            Some(memory.path()),
+            &pack_cas,
+            EnvironmentInputs::default(),
+        )
+        .unwrap();
         // The memory pointer is the captured content hash, so it is part of manifest_hash.
         assert!(manifest.memory_pointer.is_some());
 
         let unpack_cas = CasStore::open(unpackdir.path()).unwrap();
-        let restored =
-            unpack(&bundle, &unpack_cas, dest.path(), Some(mem_dest.path())).unwrap();
+        let restored = unpack(&bundle, &unpack_cas, dest.path(), Some(mem_dest.path())).unwrap();
         assert_eq!(manifest.memory_pointer, restored.memory_pointer);
         // Memory survived the round trip byte for byte, alongside the working directory.
         assert_eq!(
@@ -212,6 +227,9 @@ mod tests {
         // Restoring without a memory dest still rebuilds the working directory.
         let unpack_cas = CasStore::open(unpackdir.path()).unwrap();
         unpack(&bundle, &unpack_cas, dest.path(), None).unwrap();
-        assert_eq!(fs::read(dest.path().join("src/main.rs")).unwrap(), b"fn main() {}");
+        assert_eq!(
+            fs::read(dest.path().join("src/main.rs")).unwrap(),
+            b"fn main() {}"
+        );
     }
 }

@@ -40,14 +40,25 @@ impl Runtime for LocalRuntime {
     }
 
     fn exec(&mut self, request: &ExecRequest) -> Result<ExecOutcome> {
-        let output = Command::new(&request.program)
-            .args(&request.args)
-            .current_dir(&self.workdir)
-            .output()
-            .map_err(|source| RuntimeError::Launch {
-                program: request.program.clone(),
-                source,
-            })?;
+        let mut command = Command::new(&request.program);
+        command.args(&request.args).current_dir(&self.workdir);
+        // Pin the canonical umask in the child so captured file modes are deterministic across
+        // tiers and hosts, not a function of the ambient login umask. See `crate::umask`.
+        #[cfg(unix)]
+        {
+            use std::os::unix::process::CommandExt;
+            // SAFETY: the pre_exec closure only calls async-signal-safe `umask(2)`.
+            unsafe {
+                command.pre_exec(|| {
+                    crate::apply_canonical_umask();
+                    Ok(())
+                });
+            }
+        }
+        let output = command.output().map_err(|source| RuntimeError::Launch {
+            program: request.program.clone(),
+            source,
+        })?;
 
         let exit_code = output.status.code().unwrap_or(-1);
         self.log.record(
