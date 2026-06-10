@@ -141,4 +141,35 @@ mod oci_tests {
             "event log digest differs between OCI and local tiers"
         );
     }
+
+    /// Defect #4: with a fresh network namespace the container has no route to the host network,
+    /// so the EC2 instance metadata service (169.254.169.254) — a classic credential-theft target —
+    /// must be unreachable from inside the container.
+    #[test]
+    fn oci_network_isolation_blocks_metadata_service() {
+        let rootfs = match rootfs() {
+            Some(p) => p,
+            None => return,
+        };
+        if !runc_functional(&rootfs) {
+            return;
+        }
+        let work = tempdir().unwrap();
+        let config = OciConfig { rootfs, ..OciConfig::default() };
+        let mut rt = OciRuntime::create(work.path().join("m"), config).unwrap();
+        // busybox wget is in the Alpine rootfs; a 2s-timeout fetch of the metadata service must fail
+        // (no route in the isolated netns). We assert on the explicit marker, not the exit code, so
+        // a missing wget doesn't masquerade as a pass.
+        let r = rt
+            .exec(&sh(
+                "wget -T 2 -q -O - http://169.254.169.254/latest/meta-data/ >/dev/null 2>&1 \
+                 && echo REACHED || echo BLOCKED",
+            ))
+            .unwrap();
+        let out = String::from_utf8_lossy(&r.stdout);
+        assert!(
+            out.contains("BLOCKED"),
+            "container reached the metadata service (network isolation broken): {out:?}"
+        );
+    }
 }

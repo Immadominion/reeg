@@ -16,6 +16,7 @@ mod error;
 mod log;
 mod process;
 mod runtime;
+mod umask;
 
 #[cfg(all(target_os = "linux", feature = "oci"))]
 mod oci;
@@ -26,6 +27,7 @@ pub use error::{Result, RuntimeError};
 pub use log::{CommandEvent, EventLog, digest_of};
 pub use process::LocalRuntime;
 pub use runtime::{ExecOutcome, ExecRequest, Runtime};
+pub use umask::{CANONICAL_UMASK, apply_canonical_umask};
 
 #[cfg(all(target_os = "linux", feature = "oci"))]
 pub use oci::{OciConfig, OciRuntime};
