@@ -10,11 +10,12 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fromHex } from '@mysten/sui/utils';
+import { buildRegisterAttestedCommand, readMachine } from '@reeg/chain';
 import { checkpoint, restore } from '@reeg/sdk';
 import type { Command } from 'commander';
 import { buildClients, loadKeypair } from '../lib/clients';
 import { type CommonOptions, loadConfig, requireOperator } from '../lib/config';
-import { engineCheckpoint, engineRestore, engineRun } from '../lib/engine';
+import { engineAttestSign, engineCheckpoint, engineRestore, engineRun } from '../lib/engine';
 import { addChainOptions } from '../lib/options';
 import { isRetiredOrFalse } from '../lib/retired';
 import { withSealRetry } from '../lib/seal-retry';
@@ -57,9 +58,29 @@ export function registerCheckpoint(program: Command): void {
       .option(
         '--threshold <t>',
         'Seal committee threshold: how many of the configured key servers must release a share to decrypt (t-of-n). Set at encryption time; defaults to the configured threshold.',
-      ),
+      )
+      .option(
+        '--attest',
+        'after anchoring, record a Nautilus enclave attestation of this checkpoint',
+      )
+      .option(
+        '--enclave-config <id>',
+        'EnclaveConfig id from `reeg enclave register` (or REEG_ENCLAVE_CONFIG); required with --attest',
+      )
+      .option('--enclave-cid <n>', 'enclave vsock CID', '16')
+      .option('--enclave-port <n>', 'enclave vsock port', '5005'),
   ).action(
-    async (machineId: string, options: CommonOptions & { epochs?: string; threshold?: string }) => {
+    async (
+      machineId: string,
+      options: CommonOptions & {
+        epochs?: string;
+        threshold?: string;
+        attest?: boolean;
+        enclaveConfig?: string;
+        enclaveCid?: string;
+        enclavePort?: string;
+      },
+    ) => {
       const config = loadConfig(options);
       const operator = requireOperator(config);
       const machine = getMachine(machineId);
@@ -147,6 +168,54 @@ export function registerCheckpoint(program: Command): void {
           '  (a disaster-recovery backup key was produced in memory; store it out of band)',
         );
         void result.backupKey;
+
+        // Optional Nautilus tier: have the local enclave sign this checkpoint and record the
+        // attestation on chain. Additive — it never touches the checkpoint's provenance, so a
+        // run without --attest is identical. Requires `reeg enclave register` to have created the
+        // EnclaveConfig, and the enclave reachable over vsock on this host.
+        if (options.attest) {
+          const enclaveConfig = options.enclaveConfig ?? process.env.REEG_ENCLAVE_CONFIG;
+          if (!enclaveConfig) {
+            console.error(
+              'error: --attest needs --enclave-config <id> (or REEG_ENCLAVE_CONFIG); run `reeg enclave register` first',
+            );
+            process.exitCode = 1;
+          } else {
+            // The sequence of the checkpoint just anchored is the new checkpoint count minus one.
+            await sui.waitForTransaction({ digest: result.digest });
+            const advanced = await readMachine(sui, machineId);
+            const seq = advanced.checkpointCount - 1n;
+            const cid = Number(options.enclaveCid ?? process.env.REEG_ENCLAVE_CID ?? '16');
+            const port = Number(options.enclavePort ?? process.env.REEG_ENCLAVE_PORT ?? '5005');
+            const signatureHex = await engineAttestSign(
+              config.engineBin,
+              cid,
+              port,
+              machineId,
+              seq,
+              info.manifestHashHex,
+            );
+            const attested = await sui.signAndExecuteTransaction({
+              transaction: buildRegisterAttestedCommand(
+                config.packageId,
+                enclaveConfig,
+                machineId,
+                seq,
+                fromHex(info.manifestHashHex),
+                fromHex(signatureHex),
+              ),
+              signer,
+              options: { showEffects: true },
+            });
+            await sui.waitForTransaction({ digest: attested.digest });
+            if (attested.effects?.status.status === 'success') {
+              console.log(`  attested: enclave signed seq ${seq} (tx ${attested.digest})`);
+            } else {
+              console.error(`  attest failed: ${JSON.stringify(attested.effects?.status)}`);
+              process.exitCode = 1;
+            }
+          }
+        }
       } finally {
         rmSync(bundleDir, { recursive: true, force: true });
       }

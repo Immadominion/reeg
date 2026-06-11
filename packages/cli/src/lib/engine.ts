@@ -83,3 +83,40 @@ export async function engineRestore(
   }
   return JSON.parse(await invoke(bin, args));
 }
+
+/** Fetch the local Nautilus enclave's attestation document (hex) over vsock. Linux/host only. */
+export async function engineAttestDoc(bin: string, cid: number, port: number): Promise<string> {
+  const out = JSON.parse(
+    await invoke(bin, ['attest', 'doc', '--cid', String(cid), '--port', String(port)]),
+  );
+  return out.documentHex as string;
+}
+
+/** Ask the local enclave to sign a checkpoint's frozen preimage; returns the ed25519 signature (hex).
+ *  The enclave rebuilds the preimage from these fields, so it only signs well-formed attestations. */
+export async function engineAttestSign(
+  bin: string,
+  cid: number,
+  port: number,
+  machineId: string,
+  seq: bigint,
+  manifestHashHex: string,
+): Promise<string> {
+  const out = JSON.parse(
+    await invoke(bin, [
+      'attest',
+      'sign',
+      '--cid',
+      String(cid),
+      '--port',
+      String(port),
+      '--machine-id',
+      machineId,
+      '--seq',
+      seq.toString(),
+      '--manifest-hash',
+      manifestHashHex,
+    ]),
+  );
+  return out.signatureHex as string;
+}

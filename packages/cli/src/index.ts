@@ -6,6 +6,7 @@
 // (build-roadmap phase G).
 
 import { Command } from 'commander';
+import { registerEnclave } from './commands/enclave';
 import { registerAudit, registerEvidence } from './commands/evidence';
 import { registerCreate, registerFork, registerRetire } from './commands/lifecycle';
 import { registerCheckpoint, registerRestore, registerRun } from './commands/session';
@@ -32,6 +33,9 @@ registerVerify(program);
 // evidence/audit turn that same record into a portable file an auditor can keep (Art. 12).
 registerEvidence(program);
 registerAudit(program);
+// the optional Nautilus tier: register a measured enclave so `checkpoint --attest` can prove
+// which code produced a checkpoint.
+registerEnclave(program);
 
 // Await async actions and turn a thrown error into one clean line, not a raw Node stack trace.
 // REEG_DEBUG=1 keeps the full stack for when you actually want it.

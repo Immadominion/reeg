@@ -9,6 +9,8 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 #[cfg(target_os = "linux")]
+mod enclave_attest;
+#[cfg(target_os = "linux")]
 mod guest_agent;
 
 use anyhow::{Context, Result};
@@ -69,6 +71,37 @@ enum Command {
         #[arg(long, default_value = "52")]
         port: u32,
     },
+    /// Talk to the local Nautilus attestation enclave over vsock (Linux only): fetch its
+    /// attestation document (to register it on chain) or sign a checkpoint's preimage.
+    Attest {
+        #[command(subcommand)]
+        action: AttestAction,
+    },
+}
+
+#[derive(Subcommand)]
+enum AttestAction {
+    /// Fetch the enclave's Nitro attestation document (hex). Register it on chain once per build.
+    Doc {
+        #[arg(long, default_value = "16")]
+        cid: u32,
+        #[arg(long, default_value = "5005")]
+        port: u32,
+    },
+    /// Sign a checkpoint's frozen preimage; prints the ed25519 signature (hex). The enclave rebuilds
+    /// the preimage from these fields, so it only ever signs well-formed Reeg attestations.
+    Sign {
+        #[arg(long, default_value = "16")]
+        cid: u32,
+        #[arg(long, default_value = "5005")]
+        port: u32,
+        #[arg(long)]
+        machine_id: String,
+        #[arg(long)]
+        seq: u64,
+        #[arg(long)]
+        manifest_hash: String,
+    },
 }
 
 fn main() -> ExitCode {
@@ -85,6 +118,7 @@ fn run() -> Result<()> {
     match Cli::parse().command {
         Command::Run { workdir, log, argv } => cmd_run(&workdir, &log, &argv),
         Command::GuestAgent { port } => cmd_guest_agent(port),
+        Command::Attest { action } => cmd_attest(action),
         Command::Checkpoint {
             workdir,
             out,
@@ -189,5 +223,36 @@ fn cmd_guest_agent(port: u32) -> Result<()> {
     {
         let _ = port;
         anyhow::bail!("guest-agent requires Linux (vsock is a Linux kernel interface)")
+    }
+}
+
+/// Talk to the local Nautilus attestation enclave over vsock. Linux-only because vsock is a Linux
+/// kernel interface; on other platforms the command is present in help but exits informatively.
+fn cmd_attest(action: AttestAction) -> Result<()> {
+    #[cfg(target_os = "linux")]
+    {
+        let out = match action {
+            AttestAction::Doc { cid, port } => serde_json::json!({
+                "documentHex": enclave_attest::fetch_document(cid, port)?,
+            }),
+            AttestAction::Sign {
+                cid,
+                port,
+                machine_id,
+                seq,
+                manifest_hash,
+            } => {
+                let (signature_hex, public_key_hex) =
+                    enclave_attest::sign(cid, port, &machine_id, seq, &manifest_hash)?;
+                serde_json::json!({ "signatureHex": signature_hex, "publicKeyHex": public_key_hex })
+            }
+        };
+        print_json(&out);
+        Ok(())
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = action;
+        anyhow::bail!("attest requires Linux (vsock); run it on the Nitro host")
     }
 }
