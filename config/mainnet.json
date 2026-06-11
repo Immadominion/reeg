@@ -8,10 +8,11 @@
     "publisherUrl": "https://publisher.walrus-mainnet.walrus.space"
   },
   "seal": {
-    "keyServerObjectIds": []
+    "keyServerObjectIds": [],
+    "threshold": 1
   },
   "reeg": {
-    "packageId": "0x0",
+    "packageId": "0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3",
     "machinePolicyId": "0x0"
   }
 }
