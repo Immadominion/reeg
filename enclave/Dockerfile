@@ -8,10 +8,14 @@ WORKDIR /build
 # Copy the manifest + lockfile first so `--locked` pins exact dependency versions (reproducibility).
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
-# SOURCE_DATE_EPOCH zeroes build timestamps; codegen-units=1 + strip + panic=abort (in Cargo.toml)
-# make the binary deterministic.
+# Reproducibility: SOURCE_DATE_EPOCH zeroes build timestamps; --remap-path-prefix strips the embedded
+# build + cargo registry paths from the binary; codegen-units=1 + strip + panic=abort (Cargo.toml)
+# make codegen deterministic; then pin the binary's mtime so the enclave filesystem (and thus PCR0)
+# does not vary with build time.
 ENV SOURCE_DATE_EPOCH=0
-RUN cargo build --release --locked
+ENV RUSTFLAGS="--remap-path-prefix=/build=/reeg --remap-path-prefix=/usr/local/cargo=/cargo"
+RUN cargo build --release --locked && \
+    touch --no-dereference --date=@0 /build/target/release/reeg-enclave
 
 # Minimal final image: just the static init binary. A smaller, fixed filesystem => stable PCRs.
 FROM scratch
