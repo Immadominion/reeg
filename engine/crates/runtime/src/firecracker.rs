@@ -42,6 +42,48 @@ const MAX_FRAME_JSON: u64 = 8 * 1024 * 1024;
 /// >4 GiB truncation that a u32 prefix caused. Must match the guest's `MAX_TAR_FRAME`.
 const MAX_FRAME_TAR: u64 = 8 * 1024 * 1024 * 1024;
 
+/// Optional jailer configuration (#14, defense in depth). When present, the Firecracker VMM is
+/// launched under the `jailer` binary, which chroots it, drops to an unprivileged uid/gid, and
+/// places it in a dedicated cgroup. Requires the launching process to be root (the jailer needs
+/// root to set up the jail before dropping privileges), so it is gated behind `REEG_FC_JAILER` and
+/// off by default — the direct-spawn path stays the default everywhere else.
+pub struct JailerConfig {
+    /// The `jailer` binary; defaults to `jailer` on PATH (or `JAILER_BIN`).
+    pub jailer_bin: PathBuf,
+    /// Unprivileged uid the jailed Firecracker runs as after the jail is set up.
+    pub uid: u32,
+    /// Gid the jailed Firecracker runs as (the `kvm` group on the dev host, so the jailed process
+    /// can open `/dev/kvm`).
+    pub gid: u32,
+    /// Base directory under which the jailer creates `firecracker/<id>/root` chroots.
+    pub chroot_base: PathBuf,
+}
+
+impl JailerConfig {
+    /// Build a jailer config from the environment, used when `REEG_FC_JAILER` is set. The uid/gid
+    /// default to `nobody`/`kvm` on the Amazon Linux dev host; override with `REEG_FC_JAILER_UID`
+    /// and `REEG_FC_JAILER_GID`, and the chroot base with `REEG_FC_JAILER_CHROOT`.
+    fn from_env() -> Self {
+        JailerConfig {
+            jailer_bin: std::env::var("JAILER_BIN")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("jailer")),
+            uid: env_u32("REEG_FC_JAILER_UID", 65534),
+            gid: env_u32("REEG_FC_JAILER_GID", 36),
+            chroot_base: std::env::var("REEG_FC_JAILER_CHROOT")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("/srv/jailer")),
+        }
+    }
+}
+
+fn env_u32(key: &str, default: u32) -> u32 {
+    std::env::var(key)
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
+}
+
 /// Configuration for a Firecracker microVM runtime instance.
 pub struct FirecrackerConfig {
     /// Linux kernel image (vmlinux or bzImage) to boot inside the VM.
@@ -60,6 +102,8 @@ pub struct FirecrackerConfig {
     pub api_socket_timeout_secs: u64,
     /// Seconds to wait for the in-guest agent to accept connections (default 10).
     pub agent_ready_timeout_secs: u64,
+    /// When set, run the VMM under the jailer (#14). Off by default; enabled via `REEG_FC_JAILER`.
+    pub jailer: Option<JailerConfig>,
 }
 
 impl Default for FirecrackerConfig {
@@ -79,6 +123,11 @@ impl Default for FirecrackerConfig {
             agent_port: 52,
             api_socket_timeout_secs: 5,
             agent_ready_timeout_secs: 10,
+            // Opt in to the jailer with REEG_FC_JAILER=1 (requires running as root). Default off.
+            jailer: std::env::var("REEG_FC_JAILER")
+                .ok()
+                .filter(|v| v != "0" && !v.is_empty())
+                .map(|_| JailerConfig::from_env()),
         }
     }
 }
@@ -147,52 +196,130 @@ impl FirecrackerRuntime {
     pub fn create(staging: impl Into<PathBuf>, config: FirecrackerConfig) -> Result<Self> {
         let staging = staging.into();
         let vm_id = VM_COUNTER.fetch_add(1, Ordering::Relaxed);
-        let run_dir = staging.with_extension(format!("vm-{vm_id}"));
+        // Resolve the launch plan. Direct mode spawns Firecracker into a per-VM run dir and points
+        // the API at the host paths directly. Jailer mode (#14) launches it under `jailer`, which
+        // chroots it into `<base>/firecracker/<id>/root`, drops to an unprivileged uid/gid, and
+        // cgroups it; the kernel, rootfs, socket, and vsock paths are then relative to that chroot,
+        // so the API receives in-jail paths while the host references their absolute equivalents.
+        let jail_id = format!("reeg-{vm_id}");
+        let (run_dir, chroot_root, api_socket, vsock_uds, kernel_api, rootfs_api, vsock_api) =
+            match &config.jailer {
+                Some(jc) => {
+                    let jail_dir = jc.chroot_base.join("firecracker").join(&jail_id);
+                    let root = jail_dir.join("root");
+                    (
+                        jail_dir,
+                        Some(root.clone()),
+                        root.join("api.sock"),
+                        root.join("vsock.sock"),
+                        "/vmlinux".to_string(),
+                        "/rootfs.ext4".to_string(),
+                        "/vsock.sock".to_string(),
+                    )
+                }
+                None => {
+                    let run_dir = staging.with_extension(format!("vm-{vm_id}"));
+                    let api = run_dir.join("api.sock");
+                    let vsock = run_dir.join("vsock.sock");
+                    let kernel = config.kernel_path.to_string_lossy().into_owned();
+                    let rootfs = config.rootfs_path.to_string_lossy().into_owned();
+                    let vsock_api = vsock.to_string_lossy().into_owned();
+                    (run_dir, None, api, vsock, kernel, rootfs, vsock_api)
+                }
+            };
 
-        for dir in [&staging, &run_dir] {
-            fs::create_dir_all(dir).map_err(|source| RuntimeError::Io {
-                path: dir.clone(),
+        // Always create the staging dir. Direct mode also creates the run dir up front; jailer mode
+        // lets the jailer create (and own, as the jailed uid) the chroot itself.
+        fs::create_dir_all(&staging).map_err(|source| RuntimeError::Io {
+            path: staging.clone(),
+            source,
+        })?;
+        if config.jailer.is_none() {
+            fs::create_dir_all(&run_dir).map_err(|source| RuntimeError::Io {
+                path: run_dir.clone(),
+                source,
+            })?;
+        }
+        // The jailer canonicalizes --chroot-base-dir, so it must already exist; create it (we run as
+        // root in jailer mode). The jailer then creates the per-VM `firecracker/<id>/root` chroot.
+        if let Some(jc) = &config.jailer {
+            fs::create_dir_all(&jc.chroot_base).map_err(|source| RuntimeError::Io {
+                path: jc.chroot_base.clone(),
                 source,
             })?;
         }
 
-        let api_socket = run_dir.join("api.sock");
-        let vsock_uds = run_dir.join("vsock.sock");
-
-        // Firecracker creates the API socket on start; we wait for it before sending config.
-        // --log-path was removed from the Firecracker CLI in v1.x; logging is configured via
-        // the API after boot if needed. Redirect stderr to a file so startup failures are
-        // readable rather than silently lost.
+        // Spawn the VMM. Direct mode redirects stderr to a file in the run dir; jailer mode runs the
+        // `jailer`, which execs Firecracker after setting up the chroot/uid/gid/cgroup, with the API
+        // socket created at `/api.sock` inside the jail. --log-path was removed from the Firecracker
+        // CLI in v1.x; logging is configured via the API after boot if needed.
         let stderr_log = run_dir.join("firecracker.stderr");
-        let stderr_file = fs::File::create(&stderr_log).map_err(|source| RuntimeError::Io {
-            path: stderr_log.clone(),
-            source,
-        })?;
-        let process = Command::new(&config.firecracker_bin)
-            .arg("--api-sock")
-            .arg(&api_socket)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(stderr_file)
-            .spawn()
-            .map_err(|source| RuntimeError::Launch {
-                program: config.firecracker_bin.to_string_lossy().into_owned(),
-                source,
-            })?;
+        let process = match &config.jailer {
+            Some(jc) => Command::new(&jc.jailer_bin)
+                .arg("--id")
+                .arg(&jail_id)
+                .arg("--exec-file")
+                .arg(&config.firecracker_bin)
+                .arg("--uid")
+                .arg(jc.uid.to_string())
+                .arg("--gid")
+                .arg(jc.gid.to_string())
+                .arg("--chroot-base-dir")
+                .arg(&jc.chroot_base)
+                .arg("--cgroup-version")
+                .arg("2")
+                .arg("--")
+                .arg("--api-sock")
+                .arg("/api.sock")
+                .stdin(Stdio::null())
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .spawn()
+                .map_err(|source| RuntimeError::Launch {
+                    program: jc.jailer_bin.to_string_lossy().into_owned(),
+                    source,
+                })?,
+            None => {
+                let stderr_file =
+                    fs::File::create(&stderr_log).map_err(|source| RuntimeError::Io {
+                        path: stderr_log.clone(),
+                        source,
+                    })?;
+                Command::new(&config.firecracker_bin)
+                    .arg("--api-sock")
+                    .arg(&api_socket)
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(stderr_file)
+                    .spawn()
+                    .map_err(|source| RuntimeError::Launch {
+                        program: config.firecracker_bin.to_string_lossy().into_owned(),
+                        source,
+                    })?
+            }
+        };
 
-        // Arm the cleanup guard immediately: from here, any early return kills and reaps the VM
-        // and removes its run directory instead of leaking it.
+        // Arm the cleanup guard immediately: from here, any early return kills and reaps the VM and
+        // removes its run directory — the whole chroot jail directory in jailer mode.
         let mut guard = VmGuard::new(process, run_dir.clone());
 
-        // Wait for the API socket; on failure read the stderr log for a useful error message.
+        // Wait for the API socket; in direct mode surface the stderr log on failure.
         if let Err(e) = wait_for_path(
             &api_socket,
             Duration::from_secs(config.api_socket_timeout_secs),
         ) {
             let detail = fs::read_to_string(&stderr_log).unwrap_or_default();
             return Err(RuntimeError::MicroVm(format!(
-                "{e}: firecracker stderr: {detail}"
+                "API socket did not appear ({e}); firecracker stderr: {detail}"
             )));
+        }
+
+        // Jailer mode: the kernel and rootfs must live inside the chroot. Hard-link them in (same
+        // filesystem, so this is instant and adds no disk); they are world-readable, so the
+        // dropped-privilege Firecracker can read them. The chroot exists once the API socket does.
+        if let Some(root) = &chroot_root {
+            hardlink_into_jail(&config.kernel_path, &root.join("vmlinux"))?;
+            hardlink_into_jail(&config.rootfs_path, &root.join("rootfs.ext4"))?;
         }
 
         // Configure the VM via the Firecracker REST API before booting.
@@ -209,7 +336,7 @@ impl FirecrackerRuntime {
             &api_socket,
             "/boot-source",
             &serde_json::json!({
-                "kernel_image_path": config.kernel_path.to_string_lossy(),
+                "kernel_image_path": kernel_api,
                 // console=ttyS0 for debug output; panic=1 halts on kernel panic rather than rebooting.
                 // ro: the rootfs is mounted read-only; the guest init mounts /work as an ephemeral tmpfs.
                 "boot_args": "console=ttyS0 reboot=k panic=1 pci=off ro"
@@ -224,7 +351,7 @@ impl FirecrackerRuntime {
             "/drives/rootfs",
             &serde_json::json!({
                 "drive_id": "rootfs",
-                "path_on_host": config.rootfs_path.to_string_lossy(),
+                "path_on_host": rootfs_api,
                 "is_root_device": true,
                 "is_read_only": true
             }),
@@ -238,7 +365,7 @@ impl FirecrackerRuntime {
             "/vsock",
             &serde_json::json!({
                 "guest_cid": 3,
-                "uds_path": vsock_uds.to_string_lossy()
+                "uds_path": vsock_api
             }),
         )?;
 
@@ -356,9 +483,17 @@ impl Runtime for FirecrackerRuntime {
 
         // Atomic staging: extract into a temp dir, then rename into place only on success, so a
         // failed extraction never leaves `staging` half-populated for the snapshot engine. The temp
-        // dir lives inside this session's unique `run_dir`, so concurrent sessions never collide on
-        // it (the caller is still responsible for a unique `staging` path per Machine).
-        let temp_staging = self.run_dir.join("staging.tmp");
+        // dir is a sibling of `staging` (same filesystem, so the rename is atomic and never crosses
+        // devices — in jailer mode `run_dir` lives on a different filesystem than `staging`). It is
+        // derived from the unique `staging` path, so concurrent sessions never collide on it.
+        let staging_name = self
+            .staging
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "staging".to_string());
+        let temp_staging = self
+            .staging
+            .with_file_name(format!("{staging_name}.staging-tmp"));
         if temp_staging.exists() {
             fs::remove_dir_all(&temp_staging).map_err(|source| RuntimeError::Io {
                 path: temp_staging.clone(),
@@ -638,6 +773,17 @@ fn wait_for_path(path: &Path, timeout: Duration) -> Result<()> {
         }
         std::thread::sleep(Duration::from_millis(20));
     }
+}
+
+/// Hard-link a host resource (kernel or rootfs) into the jailer chroot so the dropped-privilege
+/// Firecracker can open it by an in-jail path. Replaces any stale link first. Requires the source
+/// and destination to be on the same filesystem (they are: both under the root volume).
+fn hardlink_into_jail(src: &Path, dst: &Path) -> Result<()> {
+    let _ = fs::remove_file(dst);
+    fs::hard_link(src, dst).map_err(|source| RuntimeError::Io {
+        path: dst.to_path_buf(),
+        source,
+    })
 }
 
 // --- tar helpers -----------------------------------------------------------------------

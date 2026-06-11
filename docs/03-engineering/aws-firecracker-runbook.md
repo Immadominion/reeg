@@ -84,6 +84,30 @@ Pass means: a checkpoint taken inside a microVM restores byte-identically, **and
 the same `workdir_root_hash` as the local/OCI tiers. That is phase M's core contract: the new
 isolation boundary changes nothing about the snapshot or verification path.
 
+### 5b. Jailer (#14, defense in depth — host, root)
+
+The VMM normally spawns directly. Setting `REEG_FC_JAILER=1` launches it under the Firecracker
+`jailer` instead: a chroot under `/srv/jailer/firecracker/<id>/root`, dropped to an unprivileged
+uid/gid (`nobody`/`kvm` by default; override `REEG_FC_JAILER_UID`/`_GID`/`_CHROOT`), in a cgroup v2.
+The jailer must start as **root**, so the gated test runs the prebuilt binary under `sudo` (building
+under `sudo` would leave root-owned files in `target/`):
+
+```sh
+ssh reeg-host 'source ~/.reeg-fc.env && cd ~/reeg/engine && \
+  cargo test -p reeg-runtime --features firecracker --test firecracker_session --no-run && \
+  BIN=$(ls -t target/debug/deps/firecracker_session-* | grep -vE "\.d$" | head -1) && \
+  sudo env REEG_FC_JAILER=1 REEG_FC_KERNEL="$REEG_FC_KERNEL" REEG_FC_ROOTFS="$REEG_FC_ROOTFS" \
+       FIRECRACKER_BIN="$FIRECRACKER_BIN" JAILER_BIN=/usr/local/bin/jailer \
+       "$BIN" firecracker_jailed --test-threads=1 --nocapture'
+```
+
+Pass means a jailed microVM boots, execs over vsock, and its checkpoint restores byte-identically —
+the jail changes the isolation boundary, not the snapshot/verify path. The engine hard-links the
+kernel + rootfs into the chroot (same filesystem, world-readable) and removes the whole jail dir on
+drop. The cgroup the jailer creates under `/sys/fs/cgroup` is not auto-removed (empty after the VM
+exits; harmless). Without `REEG_FC_JAILER` the direct-spawn path is unchanged and the jailer test
+skips.
+
 ### 6. Stop (Mac)
 ```sh
 ./scripts/aws-dev-host.sh stop      # pause compute billing; keep disk + artifacts

@@ -31,6 +31,21 @@ mod fc_tests {
             .is_ok()
     }
 
+    fn running_as_root() -> bool {
+        // The jailer must start as root (to set up the chroot/cgroup before dropping privileges).
+        // Read the real uid from /proc rather than pulling in a libc dependency.
+        let status = match std::fs::read_to_string("/proc/self/status") {
+            Ok(s) => s,
+            Err(_) => return false,
+        };
+        status
+            .lines()
+            .find_map(|line| line.strip_prefix("Uid:"))
+            .and_then(|rest| rest.split_whitespace().next())
+            .map(|uid| uid == "0")
+            .unwrap_or(false)
+    }
+
     fn fc_config() -> Option<FirecrackerConfig> {
         let kernel = std::env::var("REEG_FC_KERNEL").ok()?.into();
         let rootfs = std::env::var("REEG_FC_ROOTFS").ok()?.into();
@@ -304,6 +319,66 @@ mod fc_tests {
             fc.event_log().digest_hex().unwrap(),
             local.event_log().digest_hex().unwrap(),
             "FC and local event-log digests differ"
+        );
+    }
+
+    /// #14 defense-in-depth: launch the VMM under the `jailer` (chroot + dropped privileges +
+    /// cgroup v2) and prove the full loop still works. Opt-in and privileged, so it skips unless
+    /// `REEG_FC_JAILER` is set and the process is root — run it as:
+    ///   `sudo -E env REEG_FC_JAILER=1 cargo test -p reeg-runtime --features firecracker \
+    ///        --test firecracker_session firecracker_jailed -- --test-threads=1`
+    /// When `REEG_FC_JAILER` is set, `fc_config()` already requests the jailer (via the config
+    /// default), so this exercises exactly the jailed launch path.
+    #[test]
+    fn firecracker_jailed_session_runs_and_checkpoints() {
+        if std::env::var("REEG_FC_JAILER").is_err() {
+            eprintln!("skip: set REEG_FC_JAILER=1 (and run as root) to exercise the jailer (#14)");
+            return;
+        }
+        if !running_as_root() {
+            eprintln!("skip: the jailer must be launched as root");
+            return;
+        }
+        if !kvm_accessible() {
+            eprintln!("skip: /dev/kvm not accessible");
+            return;
+        }
+        let config = match fc_config() {
+            Some(c) => c,
+            None => {
+                eprintln!("skip: set REEG_FC_KERNEL and REEG_FC_ROOTFS");
+                return;
+            }
+        };
+        assert!(
+            config.jailer.is_some(),
+            "REEG_FC_JAILER is set, so the config should request the jailer"
+        );
+
+        let store = tempdir().unwrap();
+        let cas = CasStore::open(store.path()).unwrap();
+        let staging = tempdir().unwrap();
+        let mut rt = FirecrackerRuntime::create(staging.path().join("jailed"), config).unwrap();
+
+        // A command runs inside the jailed VM and its output round-trips over vsock.
+        let out = rt.exec(&sh("printf jailed > who && cat who")).unwrap();
+        assert_eq!(
+            out.exit_code,
+            0,
+            "jailed exec failed (exit {}):\nstderr: {}",
+            out.exit_code,
+            String::from_utf8_lossy(&out.stderr),
+        );
+        assert_eq!(out.stdout_utf8_lossy(), "jailed");
+
+        // Checkpoint from inside the jail and restore on a fresh host: identical to every other
+        // tier, so the jailer changes the isolation boundary, not the snapshot/verify path.
+        let manifest = rt.checkpoint(&cas, EnvironmentInputs::default()).unwrap();
+        let fresh = tempdir().unwrap();
+        restore(&manifest, &cas, fresh.path()).unwrap();
+        assert!(
+            drift(&manifest, &cas, fresh.path()).unwrap().is_clean(),
+            "restored jailed checkpoint drifted from the manifest"
         );
     }
 }
