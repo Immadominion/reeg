@@ -5,11 +5,16 @@
   },
   "walrus": {
     "aggregatorUrl": "https://aggregator.walrus-mainnet.walrus.space",
-    "publisherUrl": "https://publisher.walrus-mainnet.walrus.space"
+    "publisherUrl": "https://publisher.walrus-mainnet.walrus.space",
+    "uploadRelayHost": "https://upload-relay.mainnet.walrus.space"
   },
   "seal": {
-    "keyServerObjectIds": [],
-    "threshold": 1
+    "keyServerObjectIds": [
+      "0xeed10312e11fa95686cc7e304f004513bd31cf1ab3c39ab206c9e73f36d191d9"
+    ],
+    "threshold": 1,
+    "apiKeyName": "x-api-key",
+    "apiKeyEnv": "SEAL_RUBY_API_KEY"
   },
   "reeg": {
     "packageId": "0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3",

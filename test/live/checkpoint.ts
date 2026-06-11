@@ -12,7 +12,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SealClient } from '@mysten/seal';
-import { SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
+import { getJsonRpcFullnodeUrl, SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { fromBase64 } from '@mysten/sui/utils';
 import { WalrusClient } from '@mysten/walrus';
@@ -22,16 +22,24 @@ import { checkpoint } from '@reeg/sdk';
 import { WalrusBlobStore } from '@reeg/storage';
 import { blake3Hash, bytesEqual, verifyFromChain } from '@reeg/verify';
 
-interface TestnetConfig {
-  walrus: { uploadRelayHost: string };
-  seal: { keyServerObjectIds: string[]; threshold: number };
+type Network = 'mainnet' | 'testnet';
+
+interface NetConfig {
+  walrus: { uploadRelayHost?: string };
+  seal: {
+    keyServerObjectIds: string[];
+    threshold: number;
+    apiKeyName?: string;
+    apiKeyEnv?: string;
+  };
   reeg: { packageId: string };
 }
 
 const OPERATOR = process.env.REEG_OPERATOR;
+const NETWORK: Network = process.env.REEG_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
 
-function loadConfig(): TestnetConfig {
-  const path = fileURLToPath(new URL('../../config/testnet.json', import.meta.url));
+function loadConfig(): NetConfig {
+  const path = fileURLToPath(new URL(`../../config/${NETWORK}.json`, import.meta.url));
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
@@ -81,34 +89,45 @@ async function main() {
   const config = loadConfig();
   const packageId = config.reeg.packageId;
   if (!packageId || packageId === '0x0') {
-    throw new Error('config/testnet.json has no published packageId');
+    throw new Error(`config/${NETWORK}.json has no published packageId`);
   }
   if (!OPERATOR) {
-    throw new Error('set REEG_OPERATOR to a funded testnet address that holds SUI + WAL');
+    throw new Error('set REEG_OPERATOR to a funded address that holds SUI + WAL');
   }
 
   const keypair = loadKeypair(OPERATOR);
-  const sui = new SuiJsonRpcClient({
-    url: 'https://fullnode.testnet.sui.io:443',
-    network: 'testnet',
-  });
-  // Write through the testnet upload relay: fanning out slivers to every storage node from a
-  // single client is unreliable, so the relay does it. The tip (a few MIST) is auto-paid.
+  const sui = new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl(NETWORK), network: NETWORK });
+  // Write through the upload relay when configured: fanning out slivers to every storage node from
+  // a single client is unreliable, so the relay does it. The tip (a few MIST) is auto-paid.
   const walrus = new WalrusClient({
-    network: 'testnet',
+    network: NETWORK,
     suiClient: sui,
-    uploadRelay: { host: config.walrus.uploadRelayHost, sendTip: { max: 1000 } },
+    // Tip cap covers the relay's quote (testnet ~1k MIST; mainnet ~2.6M MIST) with headroom; the
+    // client pays the relay's actual quote, never more than this cap.
+    ...(config.walrus.uploadRelayHost
+      ? { uploadRelay: { host: config.walrus.uploadRelayHost, sendTip: { max: 10_000_000 } } }
+      : {}),
   });
+  // The Seal API key (for servers that require one, e.g. Ruby Nodes) is read from the env var named
+  // in config (never committed). It is only used on decryption (fetch_key); encryption reads the
+  // server's public key from chain, so a checkpoint encrypts even without it.
+  const sealApiKey = config.seal.apiKeyEnv ? process.env[config.seal.apiKeyEnv] : undefined;
   const seal = new SealClient({
     suiClient: sui,
-    serverConfigs: config.seal.keyServerObjectIds.map((objectId) => ({ objectId, weight: 1 })),
+    serverConfigs: config.seal.keyServerObjectIds.map((objectId) => ({
+      objectId,
+      weight: 1,
+      ...(config.seal.apiKeyName && sealApiKey
+        ? { apiKeyName: config.seal.apiKeyName, apiKey: sealApiKey }
+        : {}),
+    })),
     verifyKeyServers: false,
   });
 
   console.log(`operator: ${OPERATOR}`);
   console.log(`package:  ${packageId}`);
 
-  console.log('\n1. creating a Machine on testnet…');
+  console.log(`\n1. creating a Machine on ${NETWORK}…`);
   const machineId = await createMachine(sui, keypair, packageId);
   console.log(`   machine: ${machineId}`);
 
