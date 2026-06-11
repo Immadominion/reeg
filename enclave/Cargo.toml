@@ -1,0 +1,25 @@
+[package]
+name = "reeg-enclave"
+version = "0.1.0"
+edition = "2021"
+description = "Reeg Nautilus attestation enclave: a measured Nitro enclave that signs checkpoint manifest hashes with an ed25519 key whose authenticity is rooted in a Nitro attestation document."
+
+# A standalone crate (not in the engine workspace) so it builds tiny and static for the enclave.
+[workspace]
+
+[dependencies]
+aws-nitro-enclaves-nsm-api = "0.4"
+ed25519-dalek = "2"
+vsock = "0.5"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_bytes = "0.11"
+hex = "0.4"
+
+# Deterministic, tiny release build: stronger reproducibility of the enclave image (stable PCRs).
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+panic = "abort"
+codegen-units = 1

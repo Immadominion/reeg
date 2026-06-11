@@ -9,6 +9,13 @@
 // is deliberately dependency-light so the Console (a static Walrus Site) can run it in the
 // browser, and any blob reader is injected rather than imported.
 
+export type {
+  AttestationCheck,
+  AttestationRecord,
+  AttestationReport,
+  EnclaveIdentity,
+} from './attestation';
+export { fetchAttestations, readEnclaveConfig, verifyAttestation } from './attestation';
 export type { Evidence, EvidenceComparison, EvidenceEntry } from './evidence';
 export {
   compareEvidence,
