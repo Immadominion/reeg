@@ -116,9 +116,8 @@ export async function createSessionKey(params: {
   return sessionKey;
 }
 
-// Re-export so callers that build session keys do not also need a direct @mysten/seal import.
-export type { SessionKey, Signer };
-
 // Optional Nautilus attestation tier: the frozen signature preimage + local ed25519 verification,
 // kept byte-for-byte in step with reeg::attestation on chain.
 export { ATTEST_DOMAIN, attestationPreimage, verifyAttestationSignature } from './nautilus';
+// Re-export so callers that build session keys do not also need a direct @mysten/seal import.
+export type { SessionKey, Signer };

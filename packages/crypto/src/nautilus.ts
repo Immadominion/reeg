@@ -44,12 +44,7 @@ export function attestationPreimage(
   seq: bigint,
   manifestHash: Uint8Array,
 ): Uint8Array {
-  const parts = [
-    asciiBytes(ATTEST_DOMAIN),
-    canonicalIdBytes(machineId),
-    u64LE(seq),
-    manifestHash,
-  ];
+  const parts = [asciiBytes(ATTEST_DOMAIN), canonicalIdBytes(machineId), u64LE(seq), manifestHash];
   const total = parts.reduce((n, p) => n + p.length, 0);
   const out = new Uint8Array(total);
   let offset = 0;
