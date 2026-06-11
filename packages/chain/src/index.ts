@@ -7,6 +7,7 @@
 
 export type { AccessPolicy, Grant } from './access';
 export { NotAnAccessPolicyError, parseAccessPolicyFields, readAccessPolicy } from './access';
+export { buildRegisterAttestedCommand, buildRegisterEnclave } from './attestation';
 export type { Machine } from './machine';
 export { parseMachineFields, readMachine } from './machine';
 export type { CheckpointArgs } from './transactions';
