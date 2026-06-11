@@ -53,83 +53,105 @@ export function registerCheckpoint(program: Command): void {
       .command('checkpoint')
       .description('Snapshot an environment: pack, encrypt, store on Walrus, anchor on Sui.')
       .argument('<machineId>', 'the environment id')
-      .option('--epochs <n>', 'Walrus epochs to keep the snapshot paid for', '1'),
-  ).action(async (machineId: string, options: CommonOptions & { epochs?: string }) => {
-    const config = loadConfig(options);
-    const operator = requireOperator(config);
-    const machine = getMachine(machineId);
+      .option('--epochs <n>', 'Walrus epochs to keep the snapshot paid for', '1')
+      .option(
+        '--threshold <t>',
+        'Seal committee threshold: how many of the configured key servers must release a share to decrypt (t-of-n). Set at encryption time; defaults to the configured threshold.',
+      ),
+  ).action(
+    async (machineId: string, options: CommonOptions & { epochs?: string; threshold?: string }) => {
+      const config = loadConfig(options);
+      const operator = requireOperator(config);
+      const machine = getMachine(machineId);
 
-    const { sui, crypto, storage } = buildClients(config);
-    // A retired environment is concluded: decline further checkpoints (the on-chain record stays
-    // verifiable, but adding to a retired run would muddy its end-of-life marker). isRetiredOrFalse
-    // fails open, so a transient RPC/indexer hiccup never blocks a legitimate checkpoint; only a
-    // confirmed retirement declines.
-    if (await isRetiredOrFalse(sui, config.packageId, machineId)) {
-      console.error(`error: ${machineId} is retired; it cannot be checkpointed again`);
-      process.exitCode = 1;
-      return;
-    }
-
-    // The bundle is the engine's PLAINTEXT snapshot. Stage it in a fresh owner-only temp dir
-    // (mkdtemp is mode 0700, so a co-tenant on a shared host cannot read it) and delete it as
-    // soon as it is encrypted. It also never lives inside the workdir, so it cannot self-capture.
-    const bundleDir = mkdtempSync(join(tmpdir(), 'reeg-checkpoint-'));
-    try {
-      const bundlePath = join(bundleDir, 'checkpoint.bundle');
-      // Capture the agent memory directory only when it holds something, so a memory-less run keeps
-      // the same manifest shape (memory_pointer null) and the filesystem story stands on its own.
-      const memory = memoryFor(machineId);
-      const captureMemory = existsSync(memory) && readdirSync(memory).length > 0;
-      const info = await engineCheckpoint(
-        config.engineBin,
-        machine.workdir,
-        bundlePath,
-        logFor(machineId),
-        captureMemory ? memory : undefined,
-      );
-      const bundleBytes = readFileSync(bundlePath);
-
-      const signer = loadKeypair(operator);
-      const result = await checkpoint(
-        { data: bundleBytes, manifestHash: fromHex(info.manifestHashHex) },
-        {
-          machineId,
-          packageId: config.packageId,
-          // A shareable Machine encrypts under its policy identity so grantees can decrypt.
-          policyId: machine.policyId,
-          threshold: config.sealThreshold,
-          epochs: Number(options.epochs ?? '1'),
-          payloadHash: fromHex(info.payloadHashHex),
-        },
-        { crypto, storage, sui, signer },
-      );
-
-      const epochs = Number(options.epochs ?? '1');
-      console.log(`Snapshot saved for ${machineId}`);
-      console.log(`  manifest: ${info.manifestHashHex}`);
-      if (info.memoryPointer) {
-        console.log(
-          `  memory:   ${info.memoryPointer} (captured and verified with the environment)`,
+      // The committee threshold is fixed when the ciphertext is sealed (it cannot be changed by a
+      // later grant, which only authorizes who may ask for shares — it does not re-encrypt). So it
+      // belongs here, on checkpoint, not on grant. Validate it against the configured key-server set.
+      const threshold = options.threshold ? Number(options.threshold) : config.sealThreshold;
+      const n = config.sealKeyServers.length;
+      if (!Number.isInteger(threshold) || threshold < 1 || (n > 0 && threshold > n)) {
+        console.error(
+          `error: --threshold must be an integer in 1..${n || 1} (configured key servers: ${n})`,
         );
+        process.exitCode = 1;
+        return;
       }
-      console.log(`  blob:     ${result.blobId}`);
-      console.log(`  bytes:    ${info.bundleBytes}`);
-      console.log(`  tx:       ${result.digest}`);
-      // Retention is a Walrus storage-epoch policy you set with --epochs; the on-chain provenance
-      // head is permanent. Surfaced plainly so a compliance buyer sees the real window and cost.
-      console.log(
-        `  retention: ${epochs} Walrus epoch${epochs === 1 ? '' : 's'} (~${epochs * 2} weeks on testnet); EU AI Act Art. 12 wants >= ~6 months (~13 epochs, --epochs 13)`,
-      );
-      console.log('  cost: WAL for storage (scales with size x epochs) plus a little SUI gas');
-      // The backup key is the only way to recover the ciphertext if Seal access is lost. Never logged.
-      console.log(
-        '  (a disaster-recovery backup key was produced in memory; store it out of band)',
-      );
-      void result.backupKey;
-    } finally {
-      rmSync(bundleDir, { recursive: true, force: true });
-    }
-  });
+
+      const { sui, crypto, storage } = buildClients(config);
+      // A retired environment is concluded: decline further checkpoints (the on-chain record stays
+      // verifiable, but adding to a retired run would muddy its end-of-life marker). isRetiredOrFalse
+      // fails open, so a transient RPC/indexer hiccup never blocks a legitimate checkpoint; only a
+      // confirmed retirement declines.
+      if (await isRetiredOrFalse(sui, config.packageId, machineId)) {
+        console.error(`error: ${machineId} is retired; it cannot be checkpointed again`);
+        process.exitCode = 1;
+        return;
+      }
+
+      // The bundle is the engine's PLAINTEXT snapshot. Stage it in a fresh owner-only temp dir
+      // (mkdtemp is mode 0700, so a co-tenant on a shared host cannot read it) and delete it as
+      // soon as it is encrypted. It also never lives inside the workdir, so it cannot self-capture.
+      const bundleDir = mkdtempSync(join(tmpdir(), 'reeg-checkpoint-'));
+      try {
+        const bundlePath = join(bundleDir, 'checkpoint.bundle');
+        // Capture the agent memory directory only when it holds something, so a memory-less run keeps
+        // the same manifest shape (memory_pointer null) and the filesystem story stands on its own.
+        const memory = memoryFor(machineId);
+        const captureMemory = existsSync(memory) && readdirSync(memory).length > 0;
+        const info = await engineCheckpoint(
+          config.engineBin,
+          machine.workdir,
+          bundlePath,
+          logFor(machineId),
+          captureMemory ? memory : undefined,
+        );
+        const bundleBytes = readFileSync(bundlePath);
+
+        const signer = loadKeypair(operator);
+        const result = await checkpoint(
+          { data: bundleBytes, manifestHash: fromHex(info.manifestHashHex) },
+          {
+            machineId,
+            packageId: config.packageId,
+            // A shareable Machine encrypts under its policy identity so grantees can decrypt.
+            policyId: machine.policyId,
+            threshold,
+            epochs: Number(options.epochs ?? '1'),
+            payloadHash: fromHex(info.payloadHashHex),
+          },
+          { crypto, storage, sui, signer },
+        );
+
+        const epochs = Number(options.epochs ?? '1');
+        console.log(`Snapshot saved for ${machineId}`);
+        console.log(`  manifest: ${info.manifestHashHex}`);
+        if (info.memoryPointer) {
+          console.log(
+            `  memory:   ${info.memoryPointer} (captured and verified with the environment)`,
+          );
+        }
+        console.log(`  blob:     ${result.blobId}`);
+        console.log(`  bytes:    ${info.bundleBytes}`);
+        console.log(`  tx:       ${result.digest}`);
+        // Retention is a Walrus storage-epoch policy you set with --epochs; the on-chain provenance
+        // head is permanent. Surfaced plainly so a compliance buyer sees the real window and cost.
+        console.log(
+          `  retention: ${epochs} Walrus epoch${epochs === 1 ? '' : 's'} (~${epochs * 2} weeks on testnet); EU AI Act Art. 12 wants >= ~6 months (~13 epochs, --epochs 13)`,
+        );
+        console.log('  cost: WAL for storage (scales with size x epochs) plus a little SUI gas');
+        console.log(
+          `  decryption: requires ${threshold}-of-${n || 1} Seal key server${(n || 1) === 1 ? '' : 's'} (committee threshold)`,
+        );
+        // The backup key is the only way to recover the ciphertext if Seal access is lost. Never logged.
+        console.log(
+          '  (a disaster-recovery backup key was produced in memory; store it out of band)',
+        );
+        void result.backupKey;
+      } finally {
+        rmSync(bundleDir, { recursive: true, force: true });
+      }
+    },
+  );
 }
 
 /** `reeg restore <machineId>`: read the latest checkpoint from Walrus, decrypt it with a Seal
