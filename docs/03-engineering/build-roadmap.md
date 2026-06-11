@@ -11,24 +11,43 @@ We are building the whole product, not an MVP and not a scripted demo. Phases la
 this list are real features real users will want, sequenced after the ones they depend
 on, never deferred because the product is incomplete without them.
 
+**Reeg is live.** Tagline: *the computer your AI agents live in — own it, share it, move
+it, prove it.* Each agent environment is a **Machine** object you own on Sui; its
+filesystem and memory are snapshotted to content-addressed blobs on Walrus, encrypted
+client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can
+verify **offline** from public Sui and Walrus data alone — no Reeg backend.
+
 ## Status at a glance
 
-Updated 2026-06-11. Legend: ✅ done · 🟡 partial · 🔵 in scope for June 21 (in progress) · ⏸️ out of scope.
+Updated 2026-06-11. Legend: ✅ done · 🟡 partial · ⏸️ out of scope.
 Each phase header below carries its own **Status** line; this is the summary:
 
 - ✅ **A–H** — foundation, snapshot engine, OCI tier, Move/provenance, client adapters, verifier, CLI/SDK, Console/indexer
-- 🔵 **I** — owner-only + allowlist + time-lock Seal done; **committee/t-of-n now in scope for June 21** (config + `--threshold` surfacing; validated on the mainnet multi-operator set)
+- ✅ **I** — owner-only + allowlist + time-lock done; committee t-of-n surfaced via `reeg checkpoint --threshold t` (threshold pinned at encryption time)
 - ✅ **J** — cross-host acceptance demo (run → checkpoint → kill → restore → verify → grant → revoke)
-- 🔵 **K** — memory seam done; **MemWal wiring now in scope for June 21** (`env` on `ExecRequest` across all tiers + optional SDK wrapper)
-- ✅ **L** — evidence export + offline audit
-- ✅/🔵 **M** — Firecracker tier hardened + verified on AWS KVM (18/19); **#14 jailer now in scope for June 21** (additive, sudo-gated)
-- 🔵 **N** — **Nautilus TEE attestation now in scope for June 21** (enclave attests results; additive to provenance, offline-verifiable)
-- 🔵 **O** — **mainnet cutover now in scope for June 21** (publish, real Seal operator set, per-checkpoint cost benchmark, mainnet acceptance loop) — gated on a funded wallet
+- 🟡 **K** — memory seam done (`REEG_MEMORY_DIR`, `memory_pointer` round-trips, captured/verified with the workdir); MemWal as an optional backend remains
+- ✅ **M** — Firecracker tier hardened + verified on AWS KVM, **19/19** including **#14 jailer** (chroot + dropped privileges + cgroup v2)
+- ✅ **N** — Nautilus TEE attestation tier **live on testnet and mainnet**; reproducible enclave, on-chain PCR registration, offline-verifiable, strictly additive
+- ✅ **O** — **live on Sui mainnet** (package published + upgraded to add attestation); measured per-checkpoint cost benchmarked
 
-**The "after the hackathon" split is removed:** everything ships before June 21. CI is green on `main`.
-The remaining critical-path input is a **funded mainnet wallet** (operator + grantee, SUI + WAL) for
-phases I-validation and O. Status reflects code present in the repo; the
-phase-M `run` bar is re-confirmed by that runbook, not assumed.
+**Reeg is live on Sui mainnet.** Mainnet package
+`0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e` (upgraded from the
+original `0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3` to add the
+attestation module). Testnet package
+`0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`. CI is green on all
+three jobs (TypeScript build/lint/test, Rust fmt/clippy/test, Move build/test).
+
+**Measured mainnet cost:** ~0.0099 SUI + ~0.0119 WAL per create + encrypted checkpoint
+(1 epoch, including the Walrus upload-relay tip). Package publish ~0.047 SUI; the
+attestation upgrade ~0.05 SUI.
+
+**One honest constraint on mainnet:** a Seal-encrypted checkpoint *decrypt* (restore) needs
+a working mainnet Seal key server, and mainnet has no free public Open-mode key server yet
+(the decentralized committee server is "available soon"; the Ruby Nodes free-tier key
+currently returns 403 from their gateway — a provider-side activation matter, not Reeg's
+code). On mainnet, **encryption + storage + anchor + offline verify all work today**; only
+decrypt waits on a provider key server. The full encrypted checkpoint → restore → verify
+loop is proven on **testnet**.
 
 ## How to read this
 
@@ -48,6 +67,24 @@ phase-M `run` bar is re-confirmed by that runbook, not assumed.
 - **The one invariant that overrides every phase:** nothing about verifying a past run
   may ever require a live or honest Reeg service (NFR-1). Any phase that would break it
   is wrong, no matter what it adds.
+
+## The four pillars
+
+Every phase below serves one of four pillars, and the headline demo proves all four at once:
+
+- **OWN** — a Machine is an **owned** Sui object on the fast path. `create` / `retire`. The
+  owner alone mutates it.
+- **SHARE** — checkpoints are Seal-encrypted client-side *before they ever touch Walrus*. A
+  shared `AccessPolicy` object holds grants; `grant` / `revoke` (allowlist + time-limited
+  expiry) append GRANT/REVOKE entries to the provenance chain. The committee t-of-n Seal
+  threshold is set at **encryption time** (`reeg checkpoint --threshold t`); revocation is
+  forward-looking (it cannot un-see already-decrypted data).
+- **MOVE** — `fork` a Machine from any checkpoint with provable on-chain lineage to the
+  parent; `restore` a checkpoint on **any** host byte-identically (content-addressed +
+  deterministic). Cross-host portability.
+- **PROVE** — a hash-chained, append-only, tamper-evident provenance head on the Machine
+  object, verified **offline** from public Sui + Walrus alone — plus the optional **Nautilus
+  TEE attestation tier** (phase N) that proves *which code* produced a checkpoint.
 
 ## The sacred path through the phases
 
@@ -69,17 +106,21 @@ and the Console move together, with versions pinned and networks switchable by c
 Produces:
 
 - The monorepo skeleton from [repo-structure.md](repo-structure.md): `move/`, `engine/`
-  (Rust), `packages/` (TypeScript), `apps/`, `config/`, `test/`, `scripts/`.
-- Pinned toolchains and pinned platform versions (`@mysten/sui` ~2.17.0,
-  `@mysten/walrus` ~1.1.7, `@mysten/seal` ~1.1.3, the Rust and Sui/Move toolchains),
-  recorded as configuration, not hardcoded constants.
+  (Rust), `packages/` (TypeScript), `apps/`, `config/`, `test/`, `scripts/`. Monorepo is
+  pnpm 10 + Turborepo with Biome lint/format; the engine is Rust 1.95.
+- Pinned toolchains and pinned platform versions (`@mysten/sui` 2.17,
+  `@mysten/walrus` 1.1.7, `@mysten/seal` 1.1.3, `@mysten/dapp-kit`, `bcs`, plus the Rust
+  and Sui/Move toolchains — Sui CLI 1.73.1, Walrus CLI), recorded as configuration, not
+  hardcoded constants. All `@mysten` SDK versions are at npm latest.
 - Config-per-network for testnet and mainnet (RPC, aggregator/publisher, Seal key
   server ids) so the two differ only by config.
 - CI that builds every workspace, lints, and runs the Move and unit test harnesses.
 - **The frozen manifest/artifact-boundary spec**: the exact manifest format and the
   content-addressed file contract between the Rust engine and the TypeScript client.
   The engineering review flagged this as the first thing to lock, because everything
-  else is built against it.
+  else is built against it. The Rust engine and TS client meet at **one** artifact
+  boundary (a manifest + content-addressed files); the engine never imports a chain or
+  storage client.
 
 Done when: a clean checkout builds all workspaces and passes CI, the same code targets
 testnet or mainnet by changing only `config/`, and the manifest spec is written down and
@@ -98,14 +139,18 @@ byte-identically, with no chain, storage, or encryption involved yet.
 
 Produces:
 
-- A content-addressed store keyed by BLAKE3 (put/get by hash, dedup).
+- A content-addressed store (CAS) keyed by BLAKE3 (put/get by hash, dedup). Rust crates:
+  `snapshot` / `runtime` / `cli`.
 - Filesystem capture as a Merkle tree over the working directory, with the working-dir
-  root hash recorded.
+  root hash recorded. Captures the working directory plus an optional agent memory dir
+  (the `memory_pointer` round-trips).
 - The manifest builder: installed packages, env vars (secrets redacted or referenced,
   never inlined), tool list, memory pointer, working-dir root hash.
 - Canonical, deterministic serialization so the same input always yields the same
   `manifest_hash`, with the known non-determinism sources neutralized (file and archive
-  timestamps, uid/gid, iteration order, clock, library versions).
+  timestamps, uid/gid, iteration order, clock, library versions). A **canonical umask is
+  pinned** so captured file modes do not leak the ambient login umask — the basis for
+  byte-identical restore across hosts *and* runtime tiers.
 - Restore that rebuilds the working directory from the store and the manifest, plus a
   drift report that names any difference rather than hiding it.
 - A reproducibility harness that runs capture/restore repeatedly and asserts stability.
@@ -120,17 +165,18 @@ Advances: C3 (portable) foundation, FR-3, FR-4, NFR-8.
 
 ## Phase C - Runtime adapter and isolation tier 1
 
-**Status: ✅ done** — `Runtime` trait + OCI/OverlayFS tier; this tier meets the June 21 bar.
+**Status: ✅ done** — one `Runtime` trait, LocalRuntime + OCI/runc tier; identical capture+verify path across tiers.
 
 Goal: give an agent a real place to work, behind one interface, with a swappable
 isolation tier, and wire the snapshot engine to live state.
 
 Produces:
 
-- The `runtime` adapter interface: `exec` plus a filesystem surface the agent uses.
-- Tier 1 implementation: OCI container with OverlayFS, a read-only lower layer
-  (composefs/EROFS) and a writable upper layer; the snapshot engine reads the upper
-  layer as the live delta. fs-verity on read-only layers where the kernel supports it.
+- The `Runtime` trait: `exec` plus a filesystem surface the agent uses. The **same**
+  capture + verify path runs across every tier that implements it.
+- `LocalRuntime` (dev, no isolation) and the **OCI container tier** (runc, read-only
+  rootfs, per-session tmpfs `/work`, network isolation proven by an unreachable metadata
+  service); the snapshot engine reads the writable upper layer as the live delta.
 - Command and event-log capture (the input to provenance `Command` events later).
 
 Done when: an agent runs commands and reads/writes files inside a Machine through the
@@ -143,7 +189,7 @@ Advances: C2/C3 foundation, FR-1, FR-2.
 
 ## Phase D - On-chain Machine and provenance (Move)
 
-**Status: ✅ done** — `Machine` + hash-chained provenance + `seal_approve`, deployed to testnet.
+**Status: ✅ done** — `Machine` + hash-chained provenance + `seal_approve`, live on testnet and mainnet.
 
 Goal: the ownership and tamper-evident-record layer, on Sui, in Move 2024.
 
@@ -195,17 +241,17 @@ Advances: C1, C3, FR-3, FR-4, NFR-4, NFR-5.
 
 ## Phase F - Verification path (the soul)
 
-**Status: ✅ done** — independent verifier with negative tests; passes offline.
+**Status: ✅ done** — independent verifier (`@reeg/verify`) with negative tests; passes offline.
 
 Goal: an outsider can verify a run reading only public Sui and Walrus data, with Reeg
 offline. This is the product's reason to exist.
 
 Produces:
 
-- An independent verifier (a library) that, given a Machine id, re-walks the provenance
-  chain to `provenance_head`, checks each `blob_id` equals the content hash of the stored
-  ciphertext, and checks `manifest_hash` and the working-dir Merkle root, all from public
-  data.
+- An independent verifier (`@reeg/verify`) that, given a Machine id, re-walks the
+  provenance chain to `provenance_head`, checks each `blob_id` equals the content hash of
+  the stored ciphertext, and checks `manifest_hash` and the working-dir Merkle root, all
+  from public data.
 - A `verify` path exposed from the CLI.
 - Negative tests as first-class: a tampered blob, a forged provenance entry, and a
   wrong-host restore with no matching on-chain record all fail verification.
@@ -219,13 +265,17 @@ Advances: C4 (provable), FR-8, NFR-1, NFR-5.
 
 ## Phase G - CLI and public SDK
 
-**Status: ✅ done** — `reeg` CLI + public SDK drive the full loop.
+**Status: ✅ done** — `reeg` CLI + public SDK drive the full loop; the TS CLI shells to a Rust engine binary.
 
 Goal: the operator-facing surface, so a person (and a script) can drive the whole loop.
 
 Produces:
 
-- The `reeg` CLI: create, run, checkpoint, restore, fork, verify, and grant/revoke.
+- The `reeg` CLI: `create`, `run`, `checkpoint` (`--epochs`, `--threshold`, `--attest
+  --enclave-config`), `restore`, `fork`, `grant`, `revoke`, `retire`, `verify`,
+  `evidence`, `audit`, `enclave register`. The TypeScript CLI shells to a Rust engine
+  binary (`reeg-engine`) for snapshot/restore and (on the Nitro host) the enclave vsock
+  client.
 - The public TypeScript SDK mirroring those operations, living where the agent ecosystem
   lives.
 - End-to-end exercises of the loop against testnet.
@@ -242,7 +292,8 @@ Advances: C1, C2, C3, C4 made usable, FR-1 through FR-5, FR-8.
 **Status: ✅ done** — rebuildable indexer + Console (Landing/Home/Detail/Preview) with offline Verify.
 
 Goal: the web presentation, as a static Walrus Site with no privileged backend, plus a
-display-only indexer that is never on the trust path.
+display-only indexer that is never on the trust path. The Console is React 19 + Vite 8,
+deployed as a static Walrus Site.
 
 Produces:
 
@@ -265,22 +316,24 @@ Advances: C4 presented, FR-13, FR-14, FR-15, FR-16, FR-17, NFR-1.
 
 ## Phase I - Sharing and access depth
 
-**Status: 🟡 partial** — owner-only, `seal_approve_allowlist`, and `seal_approve_until` are in
-`move/sources/access.move`; committee / threshold (t-of-n) policies still deferred.
+**Status: ✅ done** — owner-only, allowlist (`seal_approve_allowlist`), time-lock (`seal_approve_until`), and committee t-of-n all shipped.
 
 Goal: real sharing, from owner-only to allowlist to higher-assurance committee policies.
 
 Produces:
 
 - Allowlist grant and revoke end to end (`seal_approve_allowlist`), with the Console UI
-  to add and remove people by name, not address.
-- Committee / threshold (t-of-n) Seal policies for higher-assurance sharing, now that
-  committee mode is GA.
+  to add and remove people by name, not address. GRANT/REVOKE entries append to the
+  provenance chain.
+- Committee / threshold (t-of-n) Seal policies for higher-assurance sharing. The
+  committee threshold `t` is **pinned at encryption time** via `reeg checkpoint
+  --threshold t`, so the decrypt assurance is fixed when the ciphertext is written.
 - Time-limited grants (`seal_approve_until`) for collaborators.
 
 Done when: a grantee can decrypt and restore after a grant and fails on the next attempt
 after a revoke; a committee-gated Machine requires the threshold set to decrypt; a
-time-limited grant stops working after its window. Revocation is correctly forward-looking.
+time-limited grant stops working after its window. Revocation is correctly forward-looking
+(it cannot un-see already-decrypted data).
 
 Advances: C2 (shareable) deepened, FR-11, FR-12, FR-16.
 
@@ -296,8 +349,9 @@ Goal: make the kill-and-restore-elsewhere story robust, not just demoable once.
 Produces:
 
 - The kill-host then restore-on-a-fresh-host flow, on a host that never saw the original.
-- Reproducibility across heterogeneous hosts: pinned libraries and a standardized restore
-  environment so a restore on a different machine still matches the recorded hashes.
+- Reproducibility across heterogeneous hosts **and runtime tiers**: pinned libraries, the
+  canonical umask, and a standardized restore environment so a restore on a different
+  machine (or a different tier) still matches the recorded hashes.
 - The full acceptance demo scripted and rehearsed until it is boring: run, checkpoint,
   kill, restore, verify-with-backend-down, grant, revoke.
 
@@ -312,14 +366,14 @@ Advances: C3 (portable) hardened, FR-4, NFR-2, NFR-8.
 ## Phase K - Agent memory (MemWal)
 
 **Status: 🟡 partial** — the backend-agnostic seam exists (`REEG_MEMORY_DIR`, `memory_pointer` in the
-manifest, captured/verified with the workdir); wiring the shipped MemWal SDK as the backend remains.
+manifest, captured/verified with the workdir); wiring MemWal as an optional backend remains.
 
 Goal: memory that is owned, checkpointed, and verified with the rest of the environment.
 
 Produces:
 
-- Integration of the shipped MemWal public-beta SDK as one runtime call, behind the
-  runtime adapter.
+- MemWal wired as one optional memory backend behind the `REEG_MEMORY_DIR` seam, as a
+  single runtime call behind the runtime adapter.
 - The `memory_pointer` carried inside the checkpointed manifest, so memory is captured,
   restored, and verified alongside the filesystem and environment.
 
@@ -336,17 +390,20 @@ Advances: FR-18, deepens C3 and C4.
 **Status: ✅ done** — `reeg evidence` exports a portable record; `reeg audit` re-verifies it offline.
 
 Goal: turn the record we already produce into evidence a regulated buyer can keep and
-present. Elevated because compliance is the one concrete, budgeted demand (EU AI Act
-Article 12, applying 2 August 2026). Reuses existing provenance and verification
-primitives; adds no new trusted party.
+present. Elevated because compliance is the one concrete, budgeted demand: Reeg's
+tamper-evident provenance and evidence export map to the EU AI Act Article 12
+record-keeping duties for high-risk AI. Reuses existing provenance and verification
+primitives; adds no new trusted party. (Positioning, not legal advice — Reeg does not
+make anyone compliant; claims stay honest.)
 
 Produces:
 
 - Evidence export for auditors: a portable manifest with the Machine id, per-checkpoint
   `blob_id`s and `manifest_hash`es, the provenance entries and their `entry_hash` chain,
   and a command-log digest, valid outside both Reeg and the Console.
-- Retention controls: keeping blobs paid through the required Walrus storage window, with
-  the permanent on-chain provenance head, mapped to the minimum-retention duty.
+- Retention controls: keeping blobs paid through the required Walrus storage window
+  (`--epochs`; ~6 months ≈ 13 testnet epochs), with the permanent on-chain provenance
+  head, mapped to the minimum-retention duty.
 - Optional signed result attestations on `Command` events.
 - Honest cost surfacing (WAL plus Sui gas) in the UI, so the buyer sees the real number.
 
@@ -360,7 +417,7 @@ Advances: C4 turned into evidence, FR-9, NFR-1, NFR-7.
 
 ## Phase M - Production isolation tier (Firecracker microVM)
 
-**Status: 🟢 hardened on KVM (2026-06-10); jailer (#14) the one tracked follow-up** — the microVM +
+**Status: ✅ done (19/19) — hardened and verified on real AWS KVM, including #14 jailer** — the microVM +
 OCI/runc + in-guest agent tiers merged in PR #1 (`14ae8c7`) with 19 logged defects and had never run on
 real hardware. They were stood up on an AWS KVM host (`c8i.2xlarge`), which first surfaced a 20th defect
 (the umask determinism leak, now fixed), then took a full hardening pass: in-process tar extraction
@@ -368,23 +425,27 @@ real hardware. They were stood up on an AWS KVM host (`c8i.2xlarge`), which firs
 tmpfs `/work` (cross-tenant isolation), u64 framing with allocation caps, OCI network/ipc/uts
 namespaces with all caps dropped, a seccomp denylist (incl. `io_uring`/`userfaultfd`/`AF_NETLINK`)
 and masked paths, and per-session path uniquification. The applied diff was then adversarially re-reviewed and its
-findings closed. **Verified on KVM:** lib unit 10/10, `firecracker_session` 8/8, `oci_session` 3/3,
-clippy `-D warnings` clean, no leaked VMs — including tests proving traversal/symlink rejection,
-per-session isolation, read-only rootfs, and the EC2 metadata service being unreachable. Closure detail
-in [firecracker-impl-review.md](../reviews/firecracker-impl-review.md) Addendum 2; ops steps in the
-[AWS Firecracker runbook](aws-firecracker-runbook.md). **One item is deliberately deferred:** #14 — the
-Firecracker VMM is still launched unjailed; the microVM kernel boundary is the primary defense and
-jailing it is operational hardening for a later pass.
+findings closed. **#14 is now closed:** the Firecracker VMM runs under the **jailer** — chroot, privileges
+dropped to an unprivileged uid/gid, and a cgroup v2 placement — on top of the microVM kernel boundary
+that remains the primary defense. **Verified on KVM:** lib unit 11/11, `firecracker_session` 8/8 plus a
+sudo-gated jailer test, `oci_session` 3/3, clippy `-D warnings` clean, no leaked VMs — including tests
+proving traversal/symlink rejection, per-session isolation, read-only rootfs, and the EC2 metadata
+service being unreachable. Closure detail in
+[firecracker-impl-review.md](../reviews/firecracker-impl-review.md) Addendum 2; ops steps in the
+[AWS Firecracker runbook](aws-firecracker-runbook.md).
 
 Goal: hard multi-tenant isolation for running untrusted agent code at volume, behind the
 same runtime adapter, without touching the verification path.
 
 Produces:
 
-- A Firecracker microVM runtime implementing the same adapter interface as the container
-  tier, with a per-session kernel.
-- microVM snapshot integration aligned with the content-addressed snapshot engine.
-- The operational layer: KVM-capable hosts and the scaling story for them.
+- A Firecracker microVM runtime implementing the same `Runtime` trait as the container
+  tier, with KVM kernel-boundary isolation, a per-session tmpfs, a read-only rootfs, and
+  an in-guest agent reached over **vsock** with a length-prefixed framed protocol.
+- The jailer wrapper (#14): chroot + dropped privileges to an unprivileged uid/gid +
+  cgroup v2 — operational hardening on top of the VM boundary.
+- The operational layer: KVM-capable hosts and the scaling story for them (the AWS KVM
+  host runbook).
 
 Done when: the full loop (run, checkpoint, restore, verify) passes on the microVM tier
 exactly as on the container tier, with no change to the verification path, and untrusted
@@ -395,24 +456,35 @@ Advances: hardens C1 through C4 for real multi-tenant use; T-I4 in
 
 ---
 
-## Phase N - Verifiable compute (Nautilus, mainnet)
+## Phase N - Verifiable compute (Nautilus attestation)
 
-**Status: ⏸️ deferred** — optional tier; the AWS host is launched with Nitro Enclaves enabled so it is
-ready when this is sequenced in. No guest code written yet.
+**Status: ✅ done — live on testnet AND mainnet this session** — the optional TEE attestation tier that
+proves *which code* produced a checkpoint. Live `EnclaveConfig`s verified offline 4/4 on both networks.
 
 Goal: for the runs that need it, prove what code ran, not just the environment. Optional
-tier, sequenced here by scope; Nautilus is on mainnet, so this is no longer testnet upside.
+tier; the enclave **attests results, it does not run the agent** (the agent stays in the
+Firecracker VM, preserving portability and offline verify).
 
 Produces:
 
-- Optional TEE-attested execution via Nautilus (AWS Nitro Enclaves or Marlin Oyster).
-- On-chain PCR registration of the enclave, and enclave-signed result attestations
-  attached to the relevant `Command` provenance events.
-- Reproducible enclave builds so anyone can rebuild the binary and confirm the PCRs.
+- A tiny **reproducible** AWS Nitro enclave (musl-static, ~6.5 MB `.eif`; two cache-cleared
+  rebuilds produce **identical PCRs**) that derives an ed25519 key from NSM entropy, obtains
+  a Nitro attestation document embedding that key, and signs a checkpoint's manifest hash
+  over a **frozen preimage**.
+- On chain: `register_enclave` verifies the Nitro document via `0x2::nitro_attestation` and
+  pins the PCRs + ed25519 key into a shared `EnclaveConfig` (once per build);
+  `register_attested_command` cheaply ed25519-verifies each per-checkpoint signature and
+  emits `CommandAttested`.
+- An offline verifier (`@reeg/verify`) that confirms the signature and that the PCRs match
+  the trusted reproducible build (it flags all-zero debug-mode PCRs).
 
 Done when: a run can carry a PCR-bound attestation in its provenance that a verifier checks
 on-chain, deepening the proof from "this environment and history are authentic" to "this
-exact code ran on this input." The core loop still works for every run that does not use it.
+exact code ran on this input." **Strictly additive:** zero changes to `machine.move`'s
+layout or provenance head, so a non-attested run is byte-identical and the core loop still
+works for every run that does not use it. `reeg checkpoint --attest` runs **on** the AWS
+Nitro host (the engine reaches the local enclave over vsock, with the operator's key on
+that host).
 
 Advances: extends C4 to execution; deepens phase L evidence for high-risk runs.
 
@@ -420,20 +492,23 @@ Advances: extends C4 to execution; deepens phase L evidence for high-risk runs.
 
 ## Phase O - Mainnet, lifecycle, and scale
 
-**Status: ⏸️ deferred** — testnet is the current target; mainnet cutover is a config switch when phase 2
-ships.
+**Status: ✅ done — live on Sui mainnet** — package published and upgraded to add attestation; the
+encrypted create + checkpoint loop is exercised on mainnet with a measured cost benchmark.
 
 Goal: run as a real service, manage cost over time, and support teams at volume.
 
 Produces:
 
-- Mainnet deployment of the Machine package and policies, by config switch only, with the
-  same tests re-run against mainnet config before cutover.
+- **Mainnet deployment** of the Machine package and policies. Live package
+  `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e` (upgraded from
+  `0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3` to add attestation),
+  reached from the same code by config switch; the same tests run against mainnet config.
 - Retire and storage-lifecycle controls (FR-6) so operators manage checkpoint cost over
   time while meeting retention duties.
 - Team accounts: multiple operators per Machine and role-based grants.
-- A per-checkpoint cost benchmark gate on a realistic run before relying on mainnet, so
-  pricing reflects real WAL and gas cost.
+- A **per-checkpoint cost benchmark** on a realistic run: **~0.0099 SUI + ~0.0119 WAL** per
+  create + encrypted checkpoint (1 epoch, incl. the Walrus upload-relay tip); publish
+  ~0.047 SUI; the attestation upgrade ~0.05 SUI.
 - Integrations that wrap the agent frameworks and sandbox runtimes teams already use, so
   Reeg fits existing workflows rather than replacing them.
 
@@ -441,34 +516,54 @@ Done when: an external team runs their own agents on mainnet, shares and restore
 environments, a third party verifies them, retention and cost are managed and visible, and
 the per-checkpoint cost is within the benchmarked budget.
 
+**Honest mainnet constraint:** encryption + storage + anchor + **offline verify all work on
+mainnet today**; only *decrypt* (restore) of a Seal-encrypted checkpoint waits on a working
+mainnet Seal key server. Mainnet has no free public Open-mode key server yet (the
+decentralized committee server is "available soon"; independent providers run Permissioned
+mode requiring signup; the Ruby Nodes free-tier key currently returns 403 from their
+gateway — a provider-side activation matter, not Reeg's code). The full encrypted
+checkpoint → restore → verify loop is proven on **testnet**.
+
 Advances: FR-6, NFR-6, NFR-7, NFR-9; the full product at scale.
 
 ---
 
 ## Mapping to the product roadmap
 
-As of 2026-06-11 the ship windows are collapsed: **everything below lands before June 21.**
+As of 2026-06-11, **Reeg is live on Sui mainnet** and the full own/share/move/prove loop ships.
 
-- **Done (A–L, J):** the full own/share/fork/move/prove loop, evidence export, and the hardened
-  Firecracker tier (M, 18/19).
-- **In scope for June 21 (this program):** committee t-of-n (rest of I), MemWal wiring (K), the
-  Firecracker jailer (#14 of M), Nautilus attestation (N), and the mainnet cutover (O) — publish, the
-  real Seal operator set, the per-checkpoint cost benchmark, and the mainnet acceptance loop.
-- **Out of scope (non-goals):** live sub-second mirroring, a regulated-data vault, our own agent
-  framework (see [roadmap.md](../01-product/roadmap.md)).
+- **Done (A–J, L, M, N, O):** the full own/share/fork/move/prove loop, evidence export, the
+  hardened Firecracker tier (M, **19/19** incl. the jailer), the Nautilus attestation tier
+  (N, live on testnet and mainnet), and the mainnet publish/upgrade with a measured
+  per-checkpoint cost benchmark (O). Sharing depth (I) — owner-only, allowlist, time-lock,
+  and committee t-of-n — is shipped.
+- **Remaining (K):** wiring MemWal as an optional backend behind the `REEG_MEMORY_DIR`
+  seam; the backend-agnostic memory seam already round-trips through capture and verify.
+- **Out of scope (non-goals):** live sub-second mirroring, a regulated-data vault, our own
+  agent framework (see [roadmap.md](../01-product/roadmap.md)).
 
-The only critical-path input that isn't code is a **funded mainnet wallet** (operator + grantee, SUI +
-WAL) for the I-validation and O work.
+The one honest open item is not code: a **working mainnet Seal key server** for *decrypt*
+(restore) of encrypted checkpoints — on mainnet, encryption + storage + anchor + offline
+verify already work; the full encrypted restore loop is proven on testnet.
+
+**Tests / CI (verified this session):** Move 40/40 (incl. attestation with a real ed25519
+vector); `@reeg/verify` 54/54; `@reeg/chain` 21/21; `@reeg/crypto` 8/8 (cross-language
+preimage match against the Move vector); engine Firecracker 8/8 + jailer + OCI 3/3 + lib
+11/11 on KVM. CI is green on all three jobs (TypeScript, Rust, Move).
 
 ## Risk gates carried from feasibility
 
 Three gates from [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md)
-sit between phases and must be cleared before proceeding:
+sat between phases and have all been cleared:
 
-- After phase B: confirm restore is reproducible enough that verify is meaningful. If not,
-  narrow the runtime surface until it is, before building anything on top.
+- After phase B: confirm restore is reproducible enough that verify is meaningful. **Cleared
+  —** byte-identical restore holds across hosts and runtime tiers (the canonical umask
+  closed the last cross-tier leak).
 - Before mainnet (phase O): confirm per-checkpoint cost is acceptable on a realistic run and
-  that Walrus storage epochs are managed.
+  that Walrus storage epochs are managed. **Cleared —** measured ~0.0099 SUI + ~0.0119 WAL
+  per create + encrypted checkpoint, with `--epochs` retention control.
 - Before leaning on a newer tier (committee Seal, MemWal, Nautilus): confirm its current
   status against [sui-tech-reference.md](../02-architecture/sui-tech-reference.md) and keep
-  the core loop independent of it.
+  the core loop independent of it. **Held —** Nautilus and committee Seal are strictly
+  additive; a non-attested, owner-only run is byte-identical and the core loop never depends
+  on them.

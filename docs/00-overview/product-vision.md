@@ -2,13 +2,16 @@
 
 ## The one line
 
-**Reeg is the computer your AI agents live in: one you own, and can share.**
+**Reeg is the computer your AI agents live in. Own it, share it, move it, prove it.**
 
 Spin up a real environment for an agent (files, packages, commands, memory), let it
 work, then snapshot it, hand it to a teammate, fork it, or move it to another
 machine. Because the environment lives on Sui and Walrus, it is genuinely yours, and
-anyone you choose can verify exactly what the agent did. The short promise:
-**own it, share it, fork it, move it, prove it.**
+anyone can verify offline what the environment contained and that the provenance
+chain is intact. This is no longer a plan: Reeg is **live on Sui mainnet** today,
+where create, encrypted checkpoint, anchoring, and offline verify all work. The full
+encrypted checkpoint → restore → verify loop is **proven on testnet**; on mainnet,
+encrypted restore (decrypt) waits on a working mainnet Seal key server.
 
 ## The problem, in plain language
 
@@ -32,21 +35,87 @@ you get from a sandbox like Daytona, E2B, or Blackbox: spin one up, run commands
 write files, checkpoint it, restore it, resume where you left off. We do that part.
 
 What makes Reeg different is what the environment *is*. It is not a row in a vendor's
-database, it is an object you own on Sui backed by your own content-addressed data on
-Walrus. That one change unlocks three things a centralized box cannot give you:
+database, it is a **Machine** object you own on Sui, backed by your own
+content-addressed data on Walrus, encrypted client-side with Seal, with a
+hash-chained provenance log anchored on Sui that anyone can verify offline. That one
+change unlocks four things a centralized box cannot give you.
 
-1. **Own it.** The environment is held as data you control, gated by an object you
-   own. No vendor can silently change it, lock you out, or delete it.
+## The four pillars
 
-2. **Share and fork it.** Hand a whole live environment to a teammate, fork a good
-   checkpoint to try two directions, or pass an agent's computer to a client exactly
-   as it was. Not a transcript, the actual workspace.
+Everything Reeg does falls out of a single design choice: the environment is an
+object you hold on Sui plus your own data on Walrus. Four capabilities follow.
 
-3. **Move it, and prove it.** Kill it on one host, bring it back on another, exactly
-   as it was. And because it lives on Sui, proof comes for free: anyone you choose
-   can verify what the agent did without trusting Reeg at all.
+1. **Own it.** A Machine is an *owned* Sui object on the fast path. You `create` it,
+   you `retire` it, and the owner alone can mutate it. No vendor can silently change
+   it, lock you out, or delete it.
 
-The short version of the promise: **own it, share it, fork it, move it, prove it.**
+2. **Share it.** Every checkpoint is **Seal-encrypted client-side before it ever
+   touches Walrus**. A shared `AccessPolicy` object holds the grants. You `grant` and
+   `revoke` access with an allowlist and time-limited expiry, and each change appends
+   a `GRANT` or `REVOKE` entry to the provenance chain. The committee t-of-n Seal
+   threshold is fixed at encryption time (`reeg checkpoint --threshold t`). Revocation
+   is forward-looking by design: it cannot un-see data someone already decrypted.
+
+3. **Move it.** `fork` a Machine from any checkpoint with provable on-chain lineage
+   back to its parent, or `restore` a checkpoint on *any* host, byte-for-byte
+   identical. Because snapshots are content-addressed and deterministic, portability
+   across hosts is not best-effort, it is guaranteed by construction.
+
+4. **Prove it.** Each Machine object carries a hash-chained, append-only,
+   tamper-evident provenance head. Anyone can verify it **offline** from public Sui
+   and Walrus data alone, with no Reeg backend in the loop. And for runs where you
+   need to prove *which code* produced a checkpoint, there is an optional **Nautilus
+   TEE attestation** tier (below).
+
+The short version of the promise: **own it, share it, move it, prove it.**
+
+## The snapshot engine
+
+Underneath the pillars is a Rust engine (the `snapshot`, `runtime`, and `cli`
+crates). It uses a content-addressed store keyed by BLAKE3, so identical content is
+stored once and a restore is byte-identical across hosts *and* across runtime tiers.
+A canonical umask is pinned so captured file modes never leak the ambient login
+umask, which is what makes cross-tier determinism hold. The engine captures the
+working directory plus an optional agent memory directory (the `memory_pointer`
+round-trips cleanly). The Rust engine and the TypeScript client meet at exactly one
+artifact boundary, a manifest plus content-addressed files; the engine never imports
+a chain or storage client, which keeps the determinism honest.
+
+## Runtime tiers
+
+The same capture-and-verify path runs across every tier behind a single `Runtime`
+trait:
+
+- **Local** — for development, no isolation.
+- **OCI container** — `runc`, read-only rootfs, a per-session tmpfs `/work`, and
+  network isolation proven by an unreachable metadata service.
+- **Firecracker microVM** — KVM kernel-boundary isolation, per-session tmpfs,
+  read-only rootfs, and an in-guest agent that speaks a length-prefixed framed
+  protocol over vsock. Phase M hardening is **19/19 complete**, verified on a real
+  AWS KVM host, including running the Firecracker VMM under the **jailer** (chroot,
+  privileges dropped to an unprivileged uid/gid, cgroup v2).
+
+## The Nautilus attestation tier
+
+The provenance chain proves *that* a checkpoint happened and *what* its contents
+were. The optional Nautilus tier proves *which code* produced it, and it is **live on
+both testnet and mainnet today**.
+
+A tiny, *reproducible* AWS Nitro enclave (musl-static, about a 6.5MB `.eif`; two
+cache-cleared rebuilds produce identical PCRs) derives an ed25519 key from NSM
+entropy, obtains a Nitro attestation document embedding that key, and signs a
+checkpoint's manifest hash over a frozen preimage. On chain, `register_enclave`
+verifies the Nitro document via `0x2::nitro_attestation` and pins the PCRs and the
+ed25519 key into a shared `EnclaveConfig` (once per build); `register_attested_command`
+then cheaply ed25519-verifies each per-checkpoint signature and emits
+`CommandAttested`. An offline verifier (`@reeg/verify`) confirms the signature and
+that the PCRs match the trusted reproducible build, and it flags all-zero debug-mode
+PCRs.
+
+The tier is **strictly additive**: it makes zero changes to `machine.move`'s layout
+or provenance head, so a non-attested run is byte-identical to before. Critically,
+the enclave *attests* results; it does not *run* the agent. The agent stays in the
+Firecracker VM, which preserves both portability and offline verification.
 
 ## Who it is for
 
@@ -66,31 +135,56 @@ for thirty seconds of work, a centralized box is the right tool. If you want an
 environment worth owning, sharing, reusing, or standing behind, that is Reeg. We do
 everything the centralized box does; we add the parts it structurally cannot.
 
+The cost of that ownership is small and measured: on mainnet, a create plus an
+encrypted checkpoint (one epoch, including the Walrus upload-relay tip) runs about
+**0.0099 SUI + 0.0119 WAL**.
+
+## Honest constraints
+
+We keep the shortcomings in plain sight:
+
+- **Mainnet decryption waits on a Seal key server.** A Seal-encrypted checkpoint on
+  mainnet needs a mainnet Seal key server to decrypt. Mainnet currently has no free
+  public Open-mode key server (the decentralized committee server is "available
+  soon"; independent providers run Permissioned mode that requires signup, and the
+  free-tier provider key we tried returns a provider-side 403). So on mainnet today:
+  encryption, storage, anchoring, and offline verify **all work**; only decrypt (the
+  `restore` of an encrypted checkpoint) waits on a working provider key server. The
+  full encrypted checkpoint → restore → verify loop is **proven on testnet**.
+- **Attestation runs on the Nitro host.** `reeg checkpoint --attest` runs on the AWS
+  Nitro host, where the engine reaches the local enclave over vsock with the
+  operator's key on that host.
+- **The hardware tiers need an AWS box.** Firecracker, OCI, the jailer, and Nautilus
+  require a Linux KVM and Nitro host. The local tier and the full own / share / move
+  / prove chain run anywhere.
+
 ## What Reeg is not
 
 - Not a memory API. Memory is one part of the environment, not the product.
 - Not "decentralized because crypto." Nobody should switch for decentralization.
-  They switch because they can finally own, share, and prove the environment, which
-  a centralized vendor cannot offer no matter how fast it is.
+  They switch because they can finally own, share, move, and prove the environment,
+  which a centralized vendor cannot offer no matter how fast it is.
 
 ## Why now
 
 Agents are being handed real authority faster every month, and the work they do is
 starting to be worth keeping and sharing rather than throwing away. At the same time,
-accountability rules for automated systems are arriving (for example, the EU AI
-Act's record-keeping obligations for high-risk AI systems enter into force in
-August 2026), which turns the proof Reeg already gives you for free into something a
-class of buyers will be required to have. The ownership and sharing win earns the
-adoption; the proof makes it defensible.
+accountability rules for automated systems are arriving. We frame Reeg against the EU
+AI Act's record-keeping and logging expectations (Article 12): tamper-evident
+provenance with configurable Walrus retention (`--epochs`; roughly six months is
+about 13 testnet epochs), plus `reeg evidence` and `reeg audit`, which export a
+portable evidence file an auditor can keep. That is positioning, not legal advice,
+and we keep the claims honest. The ownership and sharing win earns the adoption; the
+proof makes it defensible.
 
 ## How we win
 
 A centralized vendor can copy any feature we ship except one: it cannot let you own
-the environment. Ownership is what makes sharing, forking, portability, and
-independent proof possible, and all four fall out of one design choice (the
-environment is an object you hold on Sui plus your data on Walrus) that a vendor in a
-single datacenter cannot match. We do what the fast boxes do, on top of the one thing
-they cannot.
+the environment. Ownership is what makes sharing, portability, and independent proof
+possible, and all four pillars fall out of one design choice (the environment is an
+object you hold on Sui plus your data on Walrus) that a vendor in a single datacenter
+cannot match. We do what the fast boxes do, on top of the one thing they cannot, and
+it is shipped: Reeg is live on Sui mainnet, attestation included.
 
 ## The built-on-Sui story (one paragraph)
 
@@ -99,8 +193,9 @@ product needs. Walrus stores the environment as content-addressed data you own. 
 Sui object acts as the kernel: it holds ownership, permissions, and the verification
 anchor, and it is programmable, so forking, granting, and revoking access are
 on-chain operations. Seal encrypts the environment on your machine before it leaves,
-with access controlled by rules you write. Nautilus is the later upgrade path for
-proving the execution itself, not just the environment. See
+with access controlled by `seal_approve` policies you write. Nautilus is the live
+attestation tier that proves the execution itself, not just the environment. The
+whole stack is on Move 2024 with `@mysten/sui`, `@mysten/walrus`, and `@mysten/seal`
+at npm latest. See
 [../02-architecture/sui-tech-reference.md](../02-architecture/sui-tech-reference.md)
-for the verified details.
-</content>
+for the verified details, including the live mainnet and testnet package IDs.

@@ -1,15 +1,38 @@
 # Reeg Documentation
 
-**Reeg is the computer your AI agents live in: one you own, and can share.** Run an
-agent in a real environment (files, packages, commands, memory), then snapshot it,
-hand it to a teammate, fork it, or move it to another machine. The same
-snapshot-and-restore experience as a centralized sandbox, except the environment is
-an object you own on Sui backed by your own data on Walrus, so you can share it,
-fork it, move it, and let anyone verify what the agent did. Own it, share it, fork
-it, move it, prove it.
+**Reeg is the computer your AI agents live in. Own it, share it, move it, prove it.**
+Run an agent in a real environment (files, packages, commands, memory), then snapshot
+it, hand it to a teammate, fork it, or move it to another machine byte-for-byte. The
+environment is a **Machine** object you own on Sui, backed by your own content-addressed data on
+Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored
+on Sui that anyone can verify **offline** from public Sui + Walrus data alone — no Reeg
+backend. Own it, share it, move it, prove it.
 
 Domain: [reeg.xyz](https://reeg.xyz) · Track: Sui Overflow 2026, Walrus · Status:
-pre-build (architecture + planning complete, scaffolding next).
+**LIVE on Sui mainnet** (and testnet), including the optional Nautilus TEE attestation
+tier.
+
+- Mainnet package: `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`
+- Testnet package: `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`
+- Measured mainnet cost: ~0.0099 SUI + ~0.0119 WAL per create + encrypted checkpoint
+  (1 epoch, incl. Walrus upload-relay tip).
+
+---
+
+## The four pillars
+
+- **Own** — a Machine is an *owned* Sui object (fast path). `create` / `retire`; the
+  owner alone mutates it.
+- **Share** — checkpoints are Seal-encrypted client-side before they ever touch Walrus.
+  A shared `AccessPolicy` holds grants; `grant` / `revoke` (allowlist + time-limited
+  expiry) append GRANT/REVOKE entries to the provenance chain. The t-of-n Seal threshold
+  is set at encryption time; revocation is forward-looking.
+- **Move** — `fork` a Machine from any checkpoint with provable on-chain lineage to the
+  parent; `restore` a checkpoint on *any* host byte-identically (content-addressed +
+  deterministic). Cross-host, cross-runtime-tier portability.
+- **Prove** — a hash-chained, append-only, tamper-evident provenance head on the Machine
+  object, verified offline from public Sui + Walrus alone — plus the optional Nautilus
+  TEE attestation tier that proves *which code* produced a checkpoint.
 
 ---
 
@@ -76,6 +99,51 @@ pre-build (architecture + planning complete, scaffolding next).
 
 ---
 
+## What's shipped
+
+- **On chain (Move 2024).** Machine objects, provenance head, AccessPolicy
+  grant/revoke, and the optional `attestation` module — live on **mainnet** and
+  testnet. Move tests 40/40.
+- **Snapshot engine (Rust).** Content-addressed CAS keyed by BLAKE3, deterministic,
+  byte-identical restore across hosts *and* runtime tiers (a canonical umask is pinned
+  so file modes don't leak the ambient login umask). The Rust engine and TS client meet
+  at one artifact boundary — a manifest + content-addressed files; the engine never
+  imports a chain/storage client.
+- **Runtime tiers (one `Runtime` trait, identical capture + verify path).** Local (dev,
+  no isolation); OCI container tier (runc, read-only rootfs, per-session tmpfs,
+  network isolation proven by an unreachable metadata service); Firecracker microVM tier
+  (KVM kernel-boundary isolation, in-guest agent over vsock). Phase M hardening 19/19
+  complete and verified on a real AWS KVM host, including running the VMM under the
+  **jailer** (chroot, dropped privileges to an unprivileged uid/gid + cgroup v2).
+- **Nautilus attestation tier (optional).** A reproducible AWS Nitro enclave
+  (~6.5MB `.eif`, identical PCRs across cache-cleared rebuilds) signs a checkpoint's
+  manifest hash; `register_enclave` pins the PCRs + ed25519 key on chain, and an offline
+  verifier (`@reeg/verify`) confirms the signature against the trusted reproducible
+  build. Strictly additive — a non-attested run is byte-identical. The enclave *attests*
+  results; it does not run the agent.
+- **Verification is offline.** `@reeg/verify` (54/54 tests) replays the provenance chain
+  and validates attestations using only public Sui + Walrus data.
+
+See [build-roadmap.md](03-engineering/build-roadmap.md) for the full phase-by-phase
+status and [data-model.md](02-architecture/data-model.md) for the object model.
+
+---
+
+## Honest constraints
+
+- A Seal-**encrypted** checkpoint on **mainnet** needs a working mainnet Seal key
+  server. Today mainnet has no free public Open-mode key server (the decentralized
+  committee server is "available soon"; independent providers run Permissioned mode
+  requiring signup). So on mainnet, **encryption + storage + anchor + offline verify
+  all work; only decrypt (restore) waits on a working provider key server.** The full
+  encrypted checkpoint → restore → verify loop is proven end-to-end on **testnet**.
+- The Firecracker / OCI / jailer / Nautilus tiers require a Linux KVM + Nitro host (an
+  AWS box). The local tier and the full own/share/move/prove chain run anywhere.
+- `reeg checkpoint --attest` runs on the AWS Nitro host (the engine reaches the local
+  enclave over vsock), with the operator's key on that host.
+
+---
+
 ## How to keep these docs honest
 
 1. Every factual claim about Sui, Walrus, Seal, or Nautilus must trace to
@@ -85,6 +153,5 @@ pre-build (architecture + planning complete, scaffolding next).
    than no docs.
 3. The whitepaper and product vision are the only docs written for outsiders.
    Everything else assumes the reader is on the team.
-</content>
-
-</invoke>
+4. Keep the honest constraints honest — distinguish what is live on mainnet, proven on
+   testnet, and aspirational positioning (e.g. EU AI Act framing).
