@@ -1,8 +1,42 @@
 @import "tailwindcss";
 
 /* Reeg design tokens. Semantic names are the contract (see brand.md); components never use
-   raw hex. Light is the default; .dark flips the variables. Tailwind v4 maps them below. */
+   raw hex. Light is the default; .dark flips the variables. The Console is a true light/dark
+   app (the header has a theme toggle), so `.dark` is set on <html> — unlike the marketing site,
+   which only uses `.dark` per-section. Tailwind v4 maps the tokens in @theme inline below. */
 @custom-variant dark (&:is(.dark *));
+
+/* Display face. Self-hosted so the Console (a static Walrus Site) has no external font dependency.
+   Body (Montserrat Variable) and mono (JetBrains Mono Variable) are imported from @fontsource in
+   main.tsx; this only needs to declare the display face. */
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/ClashDisplay-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/ClashDisplay-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/ClashDisplay-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/ClashDisplay-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --background: #ffffff;
@@ -52,13 +86,18 @@
   --color-destructive: var(--destructive);
   --color-ring: var(--ring);
   --radius-default: var(--radius);
-  --font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Inter, Helvetica, Arial,
-    sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --font-sans: "Montserrat Variable", ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Clash Display", "Montserrat Variable", ui-sans-serif, sans-serif;
+  /* The signature product-panel lift: a soft blue light plus a dark ambient, mirroring the
+     marketing ProductPanel. Used on the hero machine card and the create surface. */
+  --shadow-panel: 0 40px 120px -48px rgba(37, 99, 235, 0.3), 0 16px 48px -24px rgba(0, 0, 0, 0.18);
 }
 
 html {
   color-scheme: light dark;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -70,8 +109,39 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+::selection {
+  background-color: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+/* Headlines wear the display face (Clash Display); body and UI stay Montserrat. Setting it on the
+   elements keeps screen components clean. Per-element tracking utilities still win over this. */
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--font-display);
+  }
+}
+
+/* A faint blueprint grid used behind the dashboard hero and empty states. Uses the border token,
+   so it flips with the theme. Callers add a radial mask to fade it at the edges. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Tabular, evenly-spaced figures for hashes, ids, counts, and timestamps. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
 /* Animations stay subtle and functional, and disappear entirely under reduced-motion. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {

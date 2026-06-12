@@ -10,5 +10,25 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     target: 'es2022',
+    // The Sui + dapp-kit clients are inherently large; split them into a long-lived vendor chunk
+    // so app code can change without re-downloading them. The dev-only sandbox is already a lazy
+    // chunk (see App.tsx), so the initial app payload stays lean.
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined;
+          }
+          if (id.includes('@mysten')) {
+            return 'sui';
+          }
+          if (id.includes('/react') || id.includes('/react-dom') || id.includes('/scheduler')) {
+            return 'react';
+          }
+          return undefined;
+        },
+      },
+    },
   },
 });

@@ -42,3 +42,6 @@ evidence-*.json
 
 # vercel link/local settings
 .vercel
+
+# local UI screenshots (scratch)
+.ui-shots/
