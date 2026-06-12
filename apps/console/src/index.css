@@ -38,6 +38,28 @@
   font-display: swap;
 }
 
+/* Brand wordmark: PP Neue Machina. Self-hosted — drop the licensed woff2 files into
+   apps/console/public/fonts/ with these names and the "Reeg" wordmark renders in them; until then
+   it falls back to the display face (see --font-wordmark). */
+@font-face {
+  font-family: "PP Neue Machina";
+  src: url("/fonts/PPNeueMachina-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PP Neue Machina";
+  src: url("/fonts/PPNeueMachina-Medium.woff2") format("woff2");
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Reeg Console palette. The neutral system is the clean light/dark theme (white surfaces, zinc
+   neutrals); the brand accent for links and focus stays blue. Orange (#FF6B2B) is used only for
+   the primary button (--primary), per the design direction. "verified" stays green (a trust
+   signal, not a brand colour). */
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
@@ -45,8 +67,8 @@
   --muted-foreground: #71717a;
   --border: #e4e4e7;
   --card: #ffffff;
-  --primary: #18181b;
-  --primary-foreground: #fafafa;
+  --primary: #ff6b2b;
+  --primary-foreground: #1a1310;
   --accent: #2563eb;
   --verified: #16a34a;
   --warning: #b45309;
@@ -62,8 +84,8 @@
   --muted-foreground: #a1a1aa;
   --border: #27272a;
   --card: #101012;
-  --primary: #fafafa;
-  --primary-foreground: #18181b;
+  --primary: #ff7a3d;
+  --primary-foreground: #1a1310;
   --accent: #3b82f6;
   --verified: #22c55e;
   --warning: #d97706;
@@ -90,9 +112,13 @@
     Arial, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
   --font-display: "Clash Display", "Montserrat Variable", ui-sans-serif, sans-serif;
-  /* The signature product-panel lift: a soft blue light plus a dark ambient, mirroring the
-     marketing ProductPanel. Used on the hero machine card and the create surface. */
-  --shadow-panel: 0 40px 120px -48px rgba(37, 99, 235, 0.3), 0 16px 48px -24px rgba(0, 0, 0, 0.18);
+  /* The brand wordmark face. Drop the PP Neue Machina woff2 into public/fonts (see the @font-face
+     above) and the wordmark picks it up; until then it falls back to the display face. */
+  --font-wordmark: "PP Neue Machina", "Clash Display", "Montserrat Variable", ui-sans-serif,
+    sans-serif;
+  /* The signature product-panel lift: a soft light plus a dark ambient. Used on the proof panel
+     and the connect surface. */
+  --shadow-panel: 0 40px 120px -48px rgba(37, 99, 235, 0.18), 0 16px 48px -24px rgba(0, 0, 0, 0.16);
 }
 
 html {

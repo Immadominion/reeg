@@ -1,6 +1,6 @@
-import { useCurrentAccount } from '@mysten/dapp-kit';
+import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
 import type { Machine } from '@reeg/sdk';
-import { ArrowRight, Boxes, Camera, Search, Share2 } from 'lucide-react';
+import { ArrowRight, Boxes, Camera, Search, Share2, Wallet } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Avatar } from '../components/Avatar';
 import { CreateEnvironment } from '../components/CreateEnvironment';
@@ -8,7 +8,6 @@ import { EmptyState, ErrorState, NotConfigured } from '../components/States';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Container } from '../components/ui/Container';
-import { Glow } from '../components/ui/Glow';
 import { Pill } from '../components/ui/Pill';
 import { Reveal } from '../components/ui/Reveal';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -29,45 +28,9 @@ export function Home() {
     );
   }
   return (
-    <>
-      <Hero />
-      <Container className="pb-24">
-        <Dashboard />
-      </Container>
-    </>
-  );
-}
-
-function Hero() {
-  const account = useCurrentAccount();
-  return (
-    <section className="relative isolate overflow-hidden border-b border-border">
-      <Glow />
-      <Container className="relative py-16 sm:py-20">
-        <Reveal>
-          <h1 className="max-w-2xl text-balance text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl">
-            {account ? 'Your environments' : 'Own the computers your AI agents live in.'}
-          </h1>
-        </Reveal>
-        <Reveal delay={0.05}>
-          <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Create an environment you own, snapshot it, share it, fork it, and prove exactly what it
-            did. Verified against Sui and Walrus, with no Reeg backend.
-          </p>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div className="mt-7">
-            {account ? (
-              <CreateEnvironment />
-            ) : (
-              <Pill dot tone="accent">
-                Connect a wallet to create an environment
-              </Pill>
-            )}
-          </div>
-        </Reveal>
-      </Container>
-    </section>
+    <Container className="py-8 sm:py-10">
+      <Dashboard />
+    </Container>
   );
 }
 
@@ -76,36 +39,56 @@ function Dashboard() {
   const { data: machines, isLoading, isError, refetch } = useOwnedMachines();
 
   return (
-    <div className="space-y-10 pt-10">
-      <section className="space-y-5">
-        {!account ? (
-          <EmptyState
-            title="Connect to see your environments"
-            description="Connect a wallet to list the environments you own. To inspect a shared one, just paste its link below. No wallet needed."
-          />
-        ) : isLoading ? (
-          <GridSkeleton />
-        ) : isError ? (
-          <ErrorState
-            message="Could not load your environments from the network. Check your connection and try again."
-            onRetry={() => void refetch()}
-          />
-        ) : !machines || machines.length === 0 ? (
-          <EmptyState
-            title="No environments yet"
-            description="Create your first environment to own a computer your agents can live in. Snapshot it, share it, and prove what it did."
-            action={<CreateEnvironment size="md" />}
-          />
-        ) : (
-          <>
-            <Stats machines={machines} />
-            <MachineGrid machines={machines} />
-          </>
-        )}
-      </section>
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Environments</h1>
+        {account && machines && machines.length > 0 ? <CreateEnvironment size="md" /> : null}
+      </div>
+
+      {!account ? (
+        <ConnectPrompt />
+      ) : isLoading ? (
+        <GridSkeleton />
+      ) : isError ? (
+        <ErrorState
+          message="Could not load your environments from the network. Check your connection and try again."
+          onRetry={() => void refetch()}
+        />
+      ) : !machines || machines.length === 0 ? (
+        <EmptyState
+          title="No environments yet"
+          description="Create your first environment to own a computer your agents can live in. Snapshot it, share it, and prove what it did."
+          action={<CreateEnvironment size="md" />}
+        />
+      ) : (
+        <>
+          <Stats machines={machines} />
+          <MachineGrid machines={machines} />
+        </>
+      )}
 
       <InspectAny />
     </div>
+  );
+}
+
+function ConnectPrompt() {
+  return (
+    <Card className="shadow-panel">
+      <div className="flex flex-col items-center gap-5 px-6 py-16 text-center">
+        <span className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-muted/60 text-muted-foreground">
+          <Wallet className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <div className="space-y-1.5">
+          <h2 className="text-lg font-semibold tracking-tight">Connect your wallet</h2>
+          <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
+            Connect to create and manage the environments you own. To inspect a shared one, paste
+            its link below. No wallet needed.
+          </p>
+        </div>
+        <ConnectModal trigger={<Button size="lg">Connect wallet</Button>} />
+      </div>
+    </Card>
   );
 }
 
@@ -136,16 +119,10 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Boxes; label: string;
 
 function MachineGrid({ machines }: { machines: Machine[] }) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-tight">Your environments</h2>
-        <CreateEnvironment size="sm" variant="secondary" label="New" />
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {machines.map((machine, index) => (
-          <MachineCard key={machine.id} machine={machine} index={index} />
-        ))}
-      </div>
+    <div className="grid gap-3 sm:grid-cols-2">
+      {machines.map((machine, index) => (
+        <MachineCard key={machine.id} machine={machine} index={index} />
+      ))}
     </div>
   );
 }

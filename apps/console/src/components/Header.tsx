@@ -6,7 +6,6 @@ import { navigate } from '../lib/router';
 import { useTheme } from '../lib/theme';
 import { Container } from './ui/Container';
 import { Logo } from './ui/Logo';
-import { Pill } from './ui/Pill';
 
 /** The product's top bar: the Reeg mark, the live network, a theme toggle, and wallet connect.
  *  Transparent while at the top of the page, it solidifies into a glass bar on scroll — the same
@@ -42,9 +41,13 @@ export function Header() {
         </button>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Pill dot tone="verified" className="hidden capitalize sm:inline-flex">
+          <span
+            className="hidden items-center gap-1.5 text-xs font-medium capitalize text-muted-foreground sm:inline-flex"
+            title={`Connected to Sui ${NETWORK}`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-verified" aria-hidden="true" />
             {NETWORK}
-          </Pill>
+          </span>
           <button
             type="button"
             onClick={toggle}
