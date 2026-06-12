@@ -1,7 +1,7 @@
 import { cn } from '../../lib/cn';
 
-/** The Reeg mark (public/transparent-bg-logo.svg), inlined so it inherits `currentColor` and
- *  adapts to light/dark. Square glyph; size it with className (defaults to 22px). */
+/** The Reeg mark only (square glyph, public/transparent-bg-logo.svg) inlined as currentColor.
+ *  Used where a compact square mark is needed (e.g. a tile). */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
@@ -18,7 +18,8 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-/** The mark plus the wordmark, for the header and anywhere the brand is shown. */
+/** The full Reeg lockup (mark + wordmark) from public/reeg-text.svg. Rendered as a CSS mask filled
+ *  with currentColor, so the one SVG stays the source of truth and the lockup adapts to light/dark. */
 export function Logo({
   className,
   withWordmark = true,
@@ -26,12 +27,24 @@ export function Logo({
   className?: string;
   withWordmark?: boolean;
 }) {
+  if (!withWordmark) {
+    return <LogoMark className={className} />;
+  }
   return (
-    <span className={cn('inline-flex items-center gap-2', className)}>
-      <LogoMark />
-      {withWordmark ? (
-        <span className="font-wordmark text-lg font-semibold tracking-tight">Reeg</span>
-      ) : null}
-    </span>
+    <span
+      role="img"
+      aria-label="Reeg"
+      className={cn('inline-block h-6 w-[81px] bg-current text-foreground', className)}
+      style={{
+        maskImage: 'url(/reeg-text.svg)',
+        WebkitMaskImage: 'url(/reeg-text.svg)',
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskPosition: 'left center',
+        WebkitMaskPosition: 'left center',
+      }}
+    />
   );
 }
