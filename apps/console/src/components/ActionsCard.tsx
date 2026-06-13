@@ -1,4 +1,4 @@
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import { buildFork, buildRetire, type Machine } from '@reeg/sdk';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, Copy, GitFork, PowerOff } from 'lucide-react';
@@ -7,6 +7,7 @@ import { CONFIG } from '../lib/config';
 import { forkAvailability, forkErrorMessage } from '../lib/fork';
 import { sameAddress } from '../lib/format';
 import { navigate } from '../lib/router';
+import { useExecuteTransaction } from '../lib/sponsor';
 import { createdMachineId, txErrorMessage } from '../lib/tx';
 import { Button } from './ui/Button';
 import { Card, CardBody } from './ui/Card';
@@ -19,7 +20,7 @@ import { Card, CardBody } from './ui/Card';
  */
 export function ActionsCard({ machine, retired }: { machine: Machine; retired?: boolean }) {
   const account = useCurrentAccount();
-  const { mutateAsync } = useSignAndExecuteTransaction();
+  const execute = useExecuteTransaction();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState<'fork' | 'retire' | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +37,10 @@ export function ActionsCard({ machine, retired }: { machine: Machine; retired?: 
     setBusy('fork');
     setError(null);
     try {
-      const result = await mutateAsync({
-        transaction: buildFork(CONFIG.packageId, machine.id, machine.policyId),
-      });
+      const result = await execute(
+        buildFork(CONFIG.packageId, machine.id, machine.policyId),
+        account?.address,
+      );
       const childId = await createdMachineId(result.digest);
       await queryClient.invalidateQueries({ queryKey: ['owned-machines'] });
       navigate(childId ? `/env/${childId}` : '/');
@@ -53,7 +55,7 @@ export function ActionsCard({ machine, retired }: { machine: Machine; retired?: 
     setBusy('retire');
     setError(null);
     try {
-      await mutateAsync({ transaction: buildRetire(CONFIG.packageId, machine.id) });
+      await execute(buildRetire(CONFIG.packageId, machine.id), account?.address);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['retired', machine.id] }),
         queryClient.invalidateQueries({ queryKey: ['environment', machine.id] }),

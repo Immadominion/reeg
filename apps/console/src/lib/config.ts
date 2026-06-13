@@ -30,6 +30,17 @@ export const CONFIG = { network, packageId };
 export const NETWORK: SuiNetwork = network;
 export const PACKAGE_ID: string = packageId;
 
+/**
+ * The Reeg paymaster base URL (apps/api). When set, the Console routes its on-chain Reeg actions
+ * through it so gas is sponsored — a zkLogin user with no SUI can act for free. Empty = the
+ * connected wallet pays its own gas (the unsponsored path). Verification never goes through here.
+ */
+export const API_URL: string = (import.meta.env.VITE_REEG_API_URL ?? '').replace(/\/$/, '');
+
+export function sponsorshipConfigured(): boolean {
+  return API_URL.length > 0;
+}
+
 /** A read-only Sui client for reads and verification, independent of any connected wallet. */
 export const readClient = new SuiJsonRpcClient({
   url: import.meta.env.VITE_REEG_RPC_URL ?? getJsonRpcFullnodeUrl(network),

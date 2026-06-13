@@ -1,10 +1,11 @@
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import type { Transaction } from '@mysten/sui/transactions';
 import { buildGrant, buildRevoke } from '@reeg/sdk';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useAccess } from '../hooks/useEnvironment';
 import { CONFIG } from '../lib/config';
+import { useExecuteTransaction } from '../lib/sponsor';
 import { type GrantRole, SharePanel } from './SharePanel';
 import { Card, CardBody } from './ui/Card';
 import { Skeleton } from './ui/Skeleton';
@@ -20,7 +21,7 @@ const RIGHTS_RESTORE = 2;
 export function ShareCard({ machineId, nowMs }: { machineId: string; nowMs: number }) {
   const { data: access, isLoading } = useAccess(machineId);
   const account = useCurrentAccount();
-  const { mutateAsync } = useSignAndExecuteTransaction();
+  const execute = useExecuteTransaction();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
 
@@ -40,7 +41,7 @@ export function ShareCard({ machineId, nowMs }: { machineId: string; nowMs: numb
   async function submit(transaction: Transaction) {
     setBusy(true);
     try {
-      await mutateAsync({ transaction });
+      await execute(transaction, account?.address);
       await queryClient.invalidateQueries({ queryKey: ['access', machineId] });
       await queryClient.invalidateQueries({ queryKey: ['environment', machineId] });
     } finally {

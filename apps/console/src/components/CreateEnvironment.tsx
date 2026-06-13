@@ -1,10 +1,11 @@
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import { buildCreateSharedMachine } from '@reeg/sdk';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { CONFIG } from '../lib/config';
 import { navigate } from '../lib/router';
+import { useExecuteTransaction } from '../lib/sponsor';
 import { createdMachineId, txErrorMessage } from '../lib/tx';
 import { Button } from './ui/Button';
 
@@ -24,7 +25,7 @@ export function CreateEnvironment({
   label?: string;
 }) {
   const account = useCurrentAccount();
-  const { mutateAsync } = useSignAndExecuteTransaction();
+  const execute = useExecuteTransaction();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,9 +39,7 @@ export function CreateEnvironment({
     setBusy(true);
     setError(null);
     try {
-      const result = await mutateAsync({
-        transaction: buildCreateSharedMachine(CONFIG.packageId),
-      });
+      const result = await execute(buildCreateSharedMachine(CONFIG.packageId), account?.address);
       const id = await createdMachineId(result.digest);
       await queryClient.invalidateQueries({ queryKey: ['owned-machines'] });
       navigate(id ? `/env/${id}` : '/');

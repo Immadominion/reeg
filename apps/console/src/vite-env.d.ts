@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_ENOKI_API_KEY?: string;
   /** Google OAuth Web client id for the zkLogin provider. */
   readonly VITE_ENOKI_GOOGLE_CLIENT_ID?: string;
+  /** Reeg paymaster base URL (apps/api). When set, on-chain actions are gas-sponsored. */
+  readonly VITE_REEG_API_URL?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;
