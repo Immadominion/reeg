@@ -17,7 +17,7 @@ const program = new Command();
 
 program
   .name('reeg')
-  .description('The computer your AI agents live in. Own it, share it, move it, prove it.')
+  .description('GitHub for AI agents. Own it, share it, move it, prove it.')
   .version('0.0.0');
 
 registerCreate(program);
