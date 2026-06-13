@@ -57,9 +57,11 @@ export function Header() {
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
           {/* dapp-kit's ConnectButton is a stock component with its own styles; normalise its radius
-              to our control radius (see .reeg-connect in index.css). It is already 40px tall. */}
+              to our control radius (see .reeg-connect in index.css). It is already 40px tall. The
+              wallet list includes "Sign in with Reeg" (Enoki zkLogin) when configured, so the label
+              reads "Sign in" rather than "Connect Wallet". */}
           <span className="reeg-connect">
-            <ConnectButton />
+            <ConnectButton connectText="Sign in" />
           </span>
         </div>
       </Container>

@@ -15,6 +15,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/montserrat": "^5.2.8",
     "@mysten/dapp-kit": "^1.0.6",
+    "@mysten/enoki": "^1.0.8",
     "@mysten/sui": "^2.17.0",
     "@reeg/sdk": "workspace:*",
     "@reeg/verify": "workspace:*",

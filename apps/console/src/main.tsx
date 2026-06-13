@@ -2,6 +2,7 @@ import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
 import '@mysten/dapp-kit/dist/index.css';
 import { getJsonRpcFullnodeUrl, SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RegisterEnokiWallets } from './lib/enoki';
 // Self-hosted body + mono faces (no external font dependency for the static Walrus Site). The
 // display face (Clash Display) is @font-face'd in index.css. Import order: fonts, then our css,
 // so our @theme font-family vars resolve against the now-registered families.
@@ -28,6 +29,9 @@ createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider networks={networks} defaultNetwork="testnet">
+        {/* Register "Sign in with Reeg" (Enoki zkLogin) before WalletProvider so it appears as a
+            wallet option; no-ops when the Enoki env is unset. */}
+        <RegisterEnokiWallets />
         <WalletProvider autoConnect>
           <App />
         </WalletProvider>
