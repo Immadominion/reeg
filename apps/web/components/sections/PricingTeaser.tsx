@@ -68,7 +68,7 @@ export function PricingTeaser() {
             <Reveal key={tier.name} delay={i * 0.06} className="h-full">
               <div
                 className={cn(
-                  'flex h-full flex-col rounded-2xl border bg-card p-7',
+                  'flex h-full flex-col rounded-lg border bg-card p-7',
                   tier.highlight ? 'border-accent ring-1 ring-accent' : 'border-border',
                 )}
               >

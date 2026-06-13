@@ -30,8 +30,8 @@ export function ProductPanel({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-2xl border border-border bg-card',
-        'shadow-[0_40px_120px_-48px_rgba(37,99,235,0.30),0_16px_48px_-24px_rgba(0,0,0,0.18)]',
+        'overflow-hidden rounded-lg border border-border bg-card',
+        'shadow-[6px_6px_0_0_rgba(17,17,17,0.06)]',
         className,
       )}
     >

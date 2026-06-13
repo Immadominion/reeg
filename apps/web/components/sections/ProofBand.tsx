@@ -59,7 +59,7 @@ export function ProofBand() {
 
           <Reveal delay={0.08}>
             {/* The verify panel: a calm terminal showing the checks passing. */}
-            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="overflow-hidden rounded-lg border border-border bg-card">
               <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-3">
                 <VerifiedBadge />
                 <span className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">

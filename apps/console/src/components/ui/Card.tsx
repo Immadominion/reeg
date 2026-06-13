@@ -2,9 +2,9 @@ import type { HTMLAttributes } from 'react';
 import { cn } from '../../lib/cn';
 
 /** The base surface: a hairline border on the card token, generously rounded (matches the
- *  marketing site's rounded-2xl panels). Lift it with `shadow-panel` for hero surfaces. */
+ *  marketing site's rounded-lg panels). Lift it with `shadow-panel` for hero surfaces. */
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('rounded-2xl border border-border bg-card', className)} {...props} />;
+  return <div className={cn('rounded-lg border border-border bg-card', className)} {...props} />;
 }
 
 export function CardBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {

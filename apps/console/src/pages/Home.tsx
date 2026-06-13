@@ -76,7 +76,7 @@ function ConnectPrompt() {
   return (
     <Card className="shadow-panel">
       <div className="flex flex-col items-center gap-5 px-6 py-16 text-center">
-        <span className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-muted/60 text-muted-foreground">
+        <span className="grid h-14 w-14 place-items-center rounded-lg border border-border bg-muted/60 text-muted-foreground">
           <Wallet className="h-6 w-6" aria-hidden="true" />
         </span>
         <div className="space-y-1.5">
@@ -136,7 +136,7 @@ function MachineCard({ machine, index }: { machine: Machine; index: number }) {
       <button
         type="button"
         onClick={() => navigate(`/env/${machine.id}`)}
-        className="group flex w-full flex-col gap-4 rounded-2xl border border-border bg-card p-5 text-left transition-all duration-150 hover:border-foreground/20 hover:shadow-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group flex w-full flex-col gap-4 rounded-lg border border-border bg-card p-5 text-left transition-all duration-150 hover:border-foreground/20 hover:shadow-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="flex items-start justify-between gap-3">
           <Avatar id={machine.id} className="h-9 w-9 text-sm" />
@@ -177,12 +177,12 @@ function GridSkeleton() {
     <div className="space-y-5">
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-[88px] w-full rounded-2xl" />
+          <Skeleton key={i} className="h-[88px] w-full rounded-lg" />
         ))}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {[0, 1].map((i) => (
-          <Skeleton key={i} className="h-[148px] w-full rounded-2xl" />
+          <Skeleton key={i} className="h-[148px] w-full rounded-lg" />
         ))}
       </div>
     </div>
@@ -220,7 +220,7 @@ function InspectAny() {
               onChange={(e) => setValue(e.target.value)}
               placeholder="0x…"
               aria-label="Environment id"
-              className="tnum h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="tnum h-10 w-full rounded-md border border-border bg-background pl-9 pr-3 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
           <Button type="submit" disabled={!valid}>

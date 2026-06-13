@@ -45,7 +45,7 @@ export function Different() {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="mt-12 overflow-hidden rounded-lg border border-border bg-card">
             <div className="grid grid-cols-[1fr_4rem_4rem] sm:grid-cols-[1fr_11rem_11rem]">
               {/* Header */}
               <div className="border-b border-border px-4 py-4 sm:px-5" />

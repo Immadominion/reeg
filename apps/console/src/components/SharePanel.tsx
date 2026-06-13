@@ -133,14 +133,14 @@ function AddPerson({ busy, onGrant }: { busy: boolean; onGrant: SharePanelProps[
         value={address}
         onChange={(e) => setAddress(e.target.value)}
         placeholder="0x..."
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs"
+        className="w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs"
       />
       <div className="flex flex-wrap items-center gap-2">
         <select
           aria-label="Role"
           value={role}
           onChange={(e) => setRole(e.target.value as GrantRole)}
-          className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+          className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
         >
           <option value="restore">Can restore</option>
           <option value="viewer">Viewer</option>
@@ -149,7 +149,7 @@ function AddPerson({ busy, onGrant }: { busy: boolean; onGrant: SharePanelProps[
           aria-label="Expires"
           value={expiry}
           onChange={(e) => setExpiry(e.target.value as GrantExpiry)}
-          className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+          className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
         >
           <option value="none">No expiry</option>
           <option value="1d">1 day</option>
