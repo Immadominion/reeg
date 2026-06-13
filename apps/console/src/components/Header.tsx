@@ -52,11 +52,15 @@ export function Header() {
             type="button"
             onClick={toggle}
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="grid h-10 w-10 place-items-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
-          <ConnectButton />
+          {/* dapp-kit's ConnectButton is a stock component with its own styles; normalise its radius
+              to our control radius (see .reeg-connect in index.css). It is already 40px tall. */}
+          <span className="reeg-connect">
+            <ConnectButton />
+          </span>
         </div>
       </Container>
     </header>
