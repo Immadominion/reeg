@@ -2,7 +2,7 @@
   "name": "@reeg/web",
   "version": "0.0.0",
   "private": true,
-  "description": "Reeg marketing site (reeg.xyz): the computer your AI agents live in.",
+  "description": "Reeg marketing site (reeg.xyz): GitHub for AI agents.",
   "type": "module",
   "engines": {
     "node": ">=20"

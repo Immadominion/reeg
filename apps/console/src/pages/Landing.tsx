@@ -49,11 +49,11 @@ function Hero() {
         Live on Sui testnet
       </span>
       <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-        The computer your AI agents live in.
+        GitHub for AI agents.
       </h1>
       <p className="mx-auto mt-5 max-w-xl text-pretty text-lg text-muted-foreground">
-        Own it, share it, move it, and prove it. Every run is an environment you hold, portable
-        across hosts and independently verifiable, even with Reeg offline.
+        Snapshot, prove, share, and move what your agents do. Every run is an environment you own,
+        portable across hosts and independently verifiable, even with Reeg offline.
       </p>
       <div className="mt-8">
         <OpenBox />

@@ -2,13 +2,14 @@
 
 ## The one line
 
-**Reeg is the computer your AI agents live in. Own it, share it, move it, prove it.**
+**Reeg is GitHub for AI agents.**
 
-Spin up a real environment for an agent (files, packages, commands, memory), let it
-work, then snapshot it, hand it to a teammate, fork it, or move it to another
-machine. Because the environment lives on Sui and Walrus, it is genuinely yours, and
-anyone can verify offline what the environment contained and that the provenance
-chain is intact. This is no longer a plan: Reeg is **live on Sui mainnet** today,
+An agent works in an environment (files, packages, commands, memory). Reeg snapshots
+that whole environment, proves exactly what the agent did, and lets you own, share,
+fork, and restore it anywhere. Like GitHub for agent runs, except the history is
+tamper-proof and the environment is yours, on no one's server. Reeg is the
+version-control and proof layer for what your agents do; it is not the sandbox they run
+in, and you run the agent. This is no longer a plan: Reeg is **live on Sui mainnet** today,
 where create, encrypted checkpoint, anchoring, and offline verify all work. The full
 encrypted checkpoint → restore → verify loop is **proven on testnet**; on mainnet,
 encrypted restore (decrypt) waits on a working mainnet Seal key server.
@@ -17,8 +18,8 @@ encrypted restore (decrypt) waits on a working mainnet Seal key server.
 
 AI agents are starting to do real work. They write code, move money, file tickets,
 change records, and act on behalf of people and companies. The environment where all
-that happens (the agent's actual computer) is rented from a vendor and gone the
-moment the session ends. You cannot hand it to a teammate as-is, you cannot fork a
+that happens is rented from a vendor and gone the moment the session ends. You cannot
+hand it to a teammate as-is, you cannot fork a
 good run to try two directions, you cannot move it off that vendor, and you cannot
 let an outside party confirm what really happened. The agent did the work, but the
 workspace it did the work in was never yours to keep, share, or stand behind.
@@ -30,15 +31,18 @@ you want to reuse a hundred times.
 
 ## What Reeg does
 
-Reeg runs your agents in real, snapshot-able environments, the same core experience
-you get from a sandbox like Daytona, E2B, or Blackbox: spin one up, run commands and
-write files, checkpoint it, restore it, resume where you left off. We do that part.
+Your agent runs in a sandbox (the local engine, an OCI container, a Firecracker
+microVM, or a third party like Daytona or E2B). Reeg sits on top: it snapshots that
+environment, anchors a tamper-proof record of what happened on Sui, and stores the
+encrypted bytes on Walrus, so you can prove, share, fork, and restore the exact
+environment later.
 
-What makes Reeg different is what the environment *is*. It is not a row in a vendor's
-database, it is a **Machine** object you own on Sui, backed by your own
-content-addressed data on Walrus, encrypted client-side with Seal, with a
+What makes that different from saving a folder is what the snapshot *is*. It is not a
+row in a vendor's database, it is a **Machine** object you own on Sui, backed by your
+own content-addressed data on Walrus, encrypted client-side with Seal, with a
 hash-chained provenance log anchored on Sui that anyone can verify offline. That one
-change unlocks four things a centralized box cannot give you.
+change unlocks four things a folder, a Docker image, or a vendor's history cannot give
+you.
 
 ## The four pillars
 
@@ -46,8 +50,8 @@ Everything Reeg does falls out of a single design choice: the environment is an
 object you hold on Sui plus your own data on Walrus. Four capabilities follow.
 
 1. **Own it.** A Machine is an *owned* Sui object on the fast path. You `create` it,
-   you `retire` it, and the owner alone can mutate it. No vendor can silently change
-   it, lock you out, or delete it.
+   you `retire` it, and the owner alone can mutate it. It is your repo, with no vendor
+   in the middle: no one can silently change it, lock you out, or delete it.
 
 2. **Share it.** Every checkpoint is **Seal-encrypted client-side before it ever
    touches Walrus**. A shared `AccessPolicy` object holds the grants. You `grant` and
@@ -63,11 +67,13 @@ object you hold on Sui plus your own data on Walrus. Four capabilities follow.
 
 4. **Prove it.** Each Machine object carries a hash-chained, append-only,
    tamper-evident provenance head. Anyone can verify it **offline** from public Sui
-   and Walrus data alone, with no Reeg backend in the loop. And for runs where you
-   need to prove *which code* produced a checkpoint, there is an optional **Nautilus
-   TEE attestation** tier (below).
+   and Walrus data alone, with no Reeg backend in the loop. This is the part GitHub
+   cannot give you: its history can be force-pushed and rewritten, and you trust GitHub
+   it was not. For runs where you also need to prove *which code* produced a checkpoint,
+   there is an optional **Nautilus TEE attestation** tier (below).
 
-The short version of the promise: **own it, share it, move it, prove it.**
+The short version: own it, share it, move it, prove it. GitHub for AI agents, with a
+history no one can rewrite.
 
 ## The snapshot engine
 
@@ -128,12 +134,13 @@ Firecracker VM, which preserves both portability and offline verification.
 
 ## The honest tradeoff
 
-We are not trying to be the fastest sandbox. A centralized box that lives in one
-datacenter will always have lower latency than data coordinated across Sui and
-Walrus. We took that trade on purpose. If you want a throwaway scratch environment
-for thirty seconds of work, a centralized box is the right tool. If you want an
-environment worth owning, sharing, reusing, or standing behind, that is Reeg. We do
-everything the centralized box does; we add the parts it structurally cannot.
+We are not trying to be the sandbox. Use whatever runner you like for the agent; Reeg
+is the layer on top. The snapshot-and-prove step adds work a throwaway scratch
+environment does not need, and coordinating across Sui and Walrus is slower than a
+single datacenter. We took that trade on purpose. If you want a scratch environment for
+thirty seconds of work, you do not need Reeg. If the run is worth owning, sharing,
+reusing, or standing behind, that is exactly what Reeg adds, and nothing else gives you
+a tamper-proof, ownable record of it.
 
 The cost of that ownership is small and measured: on mainnet, a create plus an
 encrypted checkpoint (one epoch, including the Walrus upload-relay tip) runs about
@@ -161,9 +168,10 @@ We keep the shortcomings in plain sight:
 ## What Reeg is not
 
 - Not a memory API. Memory is one part of the environment, not the product.
-- Not "decentralized because crypto." Nobody should switch for decentralization.
-  They switch because they can finally own, share, move, and prove the environment,
-  which a centralized vendor cannot offer no matter how fast it is.
+- Not the sandbox or compute. You run the agent; Reeg versions and proves what it did.
+- Not "decentralized because crypto." Nobody should switch for decentralization. They
+  switch because they can finally own, share, move, and prove an agent's environment,
+  which a folder, a Docker registry, or a vendor's history cannot give them.
 
 ## Why now
 
@@ -179,12 +187,12 @@ proof makes it defensible.
 
 ## How we win
 
-A centralized vendor can copy any feature we ship except one: it cannot let you own
-the environment. Ownership is what makes sharing, portability, and independent proof
-possible, and all four pillars fall out of one design choice (the environment is an
-object you hold on Sui plus your data on Walrus) that a vendor in a single datacenter
-cannot match. We do what the fast boxes do, on top of the one thing they cannot, and
-it is shipped: Reeg is live on Sui mainnet, attestation included.
+A sandbox vendor can copy any feature we ship except two: a history no one can rewrite,
+and an environment you actually own. Those make sharing, portability, and independent
+proof possible, and all four pillars fall out of one design choice (the environment is
+an object you hold on Sui plus your data on Walrus) that a vendor's own database cannot
+match. We are the layer over any sandbox, adding the parts none of them can, and it is
+shipped: Reeg is live on Sui mainnet, attestation included.
 
 ## The built-on-Sui story (one paragraph)
 

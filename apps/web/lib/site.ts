@@ -3,8 +3,9 @@
 // complete without implying a page is live. Update the marked entries as surfaces come online.
 export const site = {
   name: 'Reeg',
-  tagline: 'The computer your AI agents live in.',
-  positioning: 'The AI operating system you own, built on Walrus.',
+  tagline: 'GitHub for AI agents.',
+  positioning:
+    'Snapshot, prove, share, and move what your agents do. The proof layer for AI agents, built on Sui and Walrus.',
   appUrl: 'https://app.reeg.xyz', // the Console (separate deploy)
   docsUrl: '#', // TODO(launch): docs.reeg.xyz not live yet
   github: '#', // TODO(launch): public repo URL

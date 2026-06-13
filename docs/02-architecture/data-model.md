@@ -115,8 +115,7 @@ match the on-chain anchors) needs no decryption at all and no Reeg server.
 ## 5. What is intentionally not modeled in the MVP
 
 - **Full process / memory state (CRIU-style).** Out of scope. The manifest plus
-  filesystem is enough to resume the target agent workloads. See
-  [../04-feasibility/technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md).
+  filesystem is enough to resume the target agent workloads.
 - **Billing / metering records.** Mocked for the MVP; designed as off-chain usage
   events that can later settle on-chain.
 - **Nautilus execution attestations.** Nautilus is on mainnet, but attested execution

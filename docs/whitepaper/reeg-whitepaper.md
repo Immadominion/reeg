@@ -2,7 +2,7 @@
 
 Version: Sui Overflow 2026. This document stands on its own; you can share it with someone who has read nothing else. For the verified platform details behind every technical claim, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
 
-Tagline: **The computer your AI agents live in. Own it, share it, move it, prove it.**
+Tagline: **GitHub for AI agents. Snapshot, prove, share, and move what your agents do.**
 
 Contact: <hello@reeg.xyz>. Security disclosures: <security@reeg.xyz>.
 
@@ -12,14 +12,15 @@ AI agents increasingly do real work inside sandboxed environments: editing code,
 running data jobs, operating systems. Those environments are rented from a vendor and
 gone when the session ends. You cannot share a running environment with a teammate,
 fork a good run, move it off the vendor, or let an outsider confirm what happened.
-Reeg keeps the same snapshot-and-restore experience as a centralized sandbox, but
-makes each environment a **Machine** object you own on Sui, its filesystem and agent
-memory snapshotted to content-addressed blobs on Walrus, encrypted client-side with
-Seal, with a hash-chained provenance log anchored on Sui. That single change lets you
-**own, share, move, and prove** an agent's entire computer. Because it lives on a
-public ledger, anyone you choose can verify what the agent did **offline**, from
-public Sui and Walrus data alone, with no Reeg backend in the loop. Ownership is the
-product; proof is what ownership gives you for free. Reeg is **live on Sui mainnet**.
+Reeg is the version-control and proof layer over those environments: the agent runs in
+whatever sandbox you like, and Reeg snapshots that environment into a **Machine** object
+you own on Sui, its filesystem and agent memory stored as content-addressed blobs on
+Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored on
+Sui. That single change lets you **own, share, move, and prove** an agent's whole
+environment. Like GitHub for agent runs, with two things GitHub cannot give you: a
+history no one can rewrite, and an environment that is yours. Anyone you choose can
+verify what the agent did **offline**, from public Sui and Walrus data alone, with no
+Reeg backend in the loop. Reeg is **live on Sui mainnet**.
 
 ## 1. The problem
 
@@ -253,7 +254,7 @@ and let anyone verify it offline. We do what the fast boxes do, on top of the on
 they cannot: real ownership of the place your agents work. It is live on Sui mainnet
 today.
 
-Own it, share it, move it, prove it.
+GitHub for AI agents. Own it, share it, move it, prove it.
 
 Learn more: reeg.xyz. Contact: <hello@reeg.xyz>.
 </content>

@@ -10,10 +10,10 @@ tone. This brief covers what to design and how it should feel.
 
 ## What Reeg is, in one breath
 
-Reeg is the computer your AI agents live in: a real workspace you can own, share,
-fork, move to another machine, and prove what happened inside. Think "GitHub for an
-AI agent's environment." A user spins up an environment, an agent works in it, and
-the user can snapshot it, hand it to a teammate, branch it, or restore it elsewhere.
+Reeg is GitHub for AI agents: a real workspace you can own, share, fork, move to
+another machine, and prove what happened inside. An agent works in an environment, and
+the user can snapshot it, hand it to a teammate, branch it, or restore it elsewhere,
+with a tamper-proof history anyone can verify.
 
 ## The feel we want
 
@@ -93,9 +93,9 @@ Screens:
 
 A developer-tool landing page. Sections, in order:
 
-1. Hero: the one-liner ("The computer your AI agents live in: one you own, and can
-   share"), a sharp subhead, a primary CTA (Start building / Get early access), and a
-   product visual (the Console timeline or the restore moment).
+1. Hero: the one-liner ("GitHub for AI agents"), a sharp subhead, a primary CTA
+   (Start building / Get early access), and a product visual (the Console timeline or
+   the restore moment).
 2. The problem, in three plain lines: agent environments are rented, vanish, and
    cannot be shared, moved, or trusted.
 3. The product, as a sequence of three or four visuals: Own it, Share and fork it,

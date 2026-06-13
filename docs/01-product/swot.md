@@ -31,7 +31,7 @@ A blunt read on where Reeg stands. No cheerleading. Each point is something we c
 - T1 Centralized sandbox vendors (for example Daytona, E2B, Blackbox) already run, snapshot, and restore agents, and some market "audit logs" and "no black boxes." We do all of that too, so we must not pitch those as our differentiator. The sharp line is ownership: their environment lives in their database and you rent it; ours is yours to own, share, fork, move, and verify. They cannot copy that without rebuilding on something like Sui.
 - T2 A hyperscaler ships "owned, verifiable agent runs" and the category gets commoditized. Mitigation: own the neutral, cross-vendor, user-owned position they structurally avoid.
 - T3 Platform risk: Walrus, Seal, Nautilus are young. A breaking change or an outage on a dependency hits us directly.
-- T4 Narrative risk: leading with "blockchain" or "audit logs" makes us sound like a solution chasing a problem. We must lead with owning and sharing the agent's computer, which is everyday value, and let proof be the free bonus.
+- T4 Narrative risk: leading with "blockchain" or "audit logs" makes us sound like a solution chasing a problem. We must lead with the use case (snapshot and prove what your agent did) and an environment you own, and frame proof as the differentiator, the tamper-proof history GitHub and vendor logs cannot give you, not as buried jargon.
 - T5 If checkpoint UX is clunky or slow, people route around it and we lose the ownership and provenance that make us valuable.
 
 ## What this tells us to do

@@ -7,9 +7,12 @@ The name, the voice, and the practical identity details (domain, email) so anyth
 Reeg.
 
 - Pronounced like "reeg" (one syllable).
-- The product one-liner: Reeg is the computer your AI agents live in, one you own and
-  can share. Lead with own and share; proof and portability are benefits you list
-  after, not the headline.
+- The product one-liner: Reeg is GitHub for AI agents. Snapshot an agent's whole
+  environment, prove exactly what it did, then share, fork, or restore it anywhere.
+  You own it, on no one's server.
+- Lead with the use case (snapshot and prove what your agent did). "GitHub for AI
+  agents" is the handle; the value is the two things GitHub cannot give you, a
+  tamper-proof history and an environment you actually own.
 - Always capitalized as Reeg in prose. Not REEG, not reeg, except in domains, handles, and code identifiers where lowercase is conventional.
 
 ## Domain
@@ -35,10 +38,11 @@ The same voice we use in code and docs, because the brand and the engineering ar
 
 ## Positioning line
 
-For teams running AI agents that do real work: Reeg gives each agent a real computer
-you own and can share. Snapshot it, fork it, hand it to a teammate, move it to
-another host, and let anyone verify what it did. Everything a centralized sandbox
-does, on top of the one thing it cannot: ownership.
+For teams running AI agents that do real work: Reeg snapshots an agent's whole
+environment into a record you own, share, fork, and move, with a tamper-proof history
+anyone can verify offline. Like GitHub for agent runs, except the history cannot be
+rewritten and the environment is yours, on no one's server. Reeg is the version-control
+and proof layer for what your agents do, not the sandbox they run in.
 
 ## On "black box"
 
@@ -48,12 +52,22 @@ adopts; and "Blackbox" is an existing AI product, so the metaphor invites confus
 The flight-recorder idea still lives on as a supporting benefit (you get a provable
 record for free), never as the lead.
 
+## On "the computer your AI agents live in"
+
+We also retired "the computer your AI agents live in" and "AI OS on Walrus" as the
+headline. They overclaimed (Reeg is not a computer, an OS, or a hosted sandbox) and
+told a reader nothing about what to use it for. The honest frame is a layer, not
+compute: you run the agent, Reeg versions and proves what it did. "GitHub for AI
+agents" replaced it because it conveys the use case in three words.
+
 ## What the brand is not
 
-- Not "blockchain audit logs." We lead with owning and sharing the agent's computer,
-  not with the chain or the log.
+- Not "blockchain audit logs." We lead with versioning and proving the agent's
+  environment, not with the chain or the log.
 - Not a compliance vault for regulated PHI or classified data. Reeg records and protects the app layer; it is not that custody product (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)).
-- Not an agent framework. Reeg is the environment, not the agent's brain.
+- Not the sandbox or compute. Reeg is the layer over whatever sandbox an agent runs in
+  (local, OCI, Firecracker, or a third party); it versions and proves the environment,
+  it is not the agent's brain.
 
 ## Usage quick reference
 
@@ -61,5 +75,5 @@ record for free), never as the lead.
 - Domain: reeg.xyz.
 - Support email: <support@reeg.xyz>.
 - Security email: <security@reeg.xyz>.
-- One-liner: the computer your AI agents live in, one you own and can share.
+- One-liner: GitHub for AI agents. Snapshot, prove, share, and move what your agents do.
 </content>

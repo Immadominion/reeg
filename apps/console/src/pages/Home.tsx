@@ -57,7 +57,7 @@ function Dashboard() {
       ) : !machines || machines.length === 0 ? (
         <EmptyState
           title="No environments yet"
-          description="Create your first environment to own a computer your agents can live in. Snapshot it, share it, and prove what it did."
+          description="Create your first environment to snapshot what your agent does. Own it, share it, and prove exactly what happened."
           action={<CreateEnvironment size="md" />}
         />
       ) : (

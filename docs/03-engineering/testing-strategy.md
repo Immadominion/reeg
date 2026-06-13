@@ -1,6 +1,6 @@
 # Testing Strategy
 
-What we test, at what level, and why. The guiding question for every test: does this protect the claim that a run is owned, shareable, portable, and provable? Tests that do not map to a real failure mode are noise. Reeg's tagline — "The computer your AI agents live in. Own it, share it, move it, prove it." — is also the test charter: every suite below defends one of those four pillars.
+What we test, at what level, and why. The guiding question for every test: does this protect the claim that a run is owned, shareable, portable, and provable? Tests that do not map to a real failure mode are noise. The four capabilities (own it, share it, move it, prove it) are also the test charter: every suite below defends one of those four pillars.
 
 ## Status at a glance
 

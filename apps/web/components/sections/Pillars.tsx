@@ -34,7 +34,7 @@ const PILLARS = [
   {
     icon: ShieldCheck,
     title: 'Prove it',
-    body: 'Anyone you choose can re-check the entire history against public records and confirm nothing changed after the fact.',
+    body: 'Anyone you choose can re-check the entire history against public records and confirm nothing changed after the fact. The part GitHub cannot give you: its history can be rewritten, this one cannot.',
     points: ['Independent, offline verification', 'No trust in Reeg required'],
   },
 ];
@@ -47,7 +47,7 @@ export function Pillars() {
           <SectionHeading
             eyebrow="What makes it different"
             title="Own it, share it, move it, and prove it."
-            description="Reeg does everything a sandbox does: spin up, run commands, write files, snapshot, restore. The difference is what the environment is, and that unlocks four things a rented box cannot give you."
+            description="Reeg is the layer over whatever sandbox your agent runs in. It snapshots the environment and unlocks four things a folder or a vendor's history cannot: you own it, share and fork it, move it byte-identical, and prove exactly what happened."
           />
         </Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-2">

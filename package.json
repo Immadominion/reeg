@@ -2,7 +2,7 @@
   "name": "reeg",
   "version": "0.0.0",
   "private": true,
-  "description": "Reeg: the computer your AI agents live in. Own it, share it, move it, prove it.",
+  "description": "Reeg: GitHub for AI agents. Snapshot, prove, share, and move what your agents do.",
   "type": "module",
   "packageManager": "pnpm@10.33.1",
   "engines": {

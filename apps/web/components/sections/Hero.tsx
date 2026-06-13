@@ -13,15 +13,14 @@ export function Hero() {
       <Container className="flex flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
         <Reveal>
           <h1 className="max-w-3xl text-balance text-[2.5rem] font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            The computer your AI agents live in.
+            GitHub for AI agents.
           </h1>
         </Reveal>
 
         <Reveal delay={0.05}>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Spin up a real environment for an agent, then own it, share it, move it across hosts,
-            and prove exactly what it did. Everything a sandbox does, plus the one thing it cannot:
-            you own it.
+            Snapshot an agent's whole environment, prove exactly what it did, then share, fork, or
+            restore it anywhere. You own it, on no one's server.
           </p>
         </Reveal>
 

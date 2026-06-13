@@ -9,35 +9,35 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://reeg.xyz'),
   title: {
-    default: 'Reeg — The computer your AI agents live in',
+    default: 'Reeg: GitHub for AI agents',
     template: '%s · Reeg',
   },
   description:
-    'Reeg gives every AI agent a real computer you own. Spin one up, own it, share it, move it across hosts, and prove exactly what it did. Everything a sandbox does, plus the one thing it cannot: ownership. Built on Sui and Walrus.',
+    "Snapshot an AI agent's whole environment, prove exactly what it did, then share, fork, or restore it anywhere. The version-control and proof layer for AI agents, with a tamper-proof history you own. Built on Sui and Walrus.",
   applicationName: 'Reeg',
   keywords: [
     'AI agents',
-    'agent sandbox',
+    'AI agent provenance',
+    'version control for agents',
     'agent environments',
     'verifiable compute',
     'Sui',
     'Walrus',
-    'AI OS',
   ],
   authors: [{ name: 'Reeg' }],
   openGraph: {
     type: 'website',
     url: 'https://reeg.xyz',
     siteName: 'Reeg',
-    title: 'Reeg — The computer your AI agents live in',
+    title: 'Reeg: GitHub for AI agents',
     description:
-      'Own it, share it, move it, and prove it. The AI operating system you own, built on Walrus.',
+      'Snapshot, prove, share, and move what your AI agents do. A tamper-proof history you own, built on Sui and Walrus.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reeg — The computer your AI agents live in',
+    title: 'Reeg: GitHub for AI agents',
     description:
-      'Own it, share it, move it, and prove it. The AI operating system you own, built on Walrus.',
+      'Snapshot, prove, share, and move what your AI agents do. A tamper-proof history you own, built on Sui and Walrus.',
   },
 };
 

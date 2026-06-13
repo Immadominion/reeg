@@ -1,19 +1,18 @@
 # Roadmap
 
-No code here, only direction and sequence. Each phase has a goal, what ships, and the bar that says it is done. Dates anchor to the Overflow window; everything after is directional, not committed. Platform facts referenced here are in [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
+No code here, only direction and sequence. Each phase has a goal, what ships, and the bar that says it is done. Everything not yet shipped is directional, not committed. Platform facts referenced here are in [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
 
-We are building the actual product, not a throwaway MVP. The June 21 submission is a
-real, usable version of Reeg that a team could run, not a staged demo. Later phases
-add depth, scale, and enterprise features; they do not turn a fake into a real
-thing. When this doc defers something, it is deferring scope, never deferring "build
-a real product."
+We are building the actual product, not a throwaway MVP. Reeg is already a real, usable
+version a team could run, live on Sui mainnet. Later phases add depth, scale, and
+enterprise features; they do not turn a fake into a real thing. When this doc defers
+something, it is deferring scope, never deferring "build a real product."
 
-Reeg's tagline: **"The computer your AI agents live in. Own it, share it, move it, prove it."**
+Reeg's tagline: **"GitHub for AI agents. Snapshot, prove, share, and move what your agents do."**
 
 ## Current status (as of 2026-06-11)
 
-**Reeg is LIVE on Sui mainnet.** Phase 1's acceptance bar is met, and the work once labeled "after the
-hackathon" — committee t-of-n Seal policies, MemWal-backed memory, the Firecracker jailer (#14), and
+**Reeg is LIVE on Sui mainnet.** The Phase 1 acceptance bar is met, and the work once sequenced for
+later — committee t-of-n Seal policies, MemWal-backed memory, the Firecracker jailer (#14), and
 the Nautilus TEE attestation tier — has all **shipped**. A user can create/run/checkpoint/restore/fork
 a Machine, share and revoke, kill a host and restore elsewhere byte-identically, and have an outsider
 verify the whole run **offline** from public Sui + Walrus data alone, with every Reeg backend stopped.
@@ -29,8 +28,7 @@ verify the whole run **offline** from public Sui + Walrus data alone, with every
 The four pillars (own / share / move / prove) all run today. The full **encrypted checkpoint → restore →
 verify** loop is proven end to end on testnet; on mainnet, encryption, storage, anchoring, and offline
 verify all work, and only decrypt (restore of an encrypted checkpoint) waits on a working mainnet Seal
-key server — see [Honest constraints](#honest-constraints). The operational walkthrough is in
-[docs/demo/RUNBOOK.md](../demo/RUNBOOK.md). The build detail is in
+key server — see [Honest constraints](#honest-constraints). The build detail is in
 [build-roadmap.md](../03-engineering/build-roadmap.md); phases A–M are done, including the full
 Firecracker hardening pass (19/19) and the Nautilus attestation tier, both verified on a real AWS host.
 
@@ -72,7 +70,7 @@ Shipped:
 
 Done when: the snapshot/restore data model is settled and an internal dry run can checkpoint and restore on the same host. **Met.**
 
-## Phase 1 — The product, end to end (done; target was June 21)
+## Phase 1 — The product, end to end (done)
 
 Goal: ship a real, usable Reeg that does the full loop, own, share, fork, move, and prove, not a
 scripted demo.
@@ -90,7 +88,7 @@ kill a host, restore on another, and have an outsider verify the whole run in th
 Console with our backend stopped. That is the acceptance bar in
 [requirements-analysis.md](requirements-analysis.md), and it is the product, not a demo of one. **Met.**
 
-## Phase 2 — Mainnet and daily-driver polish (done; target was before Aug 27)
+## Phase 2 — Mainnet and daily-driver polish (done)
 
 Goal: make Reeg something a team reaches for every day, on mainnet, which also
 unlocks the 100% upfront payout.
@@ -108,7 +106,7 @@ share and restore environments, and a third party verifies them, all on mainnet.
 
 ## What shipped that was once deferred (committee, MemWal, jailer #14, Nautilus)
 
-As of this session, the "after the hackathon" split is fully closed. These are production-ready and the
+The once-deferred split is fully closed. These are production-ready and the
 core loop already stands without them, so they are additive — and they have all shipped:
 
 - **Committee (t-of-n) Seal policies** — the threshold is chosen at encryption time

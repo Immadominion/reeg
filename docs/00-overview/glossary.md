@@ -4,8 +4,9 @@ Defined once, used everywhere. If a term is used in any Reeg doc, it lives here.
 
 ## Product terms
 
-- **Reeg** - the product. The computer your AI agents live in: a real sandbox you
-  own and can share, fork, move across hosts, and verify.
+- **Reeg** - the product. GitHub for AI agents: the version-control and proof layer
+  that snapshots an agent's environment into a record you own, share, fork, move
+  across hosts, and verify. Not the sandbox; the layer over it.
 - **Machine** - one agent's computing environment in Reeg: its filesystem, package
   manifest, environment variables, memory pointer, and identity. Represented on-chain
   as a Sui object (the `Machine` object).

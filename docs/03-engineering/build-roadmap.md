@@ -1,8 +1,8 @@
 # Engineering Build Roadmap
 
 This is the build sequence, not the product timeline. The product
-[roadmap.md](../01-product/roadmap.md) says what ships and when, anchored to the
-Overflow window; this document says how we build it, phase by phase, in dependency
+[roadmap.md](../01-product/roadmap.md) says what ships and when; this document says how
+we build it, phase by phase, in dependency
 order from the easiest, most certain work to the hardest. It contains no code. It is
 the standard we will not build below: each phase names a goal, what it produces, the
 **done bar** that says it is finished, and the requirements and claims it advances.
@@ -11,8 +11,8 @@ We are building the whole product, not an MVP and not a scripted demo. Phases la
 this list are real features real users will want, sequenced after the ones they depend
 on, never deferred because the product is incomplete without them.
 
-**Reeg is live.** Tagline: *the computer your AI agents live in — own it, share it, move
-it, prove it.* Each agent environment is a **Machine** object you own on Sui; its
+**Reeg is live.** Tagline: *GitHub for AI agents. Snapshot, prove, share, and move what
+your agents do.* Each agent environment is a **Machine** object you own on Sui; its
 filesystem and memory are snapshotted to content-addressed blobs on Walrus, encrypted
 client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can
 verify **offline** from public Sui and Walrus data alone — no Reeg backend.
@@ -53,8 +53,7 @@ loop is proven on **testnet**.
 
 - **Order is dependency order, easy to hard.** A phase assumes the ones before it.
   The riskiest engineering work (the snapshot engine, phase B) is pulled early on
-  purpose, matching the de-risking sequence in
-  [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md).
+  purpose, to de-risk the hardest part first.
 - **Done bars are acceptance tests**, not aspirations. If the bar is not met, the
   phase is not done; we narrow scope rather than weaken the bar (especially the
   verification and reproducibility bars).
@@ -430,8 +429,7 @@ dropped to an unprivileged uid/gid, and a cgroup v2 placement — on top of the 
 that remains the primary defense. **Verified on KVM:** lib unit 11/11, `firecracker_session` 8/8 plus a
 sudo-gated jailer test, `oci_session` 3/3, clippy `-D warnings` clean, no leaked VMs — including tests
 proving traversal/symlink rejection, per-session isolation, read-only rootfs, and the EC2 metadata
-service being unreachable. Closure detail in
-[firecracker-impl-review.md](../reviews/firecracker-impl-review.md) Addendum 2; ops steps in the
+service being unreachable. Closure detail and ops steps are in the
 [AWS Firecracker runbook](aws-firecracker-runbook.md).
 
 Goal: hard multi-tenant isolation for running untrusted agent code at volume, behind the
@@ -553,8 +551,7 @@ preimage match against the Move vector); engine Firecracker 8/8 + jailer + OCI 3
 
 ## Risk gates carried from feasibility
 
-Three gates from [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md)
-sat between phases and have all been cleared:
+Three early risk gates sat between phases and have all been cleared:
 
 - After phase B: confirm restore is reproducible enough that verify is meaningful. **Cleared
   —** byte-identical restore holds across hosts and runtime tiers (the canonical umask

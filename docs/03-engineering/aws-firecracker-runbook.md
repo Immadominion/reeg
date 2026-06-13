@@ -134,8 +134,7 @@ identically — Phase M *runs*. The cross-tier manifest-hash parity test initial
 surfaced a real determinism defect (the captured file mode leaked the ambient login umask, which
 differs by host/user/tier: Amazon Linux's `ec2-user` uses `0002` -> mode 0664, the microVM init uses
 `0022` -> 0644). Fixed by pinning a canonical umask (`0022`) before every agent command in all three
-tiers — see `engine/crates/runtime/src/umask.rs` and the addendum in
-[firecracker-impl-review.md](../reviews/firecracker-impl-review.md). The full engine suite (manifest
+tiers — see `engine/crates/runtime/src/umask.rs`. The full engine suite (manifest
 conformance, reproducibility, bundle determinism) still passes after the change.
 
 Drive the host going forward as the `reeg-host` SSH alias (added to `~/.ssh/config`); `stop` it when
@@ -159,9 +158,8 @@ idle, `start` to resume (artifacts under `/var/lib/reeg` persist across stop/sta
 
 ## After this: hardening (separate effort)
 
-Running ≠ safe for untrusted code. The 19 defects in
-[firecracker-impl-review.md](../reviews/firecracker-impl-review.md) are the phase-M hardening punch
-list. Some are verifiable on the Mac (the safe-extract helper #1, length-framing caps #6/#7/#19, the
+Running ≠ safe for untrusted code. The phase-M hardening punch list (19 defects, now
+resolved) addresses this. Some are verifiable on the Mac (the safe-extract helper #1, length-framing caps #6/#7/#19, the
 unit traversal test); the rest (Drop reaping #2, partial-init RAII #3, OCI namespace/seccomp/cap
 hardening #4, per-session read-only rootfs #5, jailer #14, vsock/HTTP robustness, the adversarial
 regression suite #13) need this box. That is the next plan once the bench is green.

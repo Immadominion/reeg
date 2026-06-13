@@ -2,7 +2,7 @@
 
 What Reeg is built with and why each piece is here. For background on the underlying Sui/Walrus/Seal primitives, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
 
-> The computer your AI agents live in. Own it, share it, move it, prove it.
+> GitHub for AI agents. Snapshot, prove, share, and move what your agents do.
 
 Reeg makes each AI-agent environment a **Machine** object you own on Sui: its filesystem and memory are snapshotted to content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui + Walrus data alone — no Reeg backend. Reeg is **live on Sui mainnet**.
 
@@ -33,7 +33,7 @@ We pick the best language per layer instead of forcing one language everywhere. 
 - Rust for the snapshot/restore engine and the runtime/sandbox core. This layer captures and rebuilds byte-exact environment state, walks the filesystem, computes content hashes and deltas, and controls process execution. Reproducibility, performance, and low-level control decide whether restore is trustworthy at all, and Rust is the right tool for that, with no GC pauses and exact memory and byte control. It also sits in good company: Walrus core and the Seal key servers are Rust, and the sandbox layer (Firecracker) is Rust, so we stay native to the ecosystem we depend on.
 - TypeScript for the Sui/Walrus/Seal client and glue layer, the public SDK, the CLI, the indexer, and the Console. The official `@mysten/sui`, `@mysten/seal`, and `@mysten/walrus` SDKs are TypeScript-first, so the chain, storage, and encryption integration is fastest and least error-prone in TS. The SDK and CLI live where our users already are (the JS/TS agent ecosystem), and the Console is a Walrus Site, so it must run in the browser, which forces TS there regardless.
 - The Rust engine and TS client meet at **one** artifact boundary (a manifest + content-addressed files). The engine produces and consumes a manifest (content hashes plus deltas) and content-addressed files; the TypeScript client encrypts, uploads to Walrus, and anchors on Sui. The engine never imports a chain/storage client, and neither side reaches into the other's internals — matching the adapter separation in [repo-structure.md](repo-structure.md).
-- The runtime surface is kept narrow on purpose so that restore can be reproducible enough for verification to mean something (see [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md)).
+- The runtime surface is kept narrow on purpose so that restore can be reproducible enough for verification to mean something.
 - Console deployed as a Walrus Site (static, no privileged backend) so the demo has no hidden server doing the trusting.
 - An off-chain indexer for Console responsiveness, rebuildable from chain events and never on the verification trust path.
 

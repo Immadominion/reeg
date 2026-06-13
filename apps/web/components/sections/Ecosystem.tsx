@@ -47,7 +47,7 @@ export function Ecosystem() {
           <SectionHeading
             align="center"
             eyebrow="In good company"
-            title="A flagship app for the AI OS on Walrus."
+            title="Built on Sui and Walrus."
             description="Reeg stores every environment on Walrus, gates ownership with a Sui object, and encrypts with Seal before anything leaves your machine. Built in the open, in the Sui ecosystem."
           />
         </Reveal>

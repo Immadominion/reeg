@@ -48,8 +48,7 @@ ordering that depends on directory iteration order.
 
 Unsupported entry kinds (sockets, FIFOs, block and character devices) are an error, not a
 silent skip. Phase B narrows the runtime surface to clean file-based state rather than
-weakening the reproducibility guarantee (see
-[technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md)).
+weakening the reproducibility guarantee.
 
 ## 3. Canonical encoding
 

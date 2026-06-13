@@ -1,13 +1,15 @@
 # Reeg
 
-**The computer your AI agents live in. Own it, share it, move it, prove it.**
+**GitHub for AI agents. Snapshot, prove, share, and move what your agents do.**
 
-Reeg makes each agent environment a `Machine` you own on Sui — its filesystem and memory
-snapshotted to content-addressed blobs on Walrus, encrypted client-side with Seal, with a
-hash-chained provenance log anchored on Sui that anyone can verify **offline, with no Reeg
-backend**. A run can be shared with another address, forked with provable lineage, moved across
-hosts byte-identically, and — optionally — **attested by a measured TEE** so you can prove *which
-code* produced it.
+Reeg is the version-control and proof layer for AI-agent environments. It snapshots an agent's whole
+working environment into a `Machine` you own on Sui: its filesystem and memory stored as
+content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained provenance
+log anchored on Sui that anyone can verify **offline, with no Reeg backend**. A run can be shared
+with another address, forked with provable lineage, moved across hosts byte-identically, and
+optionally **attested by a measured TEE** so you can prove *which code* produced it. Like GitHub for
+agent runs, except the history cannot be rewritten and the environment is yours. Reeg is the layer,
+not the sandbox: you run the agent, Reeg versions and proves what it did.
 
 **Live on Sui mainnet.** The product, vision, architecture, and build plan live in
 [docs/](docs/README.md). Start there.

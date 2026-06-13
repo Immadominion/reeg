@@ -57,7 +57,7 @@ For the Overflow track: $35k for 1st, with a 50/50 payout structure, and 100% up
 
 ## Honest risks to the model
 
-- If checkpoint cost is too high for frequent use, usage-based pricing caps adoption. Mitigation: deltas and commit-boundary checkpoints keep per-run cost sane (see [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md)).
+- If checkpoint cost is too high for frequent use, usage-based pricing caps adoption. Mitigation: deltas and commit-boundary checkpoints keep per-run cost sane.
 - If a hyperscaler ships "verifiable agent runs" natively, the category commoditizes. Mitigation: own the neutral, cross-vendor, user-owned position they structurally will not take.
 - If buyers do not yet feel the compliance pain, the wedge has to carry the sale on portability and crash-survival alone, which it can.
 </content>

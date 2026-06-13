@@ -435,7 +435,7 @@ function HomePopulated() {
       <section className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Your environments</h1>
         <p className="text-sm text-muted-foreground">
-          The computer your AI agents live in. Open one to see its history and verify it yourself.
+          GitHub for AI agents. Open one to see its history and verify it yourself.
         </p>
       </section>
       <ul className="space-y-2">

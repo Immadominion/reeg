@@ -13,7 +13,7 @@ Four claims must hold, and every requirement traces back to one of them. Lead wi
 - C1 Owned: the operator controls the environment and who can read or run it, not Reeg.
 - C2 Shareable: a whole environment can be handed to a teammate or forked from a checkpoint, because it is owned data, not a vendor row.
 - C3 Portable: a run can be checkpointed and resumed on a different host.
-- C4 Provable: an outsider can verify what happened with the Reeg server offline. This comes for free from C1, so it is a guarantee, not the headline.
+- C4 Provable: an outsider can verify what happened with the Reeg server offline. It comes for free from C1, and it is the lead differentiator, the tamper-proof history GitHub and vendor logs cannot give you.
 
 ## 2. Functional requirements
 
@@ -54,7 +54,7 @@ Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
 
 ## 3. Non-functional requirements
 
-- NFR-1 Verifiability without trust (C4): verification must require zero secrets held only by Reeg. If Reeg vanished, every past run stays checkable. This is a non-negotiable guarantee, even though it is not the headline of the pitch.
+- NFR-1 Verifiability without trust (C4): verification must require zero secrets held only by Reeg. If Reeg vanished, every past run stays checkable. This is a non-negotiable guarantee, and it is now central to the pitch (the differentiator), not just an internal invariant.
 - NFR-2 Portability (C3): restore must work on a clean host that never saw the original. No host-local hidden state.
 - NFR-3 Honest latency: checkpoints happen on commit boundaries, not on every keystroke, because Walrus is durable storage, not a low-latency database (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)). The product must never imply real-time mirroring.
 - NFR-4 Confidentiality: checkpoint contents are encrypted before they leave the client. Walrus blobs are public, so Seal encryption is mandatory, not optional. Reeg never sees plaintext keys.

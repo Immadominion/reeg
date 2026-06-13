@@ -1,12 +1,12 @@
 # Reeg Documentation
 
-**Reeg is the computer your AI agents live in. Own it, share it, move it, prove it.**
-Run an agent in a real environment (files, packages, commands, memory), then snapshot
-it, hand it to a teammate, fork it, or move it to another machine byte-for-byte. The
-environment is a **Machine** object you own on Sui, backed by your own content-addressed data on
-Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored
-on Sui that anyone can verify **offline** from public Sui + Walrus data alone — no Reeg
-backend. Own it, share it, move it, prove it.
+**Reeg is GitHub for AI agents.** Snapshot an agent's whole environment, prove exactly what it did,
+then share, fork, or restore it anywhere. The environment is a **Machine** object you own on Sui,
+backed by your own content-addressed data on Walrus, encrypted client-side with Seal, with a
+hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui +
+Walrus data alone, no Reeg backend. Like GitHub for agent runs, except the history cannot be
+rewritten and the environment is yours. Reeg is the layer, not the sandbox: you run the agent, Reeg
+versions and proves what it did.
 
 Domain: [reeg.xyz](https://reeg.xyz) · Track: Sui Overflow 2026, Walrus · Status:
 **LIVE on Sui mainnet** (and testnet), including the optional Nautilus TEE attestation
@@ -44,7 +44,6 @@ tier.
 | A non-technical person ("what is this")| [00-overview/product-vision.md](00-overview/product-vision.md) |
 | An investor / judge                    | [whitepaper/reeg-whitepaper.md](whitepaper/reeg-whitepaper.md), [05-business/business-model.md](05-business/business-model.md) |
 | An engineer about to write code        | [02-architecture/system-architecture.md](02-architecture/system-architecture.md), [03-engineering/engineering-standards.md](03-engineering/engineering-standards.md) |
-| Anyone checking "can this be built"    | [04-feasibility/technical-feasibility-study.md](04-feasibility/technical-feasibility-study.md) |
 | An AI agent working on this repo       | [ai/AGENTS.md](ai/AGENTS.md) |
 
 ---
@@ -79,10 +78,6 @@ tier.
 - [repo-structure.md](03-engineering/repo-structure.md) - the monorepo layout.
 - [tech-stack.md](03-engineering/tech-stack.md) - every technology choice and why.
 - [testing-strategy.md](03-engineering/testing-strategy.md) - what we test, at what level, and the one test that matters most.
-
-### 04 - Feasibility
-
-- [technical-feasibility-study.md](04-feasibility/technical-feasibility-study.md) - can each piece be built, in what window, at what risk.
 
 ### 05 - Business
 

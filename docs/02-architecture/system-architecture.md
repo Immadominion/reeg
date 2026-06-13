@@ -10,10 +10,10 @@ original `0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3` to
 attestation module); testnet package
 `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`. A measured create +
 encrypted checkpoint (1 epoch, including the Walrus upload-relay tip) costs ~0.0099 SUI +
-~0.0119 WAL on mainnet. The tagline holds literally: **the computer your AI agents live in
-— own it, share it, move it, prove it.**
+~0.0119 WAL on mainnet. Reeg is **GitHub for AI agents**: it snapshots an agent's environment into
+a record you own, share, move, and prove.
 
-## 1. The mental model: an operating system you own
+## 1. The mental model: version control for agent environments
 
 Reeg takes "OS on Walrus" literally. A real OS is a filesystem, processes,
 permissions, and persistent state. Reeg builds that as an ownable, verifiable thing:

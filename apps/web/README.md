@@ -1,6 +1,6 @@
 # @reeg/web — marketing site (reeg.xyz)
 
-The public marketing site for Reeg, "the computer your AI agents live in." Separate from the
+The public marketing site for Reeg, "GitHub for AI agents." Separate from the
 Console (`apps/console`, the product at app.reeg.xyz); this is the apex `reeg.xyz`.
 
 ## Stack

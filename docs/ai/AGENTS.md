@@ -4,27 +4,32 @@ This is the single source of truth for an AI agent (or a new human) working on R
 
 ## 1. What Reeg is, in one paragraph
 
-Reeg is the computer your AI agents live in: a real sandbox you can own and share. It
-does what a centralized sandbox does (run an agent, snapshot, restore, resume) but
-makes each environment an object the operator owns on Sui backed by their own
-content-addressed data on Walrus, so it can be shared, forked, moved across hosts,
-and independently verified. Provenance is an append-only hash-chained record on Sui;
-checkpoints are encrypted content-addressed blobs on Walrus; access is enforced by
-on-chain Seal policies. One-liner: Reeg is the computer your AI agents live in, one
-you own and can share. Lead with own and share; proof and portability are benefits
-you list after, never the headline. Domain reeg.xyz. Support <support@reeg.xyz>.
+Reeg is GitHub for AI agents: the version-control and proof layer over agent
+environments. The agent runs in a sandbox (the local engine, an OCI container, a
+Firecracker microVM, or a third party); Reeg snapshots that environment and makes it an
+object the operator owns on Sui backed by their own content-addressed data on Walrus,
+so it can be shared, forked, moved across hosts, and independently verified. Provenance
+is an append-only hash-chained record on Sui; checkpoints are encrypted
+content-addressed blobs on Walrus; access is enforced by on-chain Seal policies.
+One-liner: GitHub for AI agents, snapshot, prove, share, and move what your agents do.
+Lead with the use case (snapshot and prove what your agent did); the differentiator is
+the two things GitHub cannot give you, a tamper-proof history and an environment you
+own. Reeg is the layer, not the sandbox or the agent's brain. Domain reeg.xyz. Support
+<support@reeg.xyz>.
 
 ## 2. The claims (memorize these)
 
-Every decision serves one of these. If a feature serves none, it waits. Lead the
-pitch with C1 and C2 (the adoption wedge); C3 and C4 are what ownership gives you.
+Every decision serves one of these. If a feature serves none, it waits. Lead the pitch
+with the use case (snapshot and prove what your agent did): C4 (a provable, tamper-proof
+history) is the differentiator GitHub and vendor logs cannot match, and C1 (owned) is
+what makes it possible.
 
 - C1 Owned: the operator controls the environment and who can read or run it, not Reeg. Enforced on-chain by a Seal `seal_approve` policy.
 - C2 Shareable: a whole live environment can be handed to a teammate, forked from a checkpoint, or passed to a client as-is, because it is owned data, not a vendor row.
 - C3 Portable: a run can be checkpointed and restored on a different host, byte-checked against its recorded state.
-- C4 Provable: an outsider can verify what happened with the Reeg server offline, reading only public Sui + Walrus data. This comes for free because of C1, so frame it as a bonus, not the lead.
+- C4 Provable: an outsider can verify what happened with the Reeg server offline, reading only public Sui + Walrus data. This is the lead differentiator (the part GitHub and vendor logs cannot give you); it comes for free because of C1.
 
-The non-negotiable: nothing about verifying a past run may require a live or honest Reeg service. Verifiability is demoted as a headline, not as an engineering invariant. If a design breaks it, the design is wrong.
+The non-negotiable: nothing about verifying a past run may require a live or honest Reeg service. Verifiability is now a headline (the differentiator) and a hard engineering invariant. If a design breaks it, the design is wrong.
 
 ## 3. Key product terms
 
@@ -76,7 +81,7 @@ We deliberately do not build everything in one language. Pick the best tool per 
 
 ## 7. The riskiest part of the build
 
-Reproducible snapshot/restore of live runtime state. We constrain captured state to the filesystem workdir plus a command/event log so restore is reproducible and therefore verifiable. If reproducibility is uncertain, narrow the runtime surface rather than weaken verification. Details in [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md).
+Reproducible snapshot/restore of live runtime state. We constrain captured state to the filesystem workdir plus a command/event log so restore is reproducible and therefore verifiable. If reproducibility is uncertain, narrow the runtime surface rather than weaken verification.
 
 ## 8. The Overflow context
 
@@ -113,7 +118,6 @@ Reproducible snapshot/restore of live runtime state. We constrain captured state
 - SWOT: [swot.md](../01-product/swot.md).
 - Roadmap: [roadmap.md](../01-product/roadmap.md).
 - Engineering: [engineering-standards.md](../03-engineering/engineering-standards.md), [build-roadmap.md](../03-engineering/build-roadmap.md), [repo-structure.md](../03-engineering/repo-structure.md), [tech-stack.md](../03-engineering/tech-stack.md), [testing-strategy.md](../03-engineering/testing-strategy.md).
-- Feasibility: [technical-feasibility-study.md](../04-feasibility/technical-feasibility-study.md).
 - Business: [business-model.md](../05-business/business-model.md), [brand-and-domain.md](../05-business/brand-and-domain.md).
 - Whitepaper: [reeg-whitepaper.md](../whitepaper/reeg-whitepaper.md).
 - Start here for navigation: [README.md](../README.md).
