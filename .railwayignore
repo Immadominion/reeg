@@ -1,0 +1,10 @@
+# Railway deploy-upload excludes (gitignore syntax). Keep the tarball lean and never upload secrets.
+node_modules/
+**/node_modules/
+engine/target/
+**/dist/
+.git/
+.turbo/
+.env
+.env.*
+*.log
