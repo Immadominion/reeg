@@ -47,15 +47,19 @@ export function Nav() {
         </a>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const external = link.href.startsWith('http');
+            return (
+              <a
+                key={link.label}
+                href={link.href}
+                {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {link.label}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -89,16 +93,20 @@ export function Nav() {
       {open && (
         <div id="mobile-menu" className="border-t border-border bg-background md:hidden">
           <Container className="flex flex-col gap-1 py-4">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const external = link.href.startsWith('http');
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {link.label}
+                </a>
+              );
+            })}
             <ButtonLink href={site.appUrl} size="lg" className="mt-2 w-full">
               Start building
               <MoveRight className="h-[18px] w-[18px]" />

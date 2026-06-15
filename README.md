@@ -1,34 +1,131 @@
 # Reeg
 
-**GitHub for AI agents. Snapshot, prove, share, and move what your agents do.**
+**Reeg is Dropbox for AI agent environments.**
 
-Reeg is the version-control and proof layer for AI-agent environments. It snapshots an agent's whole
-working environment into a `Machine` you own on Sui: its filesystem and memory stored as
-content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained provenance
-log anchored on Sui that anyone can verify **offline, with no Reeg backend**. A run can be shared
-with another address, forked with provable lineage, moved across hosts byte-identically, and
-optionally **attested by a measured TEE** so you can prove *which code* produced it. Like GitHub for
-agent runs, except the history cannot be rewritten and the environment is yours. Reeg is the layer,
-not the sandbox: you run the agent, Reeg versions and proves what it did.
+Reeg is infrastructure for portable computing environments. We started with AI agents
+because they're the fastest-growing source of ephemeral work, but the underlying system
+can preserve and move any environment.
 
-**Live on Sui mainnet.** The product, vision, architecture, and build plan live in
-[docs/](docs/README.md). Start there.
+**Live on Sui mainnet** · [reeg.xyz](https://reeg.xyz) · [Read the docs →](docs/README.md)
 
-## The four pillars
+---
 
-- **Own** — each environment is an owned Sui `Machine` object (the fast path). Only the owner mutates it.
-- **Share** — checkpoints are Seal-encrypted client-side before they ever touch Walrus; a shared
-  `AccessPolicy` object holds grants. `grant`/`revoke` (allowlist + time-limited) append to the
-  provenance chain, and a committee **t-of-n** threshold is set at encryption time (`--threshold`).
-- **Move** — `fork` from any checkpoint with provable on-chain lineage to the parent; `restore` a
-  checkpoint on **any** host byte-identically (content-addressed + deterministic).
-- **Prove** — an append-only, tamper-evident provenance head, verified **offline from public Sui +
-  Walrus alone**. Plus the optional **Nautilus** tier: a reproducible AWS Nitro enclave attests the
-  code that produced a checkpoint, verifiable offline against its pinned measurements.
+## The problem
 
-## Layout
+An AI agent runs for hours and does real work — writes code, moves money, changes
+records. Then the session closes and the environment is **gone**. Not the chat log — the
+actual working state. It was a row in a vendor's database, deleted on their schedule.
 
-This is a monorepo. The shape matches [docs/03-engineering/repo-structure.md](docs/03-engineering/repo-structure.md).
+You couldn't keep it, hand the live workspace to a teammate, move it off the vendor, or
+prove to anyone what really happened inside. You never owned the place the work happened.
+
+That's the thing Reeg fixes.
+
+## What you get
+
+Reeg is the layer **over** whatever sandbox you already run — not the sandbox, not a
+server, not an OS. At each commit it snapshots the whole working state, encrypts it on
+your machine, and anchors a record to a Sui object only you control. Four things a folder
+or a vendor dashboard can't give you:
+
+- **Own** — every environment is a Sui `Machine` object you hold, plus your own data on
+  Walrus. No vendor can change it, lock you out, or delete it.
+- **Share** — hand over the *live* workspace (not a transcript) under an on-chain
+  grant/revoke policy. Fork any good checkpoint to try two directions at once.
+- **Move** — kill it on one host, restore it **byte-identically** on another — across
+  machines *and* across runtime tiers (local, OCI, Firecracker).
+- **Prove** — an append-only, hash-chained history anyone can verify **offline**, from
+  public Sui + Walrus data alone. GitHub history can be rewritten; this can't.
+
+## How it works
+
+<p align="center">
+  <img src="docs/02-architecture/diagrams/system-context.png" alt="Reeg system context: you run the agent in any sandbox; Reeg snapshots the working state, Seal-encrypts it client-side, stores it on Walrus, and anchors the record to a Machine object on Sui — verifiable offline with no Reeg backend." width="840">
+</p>
+
+You run the agent in whatever runner you like — Reeg's local engine, an OCI container, a
+Firecracker microVM, or a third-party cloud. Reeg waits at the commit boundary:
+
+**snapshot** → **Seal-encrypt** (on your machine) → **store on Walrus** (content-addressed
+`blob_id`) → **anchor** the `blob_id` + `manifest_hash` to your `Machine` on Sui.
+
+`restore` reverses it on any host. The capture is content-addressed (BLAKE3) and
+deterministic (canonical umask, neutralized timestamps and ownership), which is what makes
+a restore byte-identical across hosts and runtime tiers. **Nothing about verifying a past
+run requires a live or honest Reeg service** — the Console is static, the indexer is
+rebuildable, and `verify` reads only public Sui + Walrus.
+
+→ Full walk-through, component by component:
+[docs/02-architecture/system-architecture.md](docs/02-architecture/system-architecture.md).
+
+## Try it
+
+The whole operator loop runs from the `reeg` CLI. Point `REEG_ENGINE` at the built Rust
+binary and run:
+
+```sh
+cargo build --manifest-path engine/Cargo.toml          # builds the reeg-engine binary
+export REEG_ENGINE=engine/target/debug/reeg-engine
+export REEG_NETWORK=testnet                             # or mainnet
+export REEG_OPERATOR=<your address>                     # signs; must hold SUI + WAL
+
+reeg create                                             # mint a Machine you own  -> <machineId>
+reeg run      <machineId> -- sh -c 'echo hi > note.txt' # run a command, captured in the log
+reeg checkpoint <machineId>                             # snapshot -> encrypt -> Walrus -> anchor on Sui
+reeg restore  <machineId> --dest /tmp/restored          # Walrus -> decrypt -> byte-identical workdir
+reeg grant    <machineId> <address> --role restore      # let another address decrypt and restore
+reeg revoke   <machineId> <address>                     # stop future decryption (forward-looking)
+reeg fork     <machineId>                               # child Machine, lineage recorded on chain
+reeg verify   <machineId>                               # independent verify — public Sui + Walrus only
+reeg evidence <machineId> --out evidence.json           # export a portable record for an auditor
+reeg audit    evidence.json                             # verify that record offline (no Reeg, no chain)
+```
+
+Every `reeg` command is a thin wrapper over [@reeg/sdk](packages/sdk), so the same
+operations are callable from TypeScript. The end-to-end acceptance demo creates and
+checkpoints on host A, deletes host A, restores byte-identically on a fresh host B that
+never saw it, verifies offline, shares to a grantee who restores on a third host, then
+revokes:
+
+```sh
+REEG_ENGINE=engine/target/debug/reeg-engine pnpm --filter @reeg/test run live:acceptance
+```
+
+### Prove which code ran (optional, Nautilus)
+
+On an AWS Nitro host, a reproducible enclave attests *which code* produced a checkpoint:
+
+```sh
+reeg enclave register                                        # verify the enclave's Nitro doc on chain
+reeg checkpoint <machineId> --attest --enclave-config <id>   # enclave signs the checkpoint
+```
+
+`@reeg/verify` confirms it offline — the on-chain signature plus PCRs matching the
+reproducible build. It's strictly additive: a checkpoint without `--attest` is
+byte-identical.
+
+## Proof it's real
+
+- **Live on Sui mainnet** — package `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`
+  (testnet `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`).
+- **Measured cost** — ~0.0099 SUI + ~0.0119 WAL per create + encrypted checkpoint (1 epoch,
+  incl. the Walrus upload-relay tip).
+- **Green in CI** — Move 40/40 (incl. attestation with a real ed25519 vector), `@reeg/verify`
+  54/54, `@reeg/chain` 21/21, `@reeg/crypto` 8/8 (cross-language vs the Move vector).
+- **Verified on a real AWS KVM host** (c8i.2xlarge) — Firecracker 8/8 + jailer, OCI 3/3,
+  lib 11/11; Phase M hardening 19/19. Reproducible enclave: identical PCRs across
+  cache-cleared rebuilds.
+
+> **Honest note.** Mainnet has no free public Seal key server yet, so the **decrypt**
+> (restore) of a Seal-encrypted checkpoint currently waits on a provider key server.
+> Encryption, storage, anchoring, and **offline verification all work on mainnet today**;
+> the full encrypted checkpoint → restore → verify loop is proven end-to-end on **testnet**.
+
+## Repo layout
+
+A pnpm + Turborepo monorepo. The Rust engine and the TypeScript client meet at exactly one
+artifact boundary — a manifest plus content-addressed files — so the same captured
+environment crosses hosts and runtime tiers byte-identically.
 
 | Path | What | Language |
 | --- | --- | --- |
@@ -38,164 +135,42 @@ This is a monorepo. The shape matches [docs/03-engineering/repo-structure.md](do
 | [packages/chain/](packages/chain/) | Sui client: read `Machine`, build PTBs | TypeScript |
 | [packages/storage/](packages/storage/) | Walrus adapter: store/read blobs | TypeScript |
 | [packages/crypto/](packages/crypto/) | Seal adapter + Nautilus preimage/verify | TypeScript |
-| [packages/verify/](packages/verify/) | the independent verifier (provenance + attestation, offline) | TypeScript |
+| [packages/verify/](packages/verify/) | the independent offline verifier (provenance + attestation) | TypeScript |
 | [packages/sdk/](packages/sdk/) | public SDK tying the adapters together | TypeScript |
-| [packages/cli/](packages/cli/) | `reeg` CLI | TypeScript |
-| [apps/console/](apps/console/) | Console, deployed as a static Walrus Site | TypeScript / React |
+| [packages/cli/](packages/cli/) | the `reeg` CLI | TypeScript |
+| [packages/mcp/](packages/mcp/) | MCP server — drive Reeg from an agent | TypeScript |
+| [apps/console/](apps/console/) | the Console, deployed as a static Walrus Site | TypeScript / React |
+| [apps/web/](apps/web/) | the marketing site ([reeg.xyz](https://reeg.xyz)) | TypeScript / Next.js |
+| [apps/api/](apps/api/) | Enoki-sponsored paymaster — gas-free zkLogin actions | TypeScript |
 | [apps/indexer/](apps/indexer/) | display-only indexer, rebuildable from chain events | TypeScript |
 | [config/](config/) | per-network config (testnet, mainnet) | JSON |
-| [scripts/](scripts/) | provision, publish-package, build the Firecracker/Nitro bench | mixed |
-| [test/](test/) | cross-package integration and end-to-end (incl. live) tests | TypeScript |
 
-The Rust engine and the TypeScript client meet at one artifact boundary: a manifest plus
-content-addressed files. The engine never imports a chain or storage client; the client never
-reaches into engine internals.
+### Toolchain
 
-### Runtime tiers
-
-The same `Runtime` trait (and the *identical* capture + verify path) backs three tiers, so the
-isolation boundary changes without touching the snapshot or verification:
-
-- **Local** — runs commands directly on the host (dev, the loop, tests).
-- **OCI** — `runc` container: read-only rootfs, a per-session tmpfs `/work`, network isolation.
-- **Firecracker** — a microVM with KVM kernel-boundary isolation and an in-guest agent over vsock;
-  optionally launched under the **jailer** (chroot + dropped privileges + cgroup v2).
-
-## Toolchain
-
-Pinned and config-driven, not hardcoded. See [.node-version](.node-version),
-[rust-toolchain.toml](rust-toolchain.toml), and per-package manifests.
-
-- Node >= 24, pnpm 10 (workspaces), Turborepo for task running, Biome for lint/format.
-- Rust 1.95 (stable), Cargo workspace.
-- Sui CLI 1.73, Walrus CLI for on-chain and storage operations.
-- TypeScript 6, Vite 8 + React 19 (Console), Vitest for tests.
-
-Platform SDKs are pinned to **current** releases: `@mysten/sui` ^2.17, `@mysten/walrus` ^1.1,
-`@mysten/seal` ^1.1 (all at npm latest).
-
-## Getting started
+Node ≥ 24 · pnpm 10 · Turborepo · Biome · Rust 1.95 · Sui CLI 1.73 · Walrus CLI · Move
+2024. Platform SDKs at current releases: `@mysten/sui` ^2.17, `@mysten/walrus` ^1.1,
+`@mysten/seal` ^1.1.
 
 ```sh
 cp .env.example .env        # then fill in; never commit .env
 pnpm install                # install the TypeScript workspaces
-pnpm build                  # build all packages
-pnpm test                   # run unit tests
-cargo build --manifest-path engine/Cargo.toml   # build the Rust engine
-sui move build --path move                       # build the Move package
+pnpm build && pnpm test     # build + unit tests
+cargo build --manifest-path engine/Cargo.toml   # the Rust engine
+sui move build --path move                       # the Move package
 ```
 
-## The one invariant
+## Docs
 
-Nothing about verifying a past run may ever require a live or honest Reeg service. The indexer is
-display-only and rebuildable; the Console is a static site; verification reads only public Sui and
-Walrus data. See
-[docs/02-architecture/security-and-threat-model.md](docs/02-architecture/security-and-threat-model.md).
+Everything — product, architecture, business, and the whitepaper — lives in
+**[docs/](docs/README.md)**. Good places to start:
 
-## Live on Sui mainnet
+- [Product vision](docs/00-overview/product-vision.md) — what Reeg is, who it's for, why it exists.
+- [System architecture](docs/02-architecture/system-architecture.md) — how it's built, with diagrams.
+- [Positioning](docs/00-overview/positioning.md) — the canonical one-liner and the four pillars.
+- [Whitepaper](docs/whitepaper/reeg-whitepaper.md) — the full technical and product case.
+- [Build roadmap](docs/03-engineering/build-roadmap.md) — the build sequence and what's done.
 
-The full operator loop is published and runs on Sui — driven by the `reeg` CLI: create a Machine,
-run commands in its working directory, Seal-encrypt the snapshot bundle, store the ciphertext on
-Walrus (through the upload relay), anchor the blob id and manifest hash on the `Machine` in one
-transaction, restore it byte-identically, share it, fork it with provable lineage, and verify it
-from public data with no Reeg backend.
+---
 
-- **Mainnet** package: `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`
-  (upgraded from `0xf3e0…84f3` to add the attestation module).
-- **Testnet** package: `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`.
-- Endpoints, the Seal key-server set, and the package id per network are in
-  [config/mainnet.json](config/mainnet.json) / [config/testnet.json](config/testnet.json).
-
-Measured mainnet cost is **~0.01 SUI + ~0.012 WAL** per create + encrypted checkpoint (1 epoch).
-
-> **Honest note.** Mainnet has no free public Seal key server yet, so a Seal-*encrypted* checkpoint's
-> **decrypt** (restore) currently waits on a provider key server; encryption, storage, anchoring, and
-> **offline verification all work on mainnet today**. The full encrypted checkpoint → restore → verify
-> loop is proven end to end on **testnet**.
-
-The CLI signs with the local sui keystore in memory and never prints key material; endpoints and the
-package id come from config or the `REEG_*` environment. Point `REEG_ENGINE` at the built Rust binary,
-then run the loop:
-
-```sh
-cargo build --manifest-path engine/Cargo.toml          # builds the reeg-engine binary
-export REEG_ENGINE=engine/target/debug/reeg-engine
-export REEG_NETWORK=testnet                            # or mainnet
-export REEG_OPERATOR=<your address>                    # signs; must hold SUI + WAL
-
-reeg create                                            # mint a shareable Machine you own -> <machineId>
-reeg run <machineId> -- sh -c 'echo hi > note.txt'     # run a command, captured in the log
-reeg checkpoint <machineId>                            # pack -> encrypt -> Walrus -> anchor on Sui
-reeg restore  <machineId> --dest /tmp/restored         # Walrus -> Seal decrypt -> byte-identical workdir
-reeg grant    <machineId> <address> --role restore     # let another address decrypt and restore
-reeg revoke   <machineId> <address>                    # stop future decryption (forward-looking)
-reeg fork     <machineId>                              # child Machine recording lineage to the parent
-reeg retire   <machineId>                              # permanent, verifiable end-of-life marker
-reeg verify   <machineId>                              # independent verify, public Sui + Walrus only
-reeg evidence <machineId> --out evidence.json          # export a portable record for an auditor
-reeg audit    evidence.json                            # verify that record offline (no Reeg, no chain)
-```
-
-A grantee restores with their own key and no gas (`reeg restore … --operator <granteeAddress>`).
-Use `--until 7d` (or an ISO 8601 time) on a grant for a time-limited share. Sharing rides on a
-shared `AccessPolicy` object that the Seal key servers read to decide decryption; grant and revoke
-also append GRANT and REVOKE entries to the provenance chain, so the sharing history verifies
-offline like everything else. Committee t-of-n decryption is set at checkpoint time with
-`reeg checkpoint <machineId> --threshold <t>`.
-
-### Prove which code ran (Nautilus, optional)
-
-On an AWS Nitro host, a reproducible enclave attests checkpoints. Register it once, then attest:
-
-```sh
-reeg enclave register                                  # verify the enclave's Nitro doc on chain -> EnclaveConfig
-reeg checkpoint <machineId> --attest --enclave-config <id>   # enclave signs the checkpoint; recorded on chain
-```
-
-`packages/verify` confirms the attestation **offline**: the on-chain signature verified, and the
-enclave's PCRs match the reproducible build's measurements ([enclave/](enclave/)). It is strictly
-additive — a checkpoint without `--attest` is byte-identical.
-
-### Compliance & memory
-
-For compliance (EU AI Act Article 12 tamper-evident record-keeping), `reeg evidence` exports a
-portable file an auditor keeps and `reeg audit` verifies it offline with no Reeg and no Console;
-`reeg audit --anchor` re-confirms it against live Sui. Agent memory is checkpointed and verified
-with the environment: `reeg run` exposes a `REEG_MEMORY_DIR` to the command, and whatever a memory
-backend writes there is captured into the bundle, restored on any host, and bound into
-`manifest_hash`. See [docs/03-engineering/compliance-evidence.md](docs/03-engineering/compliance-evidence.md)
-and [docs/03-engineering/agent-memory.md](docs/03-engineering/agent-memory.md).
-
-Every `reeg` command is a thin wrapper over [@reeg/sdk](packages/sdk), so the same operations are
-callable directly from TypeScript. The headline acceptance demo runs the whole story across
-simulated hosts and asserts each step:
-
-```sh
-REEG_ENGINE=engine/target/debug/reeg-engine pnpm --filter @reeg/test run live:acceptance
-```
-
-It creates and checkpoints on host A, deletes host A, restores on a fresh host B that never saw it
-(byte-identical, from Sui + Walrus alone), verifies offline, shares to a grantee who restores on a
-third host, then revokes and confirms the grantee is denied.
-
-## Status
-
-**Live on mainnet, and feature-complete across all four pillars.** Built, tested, and verified:
-
-- **On-chain** (Move, 40/40 tests): `Machine` + hash-chained provenance, `seal_approve` access
-  policies (owner / allowlist / time-limited), fork lineage, retire, and the additive Nautilus
-  **attestation** verifier — published to mainnet and testnet.
-- **Engine** (Rust): the content-addressed snapshot engine and all three runtime tiers — Local, OCI,
-  and Firecracker **including the jailer (#14)** — verified on a real AWS KVM host (Firecracker 8/8 +
-  jailer, OCI 3/3, lib 11/11).
-- **Nautilus** (live, testnet + mainnet): a **reproducible** Nitro enclave (cache-cleared rebuilds
-  produce identical PCRs) signs checkpoint manifests; `register_enclave` + `register_attested_command`
-  verify it on chain; `@reeg/verify` confirms it offline (54/54). The enclave *attests* results — it
-  does not run the agent, so portability and offline verify are preserved.
-- **Client + CLI** (TypeScript): chain/storage/crypto/sdk/verify, the `reeg` operator CLI, the
-  independent verifier, the Console (a static Walrus Site), and the indexer.
-
-The full create/run/checkpoint/restore/grant/revoke/fork/verify loop passes end to end, agent memory
-is captured and verified with the environment, and CI is green on all three jobs (TypeScript, Rust,
-Move). The detailed build sequence and done-bars are in
-[docs/03-engineering/build-roadmap.md](docs/03-engineering/build-roadmap.md).
+*Reeg is the layer over the sandbox you already use. You run the agent; Reeg versions and
+proves what it did — and the environment is yours, on no one's server.*

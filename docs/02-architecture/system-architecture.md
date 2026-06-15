@@ -15,6 +15,10 @@ agents because they're the fastest-growing source of ephemeral work, but the und
 system can preserve and move any environment. It sits over the sandbox you already use and
 versions and proves the whole working state as a record you own, share, move, and verify.
 
+<p align="center">
+  <img src="diagrams/system-context.png" alt="Reeg system context: you run the agent in any sandbox; Reeg snapshots the working state, Seal-encrypts it client-side, stores it on Walrus, and anchors the record to a Machine object on Sui — verifiable offline with no Reeg backend." width="820">
+</p>
+
 ## 1. The mental model: version control for the whole environment — not just the code
 
 Reeg takes "OS on Walrus" literally. A real OS is a filesystem, processes,
@@ -36,30 +40,9 @@ an existing runtime. We own the ownership and verifiability layer.
 
 ## 2. Components
 
-```
-                         ┌───────────────────────────────────────────────┐
-                         │                  Sui (L1, mainnet)             │
-                         │   Machine package (Move):                      │
-                         │     Machine object, fork, grant/revoke,        │
-                         │     provenance head, Blob references           │
-                         │   AccessPolicy (seal_approve)                  │
-                         │   attestation: EnclaveConfig, CommandAttested  │
-                         └───────▲───────────────────────▲───────────────┘
-                                 │ register / verify      │ policy dry-run
-                                 │                        │
-   ┌──────────────┐   exec    ┌──┴───────────┐  encrypt  ┌┴──────────┐  store  ┌──────────┐
-   │   AI agent   │──────────▶│ Reeg runtime │──────────▶│   Seal    │────────▶│  Walrus  │
-   │ (any client) │           │  + snapshot  │  (client  │ (encrypt) │ blob_id │ (storage)│
-   └──────────────┘           │    engine    │   side)   └───────────┘         └──────────┘
-                              └──────┬───────┘                                      │
-                                     │ restore (pull blob, decrypt, mount)          │
-                                     └──────────────────────────────────────────────┘
-
-   ┌──────────────────────────────────────────────────────────────────────────────┐
-   │  Reeg Console (Walrus Site): machines, provenance timeline, verify, restore,   │
-   │  grant/revoke, fork. Reads Sui + Walrus directly; no trusted Reeg backend.     │
-   └──────────────────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="diagrams/component-architecture.png" alt="Reeg component architecture: an AI agent (any client) runs in the Reeg runtime + snapshot engine, which Seal-encrypts client-side and stores content-addressed blobs on Walrus, registering/verifying against the Machine package, AccessPolicy, and attestation modules on Sui. The Console (a Walrus Site) reads Sui + Walrus directly with no trusted Reeg backend." width="860">
+</p>
 
 The Rust engine and the TypeScript client meet at exactly **one artifact boundary**: a
 manifest plus content-addressed files. The engine never imports a chain or storage client;
@@ -67,6 +50,10 @@ the TS side never reaches into snapshot internals. That boundary is what lets th
 captured environment cross hosts *and* runtime tiers byte-identically.
 
 ### 2.1 Reeg runtime + snapshot engine (off-chain, client side)
+
+<p align="center">
+  <img src="diagrams/snapshot-restore-sequence.png" alt="Snapshot and restore sequence: capture the working directory into a BLAKE3 content-addressed store with a canonical manifest, Seal-encrypt, upload to Walrus, anchor blob_id + manifest_hash on Sui; restore pulls the blob, decrypts, rebuilds the workdir byte-identically on any host." width="820">
+</p>
 
 Two concerns live here and they are deliberately decoupled: the **isolation boundary**
 (how a live agent is contained) and the **snapshot engine** (how state is captured and
@@ -169,6 +156,10 @@ about `machine.move`'s layout or provenance head, so a non-attested run is byte-
 
 This is what makes a Reeg record provable offline from public Sui + Walrus data alone,
 with no Reeg backend in the loop. See [data-model.md](data-model.md) for the exact fields.
+
+<p align="center">
+  <img src="diagrams/verification-flow.png" alt="Verification flow: an auditor reads the Machine object and walks the hash-chained provenance from the head, reads the checkpoint blob from Walrus by blob_id, checks blob_id equals hash(ciphertext), checks manifest_hash and workdir_root_hash against the Machine object; all checks pass means VERIFIED, any mismatch means REJECTED — using public data only, with Reeg offline." width="780">
+</p>
 
 1. **Manifest** describes the environment. Hash it -> `manifest_hash`.
 2. **Snapshot** is content-addressed blob(s) on Walrus; the `blob_id` is the content
