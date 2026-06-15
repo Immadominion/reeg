@@ -4,18 +4,25 @@ This is the single source of truth for an AI agent (or a new human) working on R
 
 ## 1. What Reeg is, in one paragraph
 
-Reeg is GitHub for AI agents: the version-control and proof layer over agent
-environments. The agent runs in a sandbox (the local engine, an OCI container, a
-Firecracker microVM, or a third party); Reeg snapshots that environment and makes it an
-object the operator owns on Sui backed by their own content-addressed data on Walrus,
-so it can be shared, forked, moved across hosts, and independently verified. Provenance
-is an append-only hash-chained record on Sui; checkpoints are encrypted
-content-addressed blobs on Walrus; access is enforced by on-chain Seal policies.
-One-liner: GitHub for AI agents, snapshot, prove, share, and move what your agents do.
-Lead with the use case (snapshot and prove what your agent did); the differentiator is
-the two things GitHub cannot give you, a tamper-proof history and an environment you
-own. Reeg is the layer, not the sandbox or the agent's brain. Domain reeg.xyz. Support
-<support@reeg.xyz>.
+Reeg is infrastructure for portable computing environments. We started with AI agents
+because they're the fastest-growing source of ephemeral work, but the underlying system
+can preserve and move any environment. You run the work (your agent, your container, your microVM, someone else's
+cloud) and at every commit Reeg snapshots the whole working state, encrypts it
+client-side, stores it as data you own on Walrus, and anchors a hash-chained,
+append-only record to a Sui object only you control, so it can be shared, forked, moved
+across hosts, and independently verified. It sits over the sandbox you already use; it
+does not run your workload or hold your compute. Provenance is an append-only
+hash-chained record on Sui; checkpoints are encrypted content-addressed blobs on
+Walrus; access is enforced by on-chain Seal policies. We started with AI agents because
+they're the fastest-growing source of work worth keeping, sharing, and standing behind,
+but the same layer can preserve, move, and prove any environment you run.
+One-liner: Your agent runs in a sandbox you don't own and can't keep. Reeg lets you own
+that environment, move it byte-for-byte to any host, and prove its whole history, with
+Reeg switched off. The differentiator is the part GitHub cannot match: a tamper-proof
+history (GitHub history can be rewritten; this cannot) over an environment you own. Keep
+Git only as a mechanic (version control for the whole environment, not just the code),
+never as the handle. Reeg is the layer, not the sandbox, a server, or an OS, and not the
+agent's brain. Domain reeg.xyz. Support <support@reeg.xyz>.
 
 ## 2. The claims (memorize these)
 

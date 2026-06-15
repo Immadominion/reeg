@@ -29,8 +29,8 @@ export function Problem() {
         <Reveal>
           <SectionHeading
             eyebrow="The problem"
-            title="Agents do real work in a computer that was never yours."
-            description="Agents now write code, move money, and change records. The environment where all of that happens is rented from a vendor and vanishes the moment the session ends."
+            title="Real work happens in a computer that was never yours."
+            description="Agents are the clearest case — they write code, move money, and change records. But the same loss hits any ephemeral environment: a CI job, an eval harness, or a person at a keyboard. The place the work happened is rented from a vendor and vanishes the moment the session ends."
           />
         </Reveal>
         <div className="mt-12 grid gap-4 md:grid-cols-3">

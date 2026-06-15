@@ -10,10 +10,14 @@ tone. This brief covers what to design and how it should feel.
 
 ## What Reeg is, in one breath
 
-Reeg is GitHub for AI agents: a real workspace you can own, share, fork, move to
-another machine, and prove what happened inside. An agent works in an environment, and
-the user can snapshot it, hand it to a teammate, branch it, or restore it elsewhere,
-with a tamper-proof history anyone can verify.
+Reeg is infrastructure for portable computing environments. We started with AI agents
+because they're the fastest-growing source of ephemeral work, but the underlying system
+can preserve and move any environment. **Reeg is Dropbox for AI agent environments.** Your agent runs in a sandbox you don't own
+and can't keep; Reeg is the layer over it. A real workspace you can own, share, fork,
+move to another machine, and prove what happened inside. An agent (or a container, a
+microVM, someone else's cloud) works in an environment, and the user can snapshot it,
+hand it to a teammate, branch it, or restore it elsewhere byte-identically, with a
+tamper-proof history anyone can verify. Agents are the first use case, not the ceiling.
 
 ## The feel we want
 
@@ -93,9 +97,12 @@ Screens:
 
 A developer-tool landing page. Sections, in order:
 
-1. Hero: the one-liner ("GitHub for AI agents"), a sharp subhead, a primary CTA
-   (Start building / Get early access), and a product visual (the Console timeline or
-   the restore moment).
+1. Hero: the headline ("Reeg is Dropbox for AI agent environments."), a sharp subhead ("Your
+   agent runs in a sandbox you don't own and can't keep. Reeg is the layer over it:
+   snapshot the whole working state, prove exactly what happened, then share it live,
+   fork it, or restore it byte-for-byte on any host. You own it, on no one's server —
+   verifiable with Reeg switched off."), a primary CTA (Start building / Get early
+   access), and a product visual (the Console timeline or the restore moment).
 2. The problem, in three plain lines: agent environments are rented, vanish, and
    cannot be shared, moved, or trusted.
 3. The product, as a sequence of three or four visuals: Own it, Share and fork it,

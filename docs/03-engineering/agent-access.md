@@ -4,6 +4,12 @@ How a real customer uses Reeg without running a Rust CLI or holding a crypto wal
 architecture that turns Reeg from "an operator tool" into a product you can hand to a client or point
 an agent at. None of it is built yet; this doc is the design and the provisioning checklist.
 
+Reeg is infrastructure for portable computing environments. We started with AI agents because they're
+the fastest-growing source of ephemeral work, but the underlying system can preserve and move any
+environment. Agents are the wedge for that broader category, not the ceiling — this doc covers the
+agent-access path specifically, but the same identity, delegation, and sponsorship model serves any
+environment a user runs.
+
 ## Why this exists
 
 Today the SDK and CLI sign with a **local keystore**: the operator holds a Sui address funded with SUI

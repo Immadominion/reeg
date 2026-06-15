@@ -26,7 +26,7 @@
             "id": "reeg",
             "type": "system",
             "label": "Reeg",
-            "note": "Owned, verifiable agent environments"
+            "note": "Owned, verifiable computing environments (agent runs first)"
         },
         {
             "id": "sui",

@@ -4,12 +4,16 @@ Defined once, used everywhere. If a term is used in any Reeg doc, it lives here.
 
 ## Product terms
 
-- **Reeg** - the product. GitHub for AI agents: the version-control and proof layer
-  that snapshots an agent's environment into a record you own, share, fork, move
-  across hosts, and verify. Not the sandbox; the layer over it.
-- **Machine** - one agent's computing environment in Reeg: its filesystem, package
-  manifest, environment variables, memory pointer, and identity. Represented on-chain
-  as a Sui object (the `Machine` object).
+- **Reeg** - the product. Infrastructure for portable computing environments. We
+  started with AI agents because they're the fastest-growing source of ephemeral work,
+  but the underlying system can preserve and move any environment: it sits over the
+  sandbox you already use and, at every commit, snapshots the whole working state into a
+  record you own, share, fork, move across hosts, and verify. Not the sandbox, a server,
+  or an OS; the layer over them. You run the work; Reeg versions and proves what it did.
+- **Machine** - one computing environment in Reeg, typically an agent run but equally a
+  CI job, an eval harness, or a person's setup: its filesystem, package manifest,
+  environment variables, memory pointer, and identity. Represented on-chain as a Sui
+  object (the `Machine` object).
 - **Checkpoint** - a saved state of a Machine at a point in time. Stored as an
   encrypted blob on Walrus and registered against the Machine object.
 - **Snapshot** - the act of producing a checkpoint (verb), or the blob it produces.
@@ -71,8 +75,9 @@ Defined once, used everywhere. If a term is used in any Reeg doc, it lives here.
 
 - **The switching test** - our bar for whether a feature makes someone leave their
   current tool. Ownership and verifiability pass it; decentralization does not.
-- **Neutral recorder** - the positioning: Reeg records agent work in a form the
-  recording vendor does not control, so it can be used as evidence against any party.
+- **Neutral recorder** - the positioning: Reeg records the work an environment did
+  (an agent run first, but any environment) in a form the recording vendor does not
+  control, so it can be used as evidence against any party.
 - **EU AI Act Article 12 / 19** - record-keeping and automatic-logging obligations
   for high-risk AI systems, in force 2 August 2026. The concrete regulatory driver
   for the compliance use case.

@@ -1,12 +1,20 @@
 # Reeg Documentation
 
-**Reeg is GitHub for AI agents.** Snapshot an agent's whole environment, prove exactly what it did,
-then share, fork, or restore it anywhere. The environment is a **Machine** object you own on Sui,
-backed by your own content-addressed data on Walrus, encrypted client-side with Seal, with a
+**Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing
+environments. We started with AI agents because they're the fastest-growing source of ephemeral
+work, but the underlying system can preserve and move any environment.** You run the work (your agent, your container, your microVM, someone
+else's cloud) and at every commit Reeg snapshots the whole working state, encrypts it client-side,
+and anchors a tamper-proof record of what happened. The environment is a **Machine** object you own
+on Sui, backed by your own content-addressed data on Walrus, encrypted with Seal, with a
 hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui +
-Walrus data alone, no Reeg backend. Like GitHub for agent runs, except the history cannot be
-rewritten and the environment is yours. Reeg is the layer, not the sandbox: you run the agent, Reeg
-versions and proves what it did.
+Walrus data alone, no Reeg backend. The history cannot be rewritten and the environment is yours.
+Reeg is the layer over the sandbox you already use, not a sandbox, a server, or an OS: you run the
+work, Reeg versions and proves what it did. Agents are the wedge — the first place people felt the
+loss — but the same layer preserves, moves, and proves any environment you run.
+
+The four pillars: **Own** what you run (an object you hold, not a row you rent). **Share** the live
+workspace, not a transcript. **Move** it (kill it here, bring it back there, identical). **Prove**
+the whole history to anyone, with Reeg switched off. GitHub history can be rewritten; this cannot.
 
 Domain: [reeg.xyz](https://reeg.xyz) · Track: Sui Overflow 2026, Walrus · Status:
 **LIVE on Sui mainnet** (and testnet), including the optional Nautilus TEE attestation

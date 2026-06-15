@@ -47,7 +47,7 @@ export function Pillars() {
           <SectionHeading
             eyebrow="What makes it different"
             title="Own it, share it, move it, and prove it."
-            description="Reeg is the layer over whatever sandbox your agent runs in. It snapshots the environment and unlocks four things a folder or a vendor's history cannot: you own it, share and fork it, move it byte-identical, and prove exactly what happened."
+            description="Reeg is infrastructure for portable computing environments. It sits over whatever sandbox you use and gives you four things a folder or a vendor's history cannot: you own it, share and fork it, move it byte-identical, and prove exactly what happened."
           />
         </Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-2">

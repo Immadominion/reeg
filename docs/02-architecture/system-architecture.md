@@ -10,10 +10,12 @@ original `0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3` to
 attestation module); testnet package
 `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`. A measured create +
 encrypted checkpoint (1 epoch, including the Walrus upload-relay tip) costs ~0.0099 SUI +
-~0.0119 WAL on mainnet. Reeg is **GitHub for AI agents**: it snapshots an agent's environment into
-a record you own, share, move, and prove.
+~0.0119 WAL on mainnet. Reeg is **infrastructure for portable computing environments** — we started with AI
+agents because they're the fastest-growing source of ephemeral work, but the underlying
+system can preserve and move any environment. It sits over the sandbox you already use and
+versions and proves the whole working state as a record you own, share, move, and verify.
 
-## 1. The mental model: version control for agent environments
+## 1. The mental model: version control for the whole environment — not just the code
 
 Reeg takes "OS on Walrus" literally. A real OS is a filesystem, processes,
 permissions, and persistent state. Reeg builds that as an ownable, verifiable thing:
@@ -148,7 +150,8 @@ about `machine.move`'s layout or provenance head, so a non-attested run is byte-
 - Shows the provenance head and log, checkpoint detail, `blob_id` badges, the verify action,
   live grant/revoke, and fork lineage.
 - Has no privileged backend. Anything the console can show, a third party can reproduce.
-  This is what makes Reeg a neutral recorder rather than a vendor dashboard.
+  This is what makes Reeg a neutral recorder for any environment you run, rather than a
+  vendor dashboard.
 
 ### 2.6 Nautilus enclave (off-chain, attestation only)
 

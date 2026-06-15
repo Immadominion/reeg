@@ -7,7 +7,7 @@ version a team could run, live on Sui mainnet. Later phases add depth, scale, an
 enterprise features; they do not turn a fake into a real thing. When this doc defers
 something, it is deferring scope, never deferring "build a real product."
 
-Reeg's tagline: **"GitHub for AI agents. Snapshot, prove, share, and move what your agents do."**
+Reeg's hook: **Reeg is Dropbox for AI agent environments.** Category: **infrastructure for portable computing environments.** We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Snapshot the whole working state, version and prove it, share it, and move it byte-for-byte to any host.
 
 ## Current status (as of 2026-06-11)
 
@@ -34,9 +34,12 @@ Firecracker hardening pass (19/19) and the Nautilus attestation tier, both verif
 
 ## The four pillars
 
-Everything in Reeg serves one of four guarantees. Each agent environment is a **Machine** object you
+Everything in Reeg serves one of four guarantees. Reeg is the layer over the sandbox you already use —
+not the compute, not a server, not an OS. Each computing environment is a **Machine** object you
 own on Sui, its filesystem + memory snapshotted to content-addressed blobs on Walrus, encrypted
-client-side with Seal, with a hash-chained provenance log anchored on Sui.
+client-side with Seal, with a hash-chained provenance log anchored on Sui. We lead with AI-agent runs
+because they're the fastest-growing source of work worth keeping, sharing, and standing behind, but the
+same layer preserves, moves, and proves any environment you run.
 
 - **OWN** — a Machine is an *owned* Sui object (the fast path). `create` / `retire`. The owner alone
   mutates it.
@@ -54,9 +57,9 @@ client-side with Seal, with a hash-chained provenance log anchored on Sui.
 
 ## Guiding rule
 
-Ship the real product, then widen it. The thesis is: agent environments you own and
-can share, that you can fork, move, and (for free) prove. If a feature does not move
-C1 (owned), C2 (shareable), C3 (portable), or C4 (provable), it waits. Lead with own
+Ship the real product, then widen it. The thesis is: computing environments you own and
+can share, that you can fork, move, and (for free) prove — AI-agent runs first. If a feature does
+not move C1 (owned), C2 (shareable), C3 (portable), or C4 (provable), it waits. Lead with own
 and share; the rest follows from them.
 
 ## Phase 0 — Foundations (done)
@@ -91,7 +94,7 @@ Console with our backend stopped. That is the acceptance bar in
 ## Phase 2 — Mainnet and daily-driver polish (done)
 
 Goal: make Reeg something a team reaches for every day, on mainnet, which also
-unlocks the 100% upfront payout.
+triggers the 100% upfront payout.
 
 Shipped:
 

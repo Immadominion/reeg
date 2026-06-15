@@ -65,8 +65,10 @@ minimum period (at least six months for the high-risk classes).
 ## Honest limits
 
 - **Records, not a data-custody vault.** The compliance value is auditable, tamper-evident records
-  of agent work. Reeg is not a regulated PHI or classified-data custody vault; Seal is not designed
-  for data whose mere existence is a breach. Say that plainly to compliance buyers.
+  of work in a computing environment — agent runs are the first use case, but the same record covers
+  any environment a regulated buyer must stand behind. Reeg is not a regulated PHI or classified-data
+  custody vault; Seal is not designed for data whose mere existence is a breach. Say that plainly to
+  compliance buyers.
 - **Offline audit proves consistency, not authenticity on its own.** A self-consistent evidence file
   can be fabricated offline; that is why authenticity comes from anchoring to the public chain
   (`--anchor`), which anyone can do with the machine id in the file. The chain, not the file, is the

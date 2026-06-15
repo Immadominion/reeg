@@ -4,11 +4,18 @@ How Reeg becomes a business, not a hackathon project. Honest and early; numbers 
 
 ## What we sell
 
-The product is agent environments you own and can share: spin up a real sandbox for
-an agent, then snapshot it, fork it, hand it to a teammate, and move it across hosts.
-The thing a customer pays for is keeping and controlling the agent's computer instead
-of renting it and losing it. Verifiable proof of what the agent did rides along for
-free, and becomes the thing compliance buyers pay extra for.
+The product is infrastructure for portable computing environments. We started with AI
+agents because they're the fastest-growing source of ephemeral work, but the underlying
+system can preserve and move any environment. You run the work in the sandbox you already
+use; Reeg is the layer over it (not the compute, not a server, not an OS), and it
+version-controls and proves that working state. At every commit it snapshots the whole working state,
+fork it, hand it to a teammate, and move it byte-for-byte across hosts. The thing a customer
+pays for is owning the place their work happened instead of renting it and losing it.
+Verifiable proof of what happened rides along for free, and becomes the thing compliance
+buyers pay extra for. We lead with agents because they're the fastest-growing source of work
+worth keeping, sharing, and standing behind — but the same own / share / move / prove sells
+for any environment a customer runs: a CI run, an eval or research environment, a data
+pipeline, or any reproducible workspace worth keeping.
 
 ## Who pays, and why
 
@@ -44,12 +51,15 @@ We do not monetize by holding the customer's data hostage. The record is owner-c
 ## Competition and our line against it
 
 Centralized sandbox vendors (for example Daytona, E2B, Blackbox) run agents, snapshot
-them, and restore them, and some market "audit logs" and "no black boxes." We do all
-of that too. Our line, repeated everywhere: their environment lives in their database
-and you rent it; Reeg's environment is an object you own, so you can share it, fork
-it, move it off them, and let anyone verify it with our servers offline. A competitor
-can copy any feature except letting you own the environment, and ownership is what
-makes the rest possible (T1 in [swot.md](../01-product/swot.md)).
+them, and restore them, and some market "audit logs" and "no black boxes." We do not
+compete with the sandbox — Reeg is the layer over it: infrastructure for portable
+computing environments that version-controls and proves the working state, agents first.
+Our line, repeated everywhere: their
+environment lives in their database and you rent it; Reeg's environment is an object you
+own, so you can share it, fork it, move it off them, and let anyone verify it with our
+servers offline. A competitor can copy any feature except letting you own the
+environment, and ownership is what makes the rest possible (T1 in
+[swot.md](../01-product/swot.md)).
 
 ## The grant/prize context
 

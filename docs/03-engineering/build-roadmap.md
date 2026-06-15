@@ -11,11 +11,14 @@ We are building the whole product, not an MVP and not a scripted demo. Phases la
 this list are real features real users will want, sequenced after the ones they depend
 on, never deferred because the product is incomplete without them.
 
-**Reeg is live.** Tagline: *GitHub for AI agents. Snapshot, prove, share, and move what
-your agents do.* Each agent environment is a **Machine** object you own on Sui; its
-filesystem and memory are snapshotted to content-addressed blobs on Walrus, encrypted
-client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can
-verify **offline** from public Sui and Walrus data alone — no Reeg backend.
+**Reeg is live.** Tagline: *Reeg is infrastructure for portable computing environments. We
+started with AI agents because they're the fastest-growing source of ephemeral work, but
+the underlying system can preserve and move any environment.* Reeg sits over the sandbox you already run; each environment is a
+**Machine** object you own on Sui; its filesystem and memory are snapshotted to
+content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained
+provenance log anchored on Sui that anyone can verify **offline** from public Sui and
+Walrus data alone — no Reeg backend. Agents are the first use case, not the ceiling: the
+same layer preserves, moves, and proves any environment you run.
 
 ## Status at a glance
 

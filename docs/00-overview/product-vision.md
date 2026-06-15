@@ -2,27 +2,30 @@
 
 ## The one line
 
-**Reeg is GitHub for AI agents.**
+**Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing environments — AI-agent runs first.**
 
-An agent works in an environment (files, packages, commands, memory). Reeg snapshots
-that whole environment, proves exactly what the agent did, and lets you own, share,
-fork, and restore it anywhere. Like GitHub for agent runs, except the history is
-tamper-proof and the environment is yours, on no one's server. Reeg is the
-version-control and proof layer for what your agents do; it is not the sandbox they run
-in, and you run the agent. This is no longer a plan: Reeg is **live on Sui mainnet** today,
+Reeg is infrastructure for portable computing environments. We started with AI agents
+because they're the fastest-growing source of ephemeral work, but the underlying system
+can preserve and move any environment. You run the work (your agent, your container,
+your microVM, someone else's cloud) and at every commit Reeg snapshots the whole
+working state, proves exactly what happened, and lets you own, share, fork, and restore
+it anywhere. Reeg is not a sandbox, a server, or an OS; it is the layer over them, and
+you run the work. The history is tamper-proof and the environment is yours, on no one's
+server. This is no longer a plan: Reeg is **live on Sui mainnet** today,
 where create, encrypted checkpoint, anchoring, and offline verify all work. The full
 encrypted checkpoint → restore → verify loop is **proven on testnet**; on mainnet,
 encrypted restore (decrypt) waits on a working mainnet Seal key server.
 
 ## The problem, in plain language
 
-AI agents are starting to do real work. They write code, move money, file tickets,
-change records, and act on behalf of people and companies. The environment where all
-that happens is rented from a vendor and gone the moment the session ends. You cannot
-hand it to a teammate as-is, you cannot fork a
-good run to try two directions, you cannot move it off that vendor, and you cannot
-let an outside party confirm what really happened. The agent did the work, but the
-workspace it did the work in was never yours to keep, share, or stand behind.
+A computing environment does real work, then disappears. The clearest case today is an
+AI agent: it writes code, moves money, files tickets, changes records, and acts on
+behalf of people and companies. But the same loss shows up for a CI job, an eval
+harness, or a person at a keyboard. The environment where all that happens is rented
+from a vendor and gone the moment the session ends. You cannot hand it to a teammate
+as-is, you cannot fork a good run to try two directions, you cannot move it off that
+vendor, and you cannot let an outside party confirm what really happened. The work got
+done, but the workspace it happened in was never yours to keep, share, or stand behind.
 
 That is fine when an agent summarizes an email. It starts to hurt the moment the
 work is worth keeping: a long coding run you want to continue tomorrow, an
@@ -41,8 +44,7 @@ What makes that different from saving a folder is what the snapshot *is*. It is 
 row in a vendor's database, it is a **Machine** object you own on Sui, backed by your
 own content-addressed data on Walrus, encrypted client-side with Seal, with a
 hash-chained provenance log anchored on Sui that anyone can verify offline. That one
-change unlocks four things a folder, a Docker image, or a vendor's history cannot give
-you.
+change gives you four things a folder, a Docker image, or a vendor's history cannot.
 
 ## The four pillars
 
@@ -72,8 +74,9 @@ object you hold on Sui plus your own data on Walrus. Four capabilities follow.
    it was not. For runs where you also need to prove *which code* produced a checkpoint,
    there is an optional **Nautilus TEE attestation** tier (below).
 
-The short version: own it, share it, move it, prove it. GitHub for AI agents, with a
-history no one can rewrite.
+The short version: own it, share it, move it, prove it. Version control for the whole
+environment, not just the code, with a history no one can rewrite. GitHub history can
+be rewritten; this cannot.
 
 ## The snapshot engine
 
@@ -125,12 +128,17 @@ Firecracker VM, which preserves both portability and offline verification.
 
 ## Who it is for
 
+Agents are the lead use case, not the only one. The same layer fits anyone whose work
+happens in an environment worth keeping, sharing, or standing behind.
+
 - **Teams running agents that touch money, code, or customers.** They need to prove
   what an agent did when something goes wrong or is disputed.
 - **Companies under audit or regulation.** They need an independent, durable record
   of automated decisions, not a vendor's internal log.
 - **Builders of agent platforms.** They want a standard, ownable format for agent
   environments and run history that they do not have to invent themselves.
+- **Anyone with an environment worth preserving.** A long CI job, an eval harness, or a
+  research setup a person built by hand, kept, moved between hosts, and proven later.
 
 ## The honest tradeoff
 
@@ -175,15 +183,17 @@ We keep the shortcomings in plain sight:
 
 ## Why now
 
-Agents are being handed real authority faster every month, and the work they do is
-starting to be worth keeping and sharing rather than throwing away. At the same time,
-accountability rules for automated systems are arriving. We frame Reeg against the EU
-AI Act's record-keeping and logging expectations (Article 12): tamper-evident
-provenance with configurable Walrus retention (`--epochs`; roughly six months is
-about 13 testnet epochs), plus `reeg evidence` and `reeg audit`, which export a
-portable evidence file an auditor can keep. That is positioning, not legal advice,
-and we keep the claims honest. The ownership and sharing win earns the adoption; the
-proof makes it defensible.
+Two forces. AI agents are being handed real authority faster every month, and the work
+they do is starting to be worth keeping and sharing rather than throwing away. They are
+the wedge: the fastest-growing source of ephemeral work, felt as a loss the day a good
+run vanishes. At the same time, accountability rules for automated systems are arriving.
+We frame Reeg against the EU AI Act's record-keeping and logging expectations
+(Article 12), in force **2 August 2026**: tamper-evident provenance with configurable
+Walrus retention (`--epochs`; roughly six months is about 13 testnet epochs), plus
+`reeg evidence` and `reeg audit`, which export a portable evidence file an auditor can
+keep. That is positioning, not legal advice, and we keep the claims honest. The
+ownership and sharing win earns the adoption; the proof makes it defensible, and the
+same layer extends to any environment worth proving, not agents alone.
 
 ## How we win
 
@@ -192,7 +202,10 @@ and an environment you actually own. Those make sharing, portability, and indepe
 proof possible, and all four pillars fall out of one design choice (the environment is
 an object you hold on Sui plus your data on Walrus) that a vendor's own database cannot
 match. We are the layer over any sandbox, adding the parts none of them can, and it is
-shipped: Reeg is live on Sui mainnet, attestation included.
+shipped: Reeg is live on Sui mainnet, attestation included. Because that layer never
+cared what produced the environment, agents are the entry point and the same own /
+share / move / prove holds for any computing environment, so the category grows under
+us rather than capping us.
 
 ## The built-on-Sui story (one paragraph)
 

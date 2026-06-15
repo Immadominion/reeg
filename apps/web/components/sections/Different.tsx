@@ -5,7 +5,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { cn } from '@/lib/cn';
 
 // sandbox / reeg as booleans. The first rows are parity (we do everything a box does); the lower
-// rows are the structural wins ownership unlocks.
+// rows are the structural wins ownership makes possible.
 const ROWS: { label: string; sandbox: boolean; reeg: boolean }[] = [
   { label: 'Spin up, run commands, write files', sandbox: true, reeg: true },
   { label: 'Snapshot and restore', sandbox: true, reeg: true },

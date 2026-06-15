@@ -1,26 +1,30 @@
 import { MoveRight } from 'lucide-react';
+import { HeroFloaters } from '@/components/sections/HeroFloaters';
 import { ProductPanel } from '@/components/sections/ProductPanel';
 import { ButtonLink } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/ui/Reveal';
 import { site } from '@/lib/site';
 
-// The hero's background (glow + grid) lives at page level in <TopGlow/> so it sits behind the
-// transparent header; the body reads as one continuous light surface.
+// The hero's background (grainy aurora + grid) lives at page level in <TopGlow/> so it sits behind
+// the transparent header; the body reads as one continuous light surface. <HeroFloaters/> frames the
+// headline with glassy product cards on wide screens.
 export function Hero() {
   return (
-    <section id="top">
-      <Container className="flex flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
+    <section id="top" className="relative isolate">
+      <HeroFloaters />
+      <Container className="relative z-10 flex flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
         <Reveal>
           <h1 className="max-w-3xl text-balance text-[2.5rem] font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            GitHub for AI agents.
+            Reeg is Dropbox for AI agent environments.
           </h1>
         </Reveal>
 
         <Reveal delay={0.05}>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Snapshot an agent's whole environment, prove exactly what it did, then share, fork, or
-            restore it anywhere. You own it, on no one's server.
+            Reeg is infrastructure for portable computing environments. We started with AI agents
+            because they're the fastest-growing source of ephemeral work, but the underlying system
+            can preserve and move any environment.
           </p>
         </Reveal>
 

@@ -4,7 +4,7 @@ A blunt read on where Reeg stands. No cheerleading. Each point is something we c
 
 ## Strengths
 
-- S1 Ownership is the one thing a centralized box cannot copy. Reeg gives you an agent environment you hold (an object on Sui plus your data on Walrus), so you can share it, fork it, and move it off any vendor. Every competitor can match a feature; none can hand you ownership. That is the moat.
+- S1 Ownership is the one thing a centralized box cannot copy. Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. It versions and proves over the sandbox (not the compute, not a server, not an OS): it gives you a computing environment you hold (an object on Sui plus your data on Walrus), so you can share it, fork it, and move it off any vendor. We lead with AI-agent runs as the wedge, but the same layer holds for any environment you run. Every competitor can match a feature; none can hand you ownership. That is the moat.
 - S2 The architecture leans on primitives that already work today: Sui object ownership, Walrus content-addressed blobs, Seal client-side encryption. We are composing verified pieces, not inventing cryptography (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)).
 - S3 Ownership is enforced on-chain by a Seal `seal_approve` policy, so "you own it" is a code fact, not a promise in a ToS.
 - S4 Proof comes for free, and it makes a killer demo: kill the host, restore elsewhere, and verify with our server down. We did not build an audit feature; it falls out of living on Sui, which is exactly why it is hard to copy. That moment reads instantly to a non-technical judge.
@@ -21,17 +21,17 @@ A blunt read on where Reeg stands. No cheerleading. Each point is something we c
 ## Opportunities
 
 - O1 Regulatory tailwind: the EU AI Act logging duties for high-risk systems start applying 2 Aug 2026. "Keep an automatically generated, tamper-evident record of what the agent did" becomes a thing teams must buy, not just want.
-- O2 The agent infra market is forming now. "Where does the agent actually run, and who can prove it" is an unsolved layer; sandbox vendors own the runtime but not the proof.
+- O2 The agent infra market is forming now. "Where does the work actually run, and who can prove it" is an unsolved layer; sandbox vendors own the runtime but not the proof. Reeg sits over their sandbox, not against it — agents first, then any environment that runs in one.
 - O3 Portability as a wedge: teams hate vendor lock to a single sandbox host. Restore-anywhere is a concrete reason to adopt.
 - O4 Ecosystem pull on Sui/Walrus: being a flagship real use of Walrus + Seal + provenance is good for grants, partnerships, and co-marketing.
 - O5 B2B compliance buyers pay for evidence and audit, which is a healthier revenue base than consumer crypto.
 
 ## Threats
 
-- T1 Centralized sandbox vendors (for example Daytona, E2B, Blackbox) already run, snapshot, and restore agents, and some market "audit logs" and "no black boxes." We do all of that too, so we must not pitch those as our differentiator. The sharp line is ownership: their environment lives in their database and you rent it; ours is yours to own, share, fork, move, and verify. They cannot copy that without rebuilding on something like Sui.
+- T1 Centralized sandbox vendors (for example Daytona, E2B, Blackbox) already run, snapshot, and restore agents, and some market "audit logs" and "no black boxes." We do not compete with the sandbox — Reeg is the layer over it, for computing environments, agents first. We snapshot, prove, move, and let you own whatever runs in their sandbox or any other. The sharp line is ownership: their environment lives in their database and you rent it; ours is yours to own, share, fork, move, and verify. They cannot copy that without rebuilding on something like Sui.
 - T2 A hyperscaler ships "owned, verifiable agent runs" and the category gets commoditized. Mitigation: own the neutral, cross-vendor, user-owned position they structurally avoid.
 - T3 Platform risk: Walrus, Seal, Nautilus are young. A breaking change or an outage on a dependency hits us directly.
-- T4 Narrative risk: leading with "blockchain" or "audit logs" makes us sound like a solution chasing a problem. We must lead with the use case (snapshot and prove what your agent did) and an environment you own, and frame proof as the differentiator, the tamper-proof history GitHub and vendor logs cannot give you, not as buried jargon.
+- T4 Narrative risk: leading with "blockchain" or "audit logs" makes us sound like a solution chasing a problem. We must lead with the use case (Reeg is Dropbox for AI agent environments — snapshot and prove what your agent did) and an environment you own, and frame proof as the differentiator, the tamper-proof history GitHub and vendor logs cannot give you, not as buried jargon. Keep Git only as a mechanic, never as a borrowed-brand tagline.
 - T5 If checkpoint UX is clunky or slow, people route around it and we lose the ownership and provenance that make us valuable.
 
 ## What this tells us to do

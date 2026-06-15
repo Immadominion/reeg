@@ -2,9 +2,9 @@
 
 What Reeg is built with and why each piece is here. For background on the underlying Sui/Walrus/Seal primitives, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
 
-> GitHub for AI agents. Snapshot, prove, share, and move what your agents do.
+> Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Snapshot, prove, share, and move it.
 
-Reeg makes each AI-agent environment a **Machine** object you own on Sui: its filesystem and memory are snapshotted to content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui + Walrus data alone — no Reeg backend. Reeg is **live on Sui mainnet**.
+Reeg is the layer **over** the sandbox you already run — your agent, your container, your microVM, someone else's cloud. It makes each environment a **Machine** object you own on Sui: at every commit the whole working state (filesystem and memory) is snapshotted to content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui + Walrus data alone — no Reeg backend. It does not run your workload or hold your compute. We started with AI agents because they're the fastest-growing source of work worth keeping, sharing, and standing behind, but the same layer preserves, moves, and proves any environment you run. Reeg is **live on Sui mainnet**.
 
 ## On-chain
 

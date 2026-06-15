@@ -7,7 +7,7 @@ the Console. Verified Sui/Walrus/Seal shapes are in
 
 ## 1. On-chain: the `Machine` object (Move)
 
-The kernel of one agent environment. Owned by an address so it takes Sui's fast path.
+The kernel of one computing environment (typically an agent run). Owned by an address so it takes Sui's fast path.
 
 ```
 Machine (Sui object, key + store)

@@ -21,6 +21,9 @@ move/build/
 !.env.example
 *.key
 *.keystore
+*.pem
+*.p12
+*.pfx
 
 # editor / os
 .DS_Store

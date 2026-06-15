@@ -9,11 +9,11 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://reeg.xyz'),
   title: {
-    default: 'Reeg: GitHub for AI agents',
+    default: 'Reeg — Dropbox for AI agent environments',
     template: '%s · Reeg',
   },
   description:
-    "Snapshot an AI agent's whole environment, prove exactly what it did, then share, fork, or restore it anywhere. The version-control and proof layer for AI agents, with a tamper-proof history you own. Built on Sui and Walrus.",
+    "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Live on Sui mainnet.",
   applicationName: 'Reeg',
   keywords: [
     'AI agents',
@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     'version control for agents',
     'agent environments',
     'verifiable compute',
+    'computing environments',
+    'verifiable environments',
+    'version control for environments',
     'Sui',
     'Walrus',
   ],
@@ -29,15 +32,15 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://reeg.xyz',
     siteName: 'Reeg',
-    title: 'Reeg: GitHub for AI agents',
+    title: 'Reeg — Dropbox for AI agent environments',
     description:
-      'Snapshot, prove, share, and move what your AI agents do. A tamper-proof history you own, built on Sui and Walrus.',
+      "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Live on Sui mainnet.",
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reeg: GitHub for AI agents',
+    title: 'Reeg — Dropbox for AI agent environments',
     description:
-      'Snapshot, prove, share, and move what your AI agents do. A tamper-proof history you own, built on Sui and Walrus.',
+      "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Live on Sui mainnet.",
   },
 };
 

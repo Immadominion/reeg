@@ -7,12 +7,13 @@ The name, the voice, and the practical identity details (domain, email) so anyth
 Reeg.
 
 - Pronounced like "reeg" (one syllable).
-- The product one-liner: Reeg is GitHub for AI agents. Snapshot an agent's whole
-  environment, prove exactly what it did, then share, fork, or restore it anywhere.
-  You own it, on no one's server.
-- Lead with the use case (snapshot and prove what your agent did). "GitHub for AI
-  agents" is the handle; the value is the two things GitHub cannot give you, a
-  tamper-proof history and an environment you actually own.
+- The product one-liner: Your agent runs in a sandbox you don't own and can't keep.
+  Reeg lets you own that environment, move it byte-for-byte to any host, and prove
+  its whole history, with Reeg switched off.
+- Lead with the loss the reader has felt (a good run that vanished), then answer it
+  with ownership. The differentiator is the part GitHub cannot match: a history no one
+  can rewrite over an environment you actually own. Keep Git only as a mechanic
+  (version control for the whole environment, not just the code), never as the handle.
 - Always capitalized as Reeg in prose. Not REEG, not reeg, except in domains, handles, and code identifiers where lowercase is conventional.
 
 ## Domain
@@ -38,11 +39,16 @@ The same voice we use in code and docs, because the brand and the engineering ar
 
 ## Positioning line
 
-For teams running AI agents that do real work: Reeg snapshots an agent's whole
-environment into a record you own, share, fork, and move, with a tamper-proof history
-anyone can verify offline. Like GitHub for agent runs, except the history cannot be
-rewritten and the environment is yours, on no one's server. Reeg is the version-control
-and proof layer for what your agents do, not the sandbox they run in.
+Reeg is infrastructure for portable computing environments. We started with AI agents
+because they're the fastest-growing source of ephemeral work, but the underlying system
+can preserve and move any environment. You run the work (your agent, your container,
+your microVM, someone else's cloud) and at every commit Reeg snapshots the whole working
+state, encrypts it client-side, stores it as data you own on Walrus, and anchors a
+hash-chained, append-only record to a Sui object only you control. It sits over the
+sandbox you already use; it does not run your workload or hold your compute. The
+mechanism is version control and proof for the whole environment, not just the code: the
+differentiator GitHub cannot match is that its history can be rewritten and this cannot,
+over an environment that is yours, on no one's server.
 
 ## On "black box"
 
@@ -57,8 +63,20 @@ record for free), never as the lead.
 We also retired "the computer your AI agents live in" and "AI OS on Walrus" as the
 headline. They overclaimed (Reeg is not a computer, an OS, or a hosted sandbox) and
 told a reader nothing about what to use it for. The honest frame is a layer, not
-compute: you run the agent, Reeg versions and proves what it did. "GitHub for AI
-agents" replaced it because it conveys the use case in three words.
+compute: you run the agent, Reeg versions and proves what it did. We likewise retired
+"the version-control and proof layer over your sandbox" as a headline; the category is
+now "infrastructure for portable computing environments," and version control and proof
+survive only as mechanism language for what Reeg does, never as the category.
+
+## On "GitHub for AI agents"
+
+We retired "GitHub for AI agents" as a tagline too. It boxed Reeg into agents-only
+when the same layer preserves, moves, and proves any environment you run, and it
+borrowed a brand to do it. We kept agents as the wedge (the fastest-growing source of
+work worth keeping) and broadened the category to computing environments. Git survives
+only as a mechanic, never the handle: "version control for the whole environment, not
+just the code," paired with the one thing GitHub cannot match, "GitHub history can be
+rewritten; this cannot." The headline is now "Reeg is Dropbox for AI agent environments."
 
 ## What the brand is not
 
@@ -75,5 +93,10 @@ agents" replaced it because it conveys the use case in three words.
 - Domain: reeg.xyz.
 - Support email: <support@reeg.xyz>.
 - Security email: <security@reeg.xyz>.
-- One-liner: GitHub for AI agents. Snapshot, prove, share, and move what your agents do.
+- One-liner: Your agent runs in a sandbox you don't own and can't keep. Reeg lets you
+  own that environment, move it byte-for-byte to any host, and prove its whole history,
+  with Reeg switched off.
+- X / social bio (lead): Infrastructure for portable computing environments. Own any
+  environment, move it byte-for-byte to any host, prove its history with Reeg switched
+  off. Agents first.
 </content>

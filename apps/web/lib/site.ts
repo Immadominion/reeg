@@ -3,9 +3,9 @@
 // complete without implying a page is live. Update the marked entries as surfaces come online.
 export const site = {
   name: 'Reeg',
-  tagline: 'GitHub for AI agents.',
+  tagline: 'Reeg is Dropbox for AI agent environments.',
   positioning:
-    'Snapshot, prove, share, and move what your agents do. The proof layer for AI agents, built on Sui and Walrus.',
+    "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment.",
   appUrl: 'https://app.reeg.xyz', // the Console (separate deploy)
   docsUrl: '#', // TODO(launch): docs.reeg.xyz not live yet
   github: '#', // TODO(launch): public repo URL

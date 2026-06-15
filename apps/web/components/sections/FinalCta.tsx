@@ -21,7 +21,7 @@ export function FinalCta() {
         <Container className="flex flex-col items-center py-24 text-center sm:py-32">
           <Reveal>
             <h2 className="max-w-2xl text-balance text-3xl font-semibold tracking-tight sm:text-5xl">
-              Own the computer your agents work in.
+              Reeg is Dropbox for AI agent environments.
             </h2>
           </Reveal>
           <Reveal delay={0.06}>

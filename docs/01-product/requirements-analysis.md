@@ -6,14 +6,14 @@ Read [product-vision.md](../00-overview/product-vision.md) first for the why. Re
 
 ## 1. Problem statement, restated as requirements
 
-An AI agent does real work in a sandbox. Today that sandbox is rented and gone when the session ends. The operator does not own the environment, cannot share or fork it as-is, cannot move it off the vendor, and nobody outside the vendor can prove what the agent did. Reeg must make the environment owned and shareable, portable across hosts, and provable by any outsider.
+An AI agent does real work in a sandbox you don't own and can't keep. Today that sandbox is rented and gone when the session ends. The operator does not own the environment, cannot share or fork it as-is, cannot move it off the vendor, and nobody outside the vendor can prove what happened inside it. The loss is the same wearing many faces — you didn't own the environment. Reeg is infrastructure for portable computing environments (not the compute, not a server, not an OS): it sits over that sandbox and must make the environment owned and shareable, portable across hosts, and provable by any outsider. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment — that is the wedge. The same requirements hold for any environment you run: a CI run, an eval or research environment, a data pipeline, or any reproducible workspace worth keeping.
 
-Four claims must hold, and every requirement traces back to one of them. Lead with C1 and C2 (the adoption wedge); C3 and C4 are what ownership unlocks:
+Four claims must hold, and every requirement traces back to one of them. They are the four pillars — own / share / move / prove. Lead with C1 and C2 (the adoption wedge); C3 and C4 are what ownership makes possible. Stated for AI agents first, but true of any environment you run:
 
-- C1 Owned: the operator controls the environment and who can read or run it, not Reeg.
+- C1 Owned: the operator controls the environment and who can read or run it, not Reeg. The environment is an object you hold, not a row you rent.
 - C2 Shareable: a whole environment can be handed to a teammate or forked from a checkpoint, because it is owned data, not a vendor row.
-- C3 Portable: a run can be checkpointed and resumed on a different host.
-- C4 Provable: an outsider can verify what happened with the Reeg server offline. It comes for free from C1, and it is the lead differentiator, the tamper-proof history GitHub and vendor logs cannot give you.
+- C3 Portable: a run can be checkpointed and restored byte-identically on a different host.
+- C4 Provable: an outsider can verify what happened with the Reeg server offline. It comes for free from C1, and it is the lead differentiator, the tamper-proof history GitHub and vendor logs cannot give you — Git history can be rewritten and this cannot.
 
 ## 2. Functional requirements
 
@@ -66,7 +66,7 @@ Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
 
 ## 4. Constraints
 
-- Build window: working demo by June 21; mainnet by Aug 27 unlocks 100% upfront payout (track terms, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)).
+- Build window: working demo by June 21; mainnet by Aug 27 triggers 100% upfront payout (track terms, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)).
 - Platform maturity: Nautilus (verifiable off-chain compute, TEE) is on mainnet now. Treat any TEE-attested compute as a P2 differentiator sequenced by scope, not a P0 dependency.
 - Seal committee mode is GA now; owner-only and allowlist policies remain the dependable P0/P1 path by integration risk.
 - Move has no inheritance or dynamic dispatch; design data with explicit objects and capabilities, not class hierarchies.
