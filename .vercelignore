@@ -1,19 +1,23 @@
-# Vercel does not read .gitignore, so the deploy upload is trimmed here. Only the Console
-# (apps/console) and its TypeScript workspace deps (packages/*) are needed to build the preview.
-# Everything else — the Rust engine (455 MB of target), Move, docs, and unrelated tooling — is
-# excluded so the upload stays small and never aborts.
+# Vercel does not read .gitignore, so the deploy upload is trimmed here. The app being built
+# (apps/web, the marketing + docs site) plus its TypeScript workspace deps (packages/*) are what's
+# needed. Everything else — the Rust engine (455 MB of target), Move, the repo-root docs/ folder,
+# and unrelated tooling — is excluded so the upload stays small and never aborts.
+#
+# IMPORTANT: anchor repo-root-only dirs with a leading slash. An unanchored entry like `docs`
+# matches a `docs` directory at ANY depth, which silently strips apps/web/app/docs (the in-site
+# docs route), apps/web/components/docs, and apps/web/content/docs from the build.
 
 node_modules
 .vercel
 
-# heavy / irrelevant to the Console build
-engine
-move
-gstack
-tmp
-docs
-scripts
-.github
+# heavy / irrelevant to the web build (repo-root only — note the leading slash)
+/engine
+/move
+/gstack
+/tmp
+/docs
+/scripts
+/.github
 
 # build artifacts (the Console and its deps are rebuilt on Vercel)
 **/dist
