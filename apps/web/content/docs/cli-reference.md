@@ -2,7 +2,7 @@
 
 The `reeg` command drives the whole loop from a terminal: create an environment, run work in it, snapshot it, restore it, share it, and prove what it did.
 
-Every important thing in computing became portable — files, code, containers, data — but not environments. Reeg is the layer over the sandbox: you run the work, Reeg versions and proves what it did. The CLI is how you operate that layer by hand or from a script.
+Every important thing in computing became portable (files, code, containers, data) but not environments. Reeg is the layer over the sandbox: you run the work, Reeg versions and proves what it did. The CLI is how you operate that layer by hand or from a script.
 
 ## Install
 
@@ -67,7 +67,7 @@ Mints a new environment under your operator address with a shared access policy,
 reeg run <machineId> -- <command...>
 ```
 
-Runs a command in the environment's working directory and appends it to the command log. Local only — no signer or chain access. Put `--` before your command so the CLI passes its own flags through untouched. Exposes a memory directory (`REEG_MEMORY_DIR`) that the next checkpoint captures. The command's own exit code is surfaced as the CLI's exit code.
+Runs a command in the environment's working directory and appends it to the command log. Local only: no signer or chain access. Put `--` before your command so the CLI passes its own flags through untouched. Exposes a memory directory (`REEG_MEMORY_DIR`) that the next checkpoint captures. The command's own exit code is surfaced as the CLI's exit code.
 
 ### checkpoint
 
@@ -82,7 +82,7 @@ Packs the working directory, encrypts it, stores it on Walrus, and anchors the b
 |---|---|---|
 | `--epochs <n>` | `1` | Walrus storage epochs to keep the snapshot paid for. Roughly 2 weeks per epoch on testnet. EU AI Act Art. 12 wants ~6 months (`--epochs 13`). |
 | `--threshold <t>` | configured (`1` on testnet) | Seal committee threshold (t-of-n key servers). Fixed at encryption time; a later grant cannot change it. Validated against the configured key-server set. |
-| `--attest` | off | After anchoring, record a Nautilus enclave attestation of this checkpoint. Additive — a run without it is identical. |
+| `--attest` | off | After anchoring, record a Nautilus enclave attestation of this checkpoint. Additive: a run without it is identical. |
 | `--enclave-config <id>` | `REEG_ENCLAVE_CONFIG` | The `EnclaveConfig` id from `reeg enclave register`. Required with `--attest`. |
 | `--enclave-cid <n>` | `16` | Enclave vsock CID. |
 | `--enclave-port <n>` | `5005` | Enclave vsock port. |
@@ -125,8 +125,8 @@ reeg grant <machineId> <grantee> [--role viewer|restore] [--until <when>]
 
 Lets another address decrypt and restore the environment. `<grantee>` is a `0x...` address.
 
-- `--role` — `viewer` or `restore` (default `restore`). A typo'd role is rejected at parse time.
-- `--until` — an expiry, as an ISO 8601 time or a short duration (`7d`, `24h`, `30m`, `45s`). Absent means no expiry.
+- `--role`: `viewer` or `restore` (default `restore`). A typo'd role is rejected at parse time.
+- `--until`: an expiry, as an ISO 8601 time or a short duration (`7d`, `24h`, `30m`, `45s`). Absent means no expiry.
 
 The policy id is read from the Machine on chain, so grant works without local state.
 
@@ -144,7 +144,7 @@ Stops an address from unlocking future restores. Note the honest limit it prints
 reeg verify <machineId> [-n <network>] [--rpc <url>] [--package <id>]
 ```
 
-Confirms a Machine's provenance from public Sui data, with the Reeg backend offline — it reads only Sui. Prints `Verified` or `NOT verified`, then one `ok`/`FAIL` line per check. Exits non-zero if any check fails.
+Confirms a Machine's provenance from public Sui data, with the Reeg backend offline: it reads only Sui. Prints `Verified` or `NOT verified`, then one `ok`/`FAIL` line per check. Exits non-zero if any check fails.
 
 ### evidence
 
@@ -160,7 +160,7 @@ Exports a portable evidence file an auditor can keep and verify offline. Read-on
 reeg audit <file> [--anchor] [-n <network>] [--rpc <url>] [--package <id>]
 ```
 
-Verifies an exported evidence file. Offline by default — it replays the file to its own recorded head, proving internal consistency. `--anchor` additionally confirms the file matches the live on-chain Machine, the real authenticity check. Prints one `ok`/`FAIL` line per check and exits non-zero on failure.
+Verifies an exported evidence file. Offline by default: it replays the file to its own recorded head, proving internal consistency. `--anchor` additionally confirms the file matches the live on-chain Machine, the real authenticity check. Prints one `ok`/`FAIL` line per check and exits non-zero on failure.
 
 ### enclave register
 
@@ -168,7 +168,7 @@ Verifies an exported evidence file. Offline by default — it replays the file t
 reeg enclave register [--cid <n>] [--port <n>]
 ```
 
-The optional Nautilus tier — "prove which code ran." Fetches the local Nitro enclave's attestation document over vsock, verifies it on chain via `0x2::nitro_attestation`, and pins its PCRs and ed25519 key into a shared `EnclaveConfig`. Run once per enclave build. Defaults: `--cid 16`, `--port 5005`. Prints the new `EnclaveConfig` id and the exact `reeg checkpoint --attest` line to use it.
+The optional Nautilus tier: "prove which code ran." Fetches the local Nitro enclave's attestation document over vsock, verifies it on chain via `0x2::nitro_attestation`, and pins its PCRs and ed25519 key into a shared `EnclaveConfig`. Run once per enclave build. Defaults: `--cid 16`, `--port 5005`. Prints the new `EnclaveConfig` id and the exact `reeg checkpoint --attest` line to use it.
 
 ## Environment variables
 
@@ -192,4 +192,4 @@ The mainnet package id is `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c7
 
 ## What works where
 
-On mainnet today, encryption, Walrus storage, on-chain anchoring, and offline verification all work — `create`, `checkpoint`, `verify`, `evidence`, and `audit` run against live mainnet. The `restore` decrypt of an encrypted checkpoint currently waits on a provider Seal key server. The full encrypted checkpoint → restore → verify loop is proven end to end on testnet.
+On mainnet today, encryption, Walrus storage, on-chain anchoring, and offline verification all work: `create`, `checkpoint`, `verify`, `evidence`, and `audit` run against live mainnet. The `restore` decrypt of an encrypted checkpoint currently waits on a provider Seal key server. The full encrypted checkpoint → restore → verify loop is proven end to end on testnet.

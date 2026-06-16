@@ -11,7 +11,7 @@ Contact: <hello@reeg.xyz>. Security disclosures: <security@reeg.xyz>.
 Reeg is infrastructure for portable computing environments. We started with AI agents
 because they're the fastest-growing source of ephemeral work, but the underlying system
 can preserve and move any environment. You run the
-work — your agent, your container, your microVM, someone else's cloud — and that
+work (your agent, your container, your microVM, someone else's cloud) and that
 environment is rented from a vendor and gone when the session ends. You cannot share a
 running environment with a teammate, fork a good run, move it off the vendor, or let an
 outsider confirm what happened. Reeg sits over the sandbox you already use: the work runs
@@ -20,11 +20,11 @@ in whatever sandbox you like, and at every commit Reeg snapshots that environmen
 content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained
 provenance log anchored on Sui. It does not run your workload or hold your compute. That
 single change lets you **own, share, move, and prove** the whole environment. Version
-control for the whole environment — not just the code — with two things GitHub cannot
+control for the whole environment, not just the code, with two things GitHub cannot
 give you: a history no one can rewrite, and an environment that is yours. Anyone you
 choose can verify what happened **offline**, from public Sui and Walrus data alone, with
 no Reeg backend in the loop. We started with AI agents because they're the
-fastest-growing source of work worth keeping, sharing, and standing behind — but the same
+fastest-growing source of work worth keeping, sharing, and standing behind, but the same
 layer can preserve, move, and prove any environment you run. Reeg is **live on Sui
 mainnet**.
 
@@ -46,8 +46,8 @@ use right now. The agent's work is real, but the place it happened was never you
 
 Two forces make this urgent. First, AI agents are moving from demos to production, where
 the work is worth keeping, sharing, and reusing rather than throwing away, and where
-a lost or unportable run costs real money. Agents are the wedge — the fastest-growing
-source of work worth keeping — but the same loss is felt by any environment nobody owns.
+a lost or unportable run costs real money. Agents are the wedge, the fastest-growing
+source of work worth keeping, but the same loss is felt by any environment nobody owns.
 Second, the EU AI Act's record-keeping duties for high-risk AI systems point toward
 automatically generated, tamper-evident records of system operation. The first force
 earns adoption (own and share the work you run); the second makes it defensible (the
@@ -56,10 +56,10 @@ legal advice.)
 
 ## 3. What Reeg is
 
-Reeg is the layer over the sandbox you already run — not a sandbox, server, or OS, but
+Reeg is the layer over the sandbox you already run, not a sandbox, server, or OS, but
 the version-control and proof layer over them. You run the work in whatever sandbox you
 like; Reeg waits at the commit boundary and gives you the loop a centralized box never
-could: snapshot the whole working state, restore it, fork it, resume where you left off —
+could: snapshot the whole working state, restore it, fork it, resume where you left off,
 on an environment that is yours, not the vendor's. The difference is what the environment
 is, and what that lets you do with it. Those four verbs are Reeg's four pillars:
 
@@ -249,7 +249,7 @@ tamper-evident provenance chain with configurable Walrus retention, plus `reeg
 evidence` and `reeg audit`, which export a portable evidence file an auditor keeps.
 (This is positioning, not legal advice; we keep the claim honest.) The wedge is
 concrete and immediate: own and share the environment your agent ran in instead of
-renting it and losing it. Agents are the first use case, not the ceiling — the same
+renting it and losing it. Agents are the first use case, not the ceiling: the same
 own / share / move / prove holds for any computing environment you run. The competitive
 line is simple: a centralized sandbox can match any feature except letting you own the
 environment, and ownership is what makes sharing, portability, and independent proof

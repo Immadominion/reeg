@@ -100,7 +100,7 @@ A developer-tool landing page. Sections, in order:
 1. Hero: the headline ("Reeg is Dropbox for AI agent environments."), a sharp subhead ("Your
    agent runs in a sandbox you don't own and can't keep. Reeg is the layer over it:
    snapshot the whole working state, prove exactly what happened, then share it live,
-   fork it, or restore it byte-for-byte on any host. You own it, on no one's server —
+   fork it, or restore it byte-for-byte on any host. You own it, on no one's server,
    verifiable with Reeg switched off."), a primary CTA (Start building / Get early
    access), and a product visual (the Console timeline or the restore moment).
 2. The problem, in three plain lines: agent environments are rented, vanish, and

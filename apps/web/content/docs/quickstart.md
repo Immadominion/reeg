@@ -1,17 +1,17 @@
 # Quickstart
 
-Create an environment, do work in it, checkpoint it, move it to another machine byte-identical, share it, and prove its history — all from the `reeg` CLI.
+Create an environment, do work in it, checkpoint it, move it to another machine byte-identical, share it, and prove its history: all from the `reeg` CLI.
 
 > **Use testnet to run the whole loop.** The full checkpoint → restore → verify path is proven end-to-end on testnet. On mainnet today, encryption, storage, anchoring, and offline verify work, but the decrypt step of a restore waits on a provider Seal key server.
 
 ## Prerequisites
 
 - **Node ≥ 24**, **pnpm 10**, **Rust 1.95**, the **Sui CLI** (1.73), and the **Walrus CLI**.
-- A **funded testnet address** — a little testnet SUI (gas) and WAL (storage) — with its Ed25519 key in your local Sui keystore (`~/.sui/sui_config/sui.keystore`). On testnet both are free via the faucet and `walrus get-wal`.
+- A **funded testnet address**, a little testnet SUI (gas) and WAL (storage), with its Ed25519 key in your local Sui keystore (`~/.sui/sui_config/sui.keystore`). On testnet both are free via the faucet and `walrus get-wal`.
 
 ## Install
 
-There's no npm package yet — the CLI is built from the monorepo.
+There's no npm package yet: the CLI is built from the monorepo.
 
 ```sh
 git clone <your-reeg-repo-url> reeg && cd reeg
@@ -47,11 +47,11 @@ reeg fork     <machineId>                           # child Machine, lineage rec
 reeg verify   <machineId>                           # verify the history offline — public Sui only, Reeg switched off
 ```
 
-`REEG_HOME` (default `~/.reeg`) holds the local working state for a machine. Point it at a different directory to act as a separate "host" — restoring into a fresh `REEG_HOME` is how you prove a checkpoint comes back on a machine that never saw it.
+`REEG_HOME` (default `~/.reeg`) holds the local working state for a machine. Point it at a different directory to act as a separate "host". Restoring into a fresh `REEG_HOME` is how you prove a checkpoint comes back on a machine that never saw it.
 
 ## Run the whole story at once
 
-The end-to-end acceptance test creates and checkpoints on one host, deletes it, restores byte-identically on a fresh host, verifies offline, shares to a second address that restores, then revokes — across simulated hosts:
+The end-to-end acceptance test creates and checkpoints on one host, deletes it, restores byte-identically on a fresh host, verifies offline, shares to a second address that restores, then revokes, across simulated hosts:
 
 ```sh
 export REEG_OPERATOR=<funded testnet address>
@@ -61,5 +61,5 @@ REEG_ENGINE=engine/target/debug/reeg-engine pnpm --filter @reeg/test run live:ac
 
 ## Next
 
-- **[CLI reference](/docs/cli-reference)** — every verb, flag, and environment variable.
-- **[How it works](/docs/how-it-works)** — what happens at the commit boundary.
+- **[CLI reference](/docs/cli-reference)**: every verb, flag, and environment variable.
+- **[How it works](/docs/how-it-works)**: what happens at the commit boundary.

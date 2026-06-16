@@ -1,20 +1,20 @@
 # FAQ
 
-Straight answers to the questions people ask first about Reeg — what it is, what it proves, and what it can't do.
+Straight answers to the questions people ask first about Reeg: what it is, what it proves, and what it can't do.
 
-Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Every important thing in computing eventually became portable — files (Dropbox), code (Git), containers (Docker), data too. The environment never did. Reeg is the layer over the sandbox: you run the work, Reeg versions and proves what it did.
+Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Every important thing in computing eventually became portable: files (Dropbox), code (Git), containers (Docker), data too. The environment never did. Reeg is the layer over the sandbox: you run the work, Reeg versions and proves what it did.
 
 ## Is Reeg only for AI agents?
 
 No. Agents are the wedge, not the ceiling.
 
-The layer underneath was never agent-specific. It snapshots, encrypts, anchors, and restores a working environment whether an agent, a CI job, an eval harness, or a person at a keyboard produced it. We led with agents because they're the fastest-growing source of ephemeral work and the first place people felt the loss when a good run vanished. The same own / share / move / prove holds for any environment you run — which is why the category is computing environments, not agents.
+The layer underneath was never agent-specific. It snapshots, encrypts, anchors, and restores a working environment whether an agent, a CI job, an eval harness, or a person at a keyboard produced it. We led with agents because they're the fastest-growing source of ephemeral work and the first place people felt the loss when a good run vanished. The same own / share / move / prove holds for any environment you run, which is why the category is computing environments, not agents.
 
 ## Isn't this just a sandbox? Does Reeg run my compute?
 
 No. Reeg does not run your workload or hold your compute.
 
-You run the agent in whatever runner you choose — Reeg's local engine, an OCI container, a Firecracker microVM, or a third party. Reeg waits at the commit boundary, snapshots the working state, encrypts it client-side, stores it as your own Walrus data, and anchors a record on Sui.
+You run the agent in whatever runner you choose: Reeg's local engine, an OCI container, a Firecracker microVM, or a third party. Reeg waits at the commit boundary, snapshots the working state, encrypts it client-side, stores it as your own Walrus data, and anchors a record on Sui.
 
 | It is | It is not |
 |---|---|
@@ -26,7 +26,7 @@ You run the agent in whatever runner you choose — Reeg's local engine, an OCI 
 
 No. You verify offline from public data.
 
-Every checkpoint anchors a hash-chained, append-only record on Sui — the current `blob_id` and `manifest_hash`. Anyone you choose re-walks the chain and re-checks the hashes against the Machine object using public Sui and Walrus data alone, with no Reeg backend in the trust path.
+Every checkpoint anchors a hash-chained, append-only record on Sui: the current `blob_id` and `manifest_hash`. Anyone you choose re-walks the chain and re-checks the hashes against the Machine object using public Sui and Walrus data alone, with no Reeg backend in the trust path.
 
 ```text
 1. Read the Machine object on Sui (owner, blob_id, manifest_hash, provenance_head).
@@ -40,9 +40,9 @@ Reeg's own servers and the Console are conveniences. The record stands without t
 
 ## If checkpoints are encrypted, can people I share with open them?
 
-Yes — under an access policy you control.
+Yes, under an access policy you control.
 
-Checkpoints are Seal-encrypted client-side. An on-chain `seal_approve` policy decides who may decrypt: owner-only by default, an allowlist for a shared Machine, time-limited expiry for a collaborator. Each grant and revoke appends to the provenance chain. Revocation is forward-looking — it stops future approvals; it cannot un-see data already decrypted.
+Checkpoints are Seal-encrypted client-side. An on-chain `seal_approve` policy decides who may decrypt: owner-only by default, an allowlist for a shared Machine, time-limited expiry for a collaborator. Each grant and revoke appends to the provenance chain. Revocation is forward-looking: it stops future approvals; it cannot un-see data already decrypted.
 
 One honest caveat on mainnet: the decrypt step needs a working Seal key server. On mainnet today there is no free public Open-mode key server yet, so the decrypt (restore) of an encrypted checkpoint currently waits on a provider's key server coming online. That is a provider-availability matter, not Reeg code.
 
@@ -68,7 +68,7 @@ Retention is a Walrus storage-epoch policy you set (`--epochs`) plus the permane
 
 Two honest limits, stated plainly.
 
-- **It is not custody for the most sensitive data classes.** Reeg is not a regulated PHI or classified-data vault. Seal is not designed for data whose mere existence is a breach. The value is auditable, tamper-evident records of work — not custody of the most sensitive data classes.
-- **It does not prove the agent was correct.** Reeg proves which bytes and checkpoints existed, that the history wasn't rewritten, and — with the optional Nautilus tier — which code produced a checkpoint. It does not prove the agent's output was right. The guarantee is anchored to the hash-chain and manifest, not to the agent's behavior.
+- **It is not custody for the most sensitive data classes.** Reeg is not a regulated PHI or classified-data vault. Seal is not designed for data whose mere existence is a breach. The value is auditable, tamper-evident records of work, not custody of the most sensitive data classes.
+- **It does not prove the agent was correct.** Reeg proves which bytes and checkpoints existed, that the history wasn't rewritten, and, with the optional Nautilus tier, which code produced a checkpoint. It does not prove the agent's output was right. The guarantee is anchored to the hash-chain and manifest, not to the agent's behavior.
 
 For the full mechanics, see the architecture and verification pages.

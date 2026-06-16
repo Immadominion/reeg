@@ -2,7 +2,7 @@
 
 ## The one line
 
-**Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing environments — AI-agent runs first.**
+**Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing environments: AI-agent runs first.**
 
 Reeg is infrastructure for portable computing environments. We started with AI agents
 because they're the fastest-growing source of ephemeral work, but the underlying system
@@ -95,10 +95,10 @@ a chain or storage client, which keeps the determinism honest.
 The same capture-and-verify path runs across every tier behind a single `Runtime`
 trait:
 
-- **Local** — for development, no isolation.
-- **OCI container** — `runc`, read-only rootfs, a per-session tmpfs `/work`, and
+- **Local**: for development, no isolation.
+- **OCI container**: `runc`, read-only rootfs, a per-session tmpfs `/work`, and
   network isolation proven by an unreachable metadata service.
-- **Firecracker microVM** — KVM kernel-boundary isolation, per-session tmpfs,
+- **Firecracker microVM**: KVM kernel-boundary isolation, per-session tmpfs,
   read-only rootfs, and an in-guest agent that speaks a length-prefixed framed
   protocol over vsock. Phase M hardening is **19/19 complete**, verified on a real
   AWS KVM host, including running the Firecracker VMM under the **jailer** (chroot,

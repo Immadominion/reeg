@@ -9,7 +9,7 @@ export const site = {
   appUrl: 'https://app.reeg.xyz', // the Console (separate deploy)
   docsUrl: '/docs', // the in-site docs (apps/web/app/docs), rendered in the brand style
   github: 'https://github.com/Immadominion/reeg',
-  githubStars: '—', // TODO(launch): wire real star count
+  githubStars: '-', // TODO(launch): wire real star count
   email: {
     hello: 'hello@reeg.xyz',
     support: 'support@reeg.xyz',

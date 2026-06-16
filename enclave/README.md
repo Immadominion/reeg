@@ -1,6 +1,6 @@
 # Reeg attestation enclave (Nautilus tier)
 
-A tiny AWS Nitro enclave that **attests** Reeg checkpoints — it does **not** run the agent. The agent
+A tiny AWS Nitro enclave that **attests** Reeg checkpoints: it does **not** run the agent. The agent
 keeps running in the Firecracker microVM (so portability and offline verification are preserved);
 this enclave is a *measured signer*. At boot it derives an ed25519 key from NSM entropy and obtains a
 Nitro attestation document that embeds that public key, rooting the key in the enclave's measurements
@@ -21,7 +21,7 @@ The enclave reconstructs that preimage itself, so it only ever signs well-formed
 | `{"type":"attestation"}` | `{"document_hex":…,"public_key_hex":…}` |
 | `{"type":"sign","machine_id":hex,"seq":N,"manifest_hash":hex}` | `{"signature_hex":…,"public_key_hex":…}` |
 
-## Build (on the AWS Nitro host — needs docker + nitro-cli)
+## Build (on the AWS Nitro host, needs docker + nitro-cli)
 
 ```sh
 ./enclave/build.sh            # -> reeg-enclave.eif + pcrs.json
@@ -51,13 +51,13 @@ sudo nitro-cli run-enclave --eif-path reeg-enclave.eif --cpu-count 2 --memory 51
 
 ## On-chain flow
 
-1. **register_enclave** — a PTB calls `0x2::nitro_attestation::load_nitro_attestation` to verify the
+1. **register_enclave**: a PTB calls `0x2::nitro_attestation::load_nitro_attestation` to verify the
    document on chain, then `reeg::attestation::register_enclave` pins the PCRs + ed25519 key into a
    shared `EnclaveConfig`. (`@reeg/chain` `buildRegisterEnclave`.)
-2. **register_attested_command** — the enclave signs the checkpoint preimage; the chain
+2. **register_attested_command**: the enclave signs the checkpoint preimage; the chain
    `ed25519_verify`s it against the `EnclaveConfig` key and emits `CommandAttested`.
    (`@reeg/chain` `buildRegisterAttestedCommand`.)
-3. **verify offline** — `@reeg/verify` `verifyAttestation(client, packageId, machineId, {expectedPcrs})`
+3. **verify offline**: `@reeg/verify` `verifyAttestation(client, packageId, machineId, {expectedPcrs})`
    confirms the event's key matches the config, ties the manifest hash to the checkpoint, and matches
    the config's PCRs to `pcrs.json`. Additive: a Machine with no attestation verifies unchanged.
 

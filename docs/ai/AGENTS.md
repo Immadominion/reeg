@@ -1,4 +1,4 @@
-# AGENTS.md — AI context for Reeg
+# AGENTS.md: AI context for Reeg
 
 This is the single source of truth for an AI agent (or a new human) working on Reeg. Read this first. It tells you what we are building, why, the verified facts you must not contradict, and how to behave. When something here conflicts with your assumptions, this file wins. When this file conflicts with a verified platform fact, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md), which is the factual backbone.
 

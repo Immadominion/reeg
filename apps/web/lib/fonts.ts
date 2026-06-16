@@ -3,7 +3,7 @@ import localFont from 'next/font/local';
 
 // Display: Clash Display (Fontshare, free for commercial use), self-hosted in /fonts. A distinctive
 // geometric/mechanical face in the spirit of Neue Machina. To swap in licensed Neue Machina later,
-// drop its woff2 files in /fonts and point this `src` at them — nothing else changes.
+// drop its woff2 files in /fonts and point this `src` at them. Nothing else changes.
 export const clashDisplay = localFont({
   src: [
     { path: '../fonts/ClashDisplay-400.woff2', weight: '400', style: 'normal' },

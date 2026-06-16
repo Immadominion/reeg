@@ -10,16 +10,16 @@ original `0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3` to
 attestation module); testnet package
 `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`. A measured create +
 encrypted checkpoint (1 epoch, including the Walrus upload-relay tip) costs ~0.0099 SUI +
-~0.0119 WAL on mainnet. Reeg is **infrastructure for portable computing environments** — we started with AI
+~0.0119 WAL on mainnet. Reeg is **infrastructure for portable computing environments**: we started with AI
 agents because they're the fastest-growing source of ephemeral work, but the underlying
 system can preserve and move any environment. It sits over the sandbox you already use and
 versions and proves the whole working state as a record you own, share, move, and verify.
 
 <p align="center">
-  <img src="diagrams/system-context.png" alt="Reeg system context: you run the agent in any sandbox; Reeg snapshots the working state, Seal-encrypts it client-side, stores it on Walrus, and anchors the record to a Machine object on Sui — verifiable offline with no Reeg backend." width="820">
+  <img src="diagrams/system-context.png" alt="Reeg system context: you run the agent in any sandbox; Reeg snapshots the working state, Seal-encrypts it client-side, stores it on Walrus, and anchors the record to a Machine object on Sui, verifiable offline with no Reeg backend." width="820">
 </p>
 
-## 1. The mental model: version control for the whole environment — not just the code
+## 1. The mental model: version control for the whole environment, not just the code
 
 Reeg takes "OS on Walrus" literally. A real OS is a filesystem, processes,
 permissions, and persistent state. Reeg builds that as an ownable, verifiable thing:
@@ -58,19 +58,19 @@ captured environment cross hosts *and* runtime tiers byte-identically.
 Two concerns live here and they are deliberately decoupled: the **isolation boundary**
 (how a live agent is contained) and the **snapshot engine** (how state is captured and
 restored). The moat lives in the second one, so it is the part we build best and first.
-Live process/memory migration across hosts (CRIU-style) is fragile by nature — it needs
-identical libraries and paths on the target — which is exactly why we capture the
+Live process/memory migration across hosts (CRIU-style) is fragile by nature: it needs
+identical libraries and paths on the target, which is exactly why we capture the
 filesystem workdir plus a manifest and command log, not live memory.
 
 - **One `Runtime` trait, three tiers.** A single interface (`Runtime` in
   `engine/crates/runtime`) exposes `exec` and a filesystem to the agent. The capture and
-  verification paths are **identical across all three tiers** — the isolation boundary is
+  verification paths are **identical across all three tiers**: the isolation boundary is
   the only thing that swaps:
   - *Local (development) tier.* Host process execution in the working directory, with no
     isolation boundary. It drives the full run/checkpoint/restore loop and the tests, and is
     not for untrusted code. It runs anywhere.
   - *OCI container tier.* `runc` with a read-only rootfs, a per-session tmpfs `/work`, and
-    network isolation — proven by an unreachable cloud metadata service from inside the
+    network isolation, proven by an unreachable cloud metadata service from inside the
     container. Builds fast, runs anywhere with a container runtime.
   - *Firecracker microVM tier.* KVM kernel-boundary isolation: a per-session microVM with a
     read-only rootfs and per-session tmpfs, an in-guest agent reached over **vsock** using a
@@ -85,14 +85,14 @@ filesystem workdir plus a manifest and command log, not live memory.
   memory pointer, working-dir root hash). Serialize the manifest canonically (stable
   ordering, neutralized timestamps and uid/gid) so the same input always yields the same
   `manifest_hash`. A **canonical umask is pinned** so captured file modes don't leak the
-  ambient login umask — that is what makes restore byte-identical not just across hosts but
+  ambient login umask. That is what makes restore byte-identical not just across hosts but
   across runtime tiers.
 - **Encrypt:** Seal-encrypt the snapshot on the client, before it ever touches Walrus. The
   t-of-n threshold is chosen at encryption time (`reeg checkpoint --threshold t`).
 - **Store:** write to Walrus (content-addressed blob storage, resumable upload via the
   upload relay), receive `blob_id`, register against the Machine object.
 - **Restore / move:** on **any** host and **any** runtime tier, pull the blob, decrypt with
-  Seal (if the caller's policy approves), rebuild the workdir from the CAS, and resume —
+  Seal (if the caller's policy approves), rebuild the workdir from the CAS, and resume
   byte-identically, because the content is content-addressed and the capture is
   deterministic. Report any drift against the recorded hashes rather than hiding it.
 
@@ -105,7 +105,7 @@ filesystem workdir plus a manifest and command log, not live memory.
   parent for provable on-chain lineage.
 - `grant` / `revoke`: allowlist plus time-limited expiry, enforced through the Seal access
   policy; each append a `GRANT` / `REVOKE` entry to the provenance chain. Revocation is
-  forward-looking — it cannot un-see data already decrypted.
+  forward-looking: it cannot un-see data already decrypted.
 - **Provenance log:** append-only, hash-chained records; the head lives on the Machine
   object so the chain is tamper-evident and on-chain timestamped.
 
@@ -117,7 +117,7 @@ filesystem workdir plus a manifest and command log, not live memory.
 - Revoke takes effect because the policy stops approving, not because we delete data.
 - The Seal committee threshold (t-of-n) is fixed at **encryption** time, per checkpoint.
 
-### 2.4 Attestation package (on-chain, Move) — optional Nautilus tier
+### 2.4 Attestation package (on-chain, Move): optional Nautilus tier
 
 A strictly additive tier that proves *which code* produced a checkpoint. It changes nothing
 about `machine.move`'s layout or provenance head, so a non-attested run is byte-identical.
@@ -158,7 +158,7 @@ This is what makes a Reeg record provable offline from public Sui + Walrus data 
 with no Reeg backend in the loop. See [data-model.md](data-model.md) for the exact fields.
 
 <p align="center">
-  <img src="diagrams/verification-flow.png" alt="Verification flow: an auditor reads the Machine object and walks the hash-chained provenance from the head, reads the checkpoint blob from Walrus by blob_id, checks blob_id equals hash(ciphertext), checks manifest_hash and workdir_root_hash against the Machine object; all checks pass means VERIFIED, any mismatch means REJECTED — using public data only, with Reeg offline." width="780">
+  <img src="diagrams/verification-flow.png" alt="Verification flow: an auditor reads the Machine object and walks the hash-chained provenance from the head, reads the checkpoint blob from Walrus by blob_id, checks blob_id equals hash(ciphertext), checks manifest_hash and workdir_root_hash against the Machine object; all checks pass means VERIFIED, any mismatch means REJECTED, using public data only, with Reeg offline." width="780">
 </p>
 
 1. **Manifest** describes the environment. Hash it -> `manifest_hash`.
@@ -170,14 +170,14 @@ with no Reeg backend in the loop. See [data-model.md](data-model.md) for the exa
    `provenance_head`, and `parent`, updated only through the Move package.
 5. **Verify (anyone, no Reeg server):** pull `blob_id` from Walrus, recompute
    `manifest_hash` and the working-dir root hash, re-walk the provenance chain to
-   `provenance_head`, and check all three against the Machine object — using **public Sui +
+   `provenance_head`, and check all three against the Machine object, using **public Sui +
    Walrus data only**. Match means the environment and its history are exactly what was
    claimed; `restore()` then mounts it.
 6. **Adversarial guarantee:** tamper with the blob, the manifest, or any log event
    and at least one hash diverges, so verify fails. "It rejects a forged environment"
    is a demo beat, not a claim.
 7. **Optional attestation check:** `@reeg/verify` additionally confirms the enclave's
-   ed25519 signature and that the pinned PCRs match the trusted reproducible build — and
+   ed25519 signature and that the pinned PCRs match the trusted reproducible build, and
    flags all-zero debug-mode PCRs. This raises the bar from "this environment and history
    are authentic" to "this exact code produced this checkpoint," without changing the
    base verification path.
@@ -221,7 +221,7 @@ record-keeping. The EU AI Act's record-keeping duties for high-risk AI systems
 retained over the system's lifecycle. The tamper-evident provenance and evidence
 export Reeg already produces **map to** the shape of those Article 12 record-keeping
 duties, so we treat compliance as a first-class concern, not a bolt-on. (This is
-positioning, not legal advice — Reeg does not make anyone compliant, and we keep the
+positioning, not legal advice: Reeg does not make anyone compliant, and we keep the
 claims honest.)
 
 The important design rule: **the evidence layer adds no new primitives and no new
@@ -233,8 +233,8 @@ content-addressed checkpoints that everything else uses.
   an automatically generated, independently verifiable record. Nothing about checking
   it requires a live or honest Reeg service.
 - **Evidence export (`reeg evidence` / `reeg audit`):** a portable manifest an auditor can
-  keep — Machine id, per-checkpoint `blob_id`s and `manifest_hash`es, the provenance entries
-  with their `entry_hash` chain, and a command-log digest — so the record survives outside
+  keep: Machine id, per-checkpoint `blob_id`s and `manifest_hash`es, the provenance entries
+  with their `entry_hash` chain, and a command-log digest, so the record survives outside
   both Reeg and the Console.
 - **Retention:** retention is a Walrus storage-epoch policy (`--epochs`) plus the permanent
   on-chain provenance head. The retire/lifecycle controls let an operator manage cost while
@@ -256,7 +256,7 @@ data classes. Say that plainly to compliance buyers.
   working key server. On mainnet there is currently no free public Open-mode Seal key server
   (the decentralized committee server is "available soon"; independent providers run
   Permissioned mode requiring signup, and the Ruby Nodes free-tier key currently returns 403
-  from their gateway — a provider-side activation matter, not Reeg's code). So on mainnet,
+  from their gateway, a provider-side activation matter, not Reeg's code). So on mainnet,
   **encryption + storage + anchor + offline verify all work; only decrypt (restore) is
   blocked** until a provider key server is live. The full encrypted
   checkpoint -> restore -> verify loop is proven end-to-end on **testnet**.
@@ -270,7 +270,7 @@ data classes. Say that plainly to compliance buyers.
 
 - **On-chain:** Sui, Move 2024 edition. Live on mainnet and testnet.
 - **SDKs:** `@mysten/sui` 2.17, `@mysten/walrus` 1.1.7, `@mysten/seal` 1.1.3,
-  `@mysten/dapp-kit`, `bcs` — all at npm latest.
+  `@mysten/dapp-kit`, `bcs`: all at npm latest.
 - **Engine:** Rust 1.95, crates `snapshot` / `runtime` / `cli`. The `reeg` TS CLI shells to
   the `reeg-engine` binary for snapshot/restore and, on the Nitro host, the enclave vsock
   client.

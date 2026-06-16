@@ -1,7 +1,7 @@
-# @reeg/web — marketing site (reeg.xyz)
+# @reeg/web: marketing site (reeg.xyz)
 
 The public marketing site for Reeg, infrastructure for portable computing
-environments — we started with AI agents because they're the fastest-growing
+environments. We started with AI agents because they're the fastest-growing
 source of ephemeral work, but the underlying system can preserve and move any
 environment. Separate from the
 Console (`apps/console`, the product at app.reeg.xyz); this is the apex `reeg.xyz`.
@@ -10,10 +10,10 @@ Console (`apps/console`, the product at app.reeg.xyz); this is the apex `reeg.xy
 
 - Next.js (App Router) + React 19 + TypeScript
 - Tailwind v4 (via `@tailwindcss/postcss`) with the brand tokens ported from
-  `apps/console/src/index.css` (see [brand.md](../../brand.md) — the source of truth)
+  `apps/console/src/index.css` (see [brand.md](../../brand.md), the source of truth)
 - Type: **Clash Display** for headlines (self-hosted in `fonts/`, free for commercial use, a
   Neue-Machina-adjacent display face), **Montserrat** for body/UI, **JetBrains Mono** for the
-  terminal/proof panel — wired in `lib/fonts.ts`. To swap in licensed **Neue Machina**, drop its
+  terminal/proof panel, wired in `lib/fonts.ts`. To swap in licensed **Neue Machina**, drop its
   woff2 files in `fonts/` and repoint `clashDisplay.src` in `lib/fonts.ts`; nothing else changes.
 - Motion (`motion/react`) for choreographed, reduced-motion-aware entrances
 

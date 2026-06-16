@@ -75,7 +75,7 @@ export function ProofBand() {
                     <li key={c.name} className="flex gap-2.5">
                       <span className="font-semibold text-verified">ok</span>
                       <span className="text-foreground">{c.name}</span>
-                      <span className="hidden text-muted-foreground sm:inline">— {c.detail}</span>
+                      <span className="hidden text-muted-foreground sm:inline">: {c.detail}</span>
                     </li>
                   ))}
                 </ul>

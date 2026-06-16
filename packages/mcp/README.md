@@ -1,14 +1,14 @@
 # @reeg/mcp
 
 The Reeg [Model Context Protocol](https://modelcontextprotocol.io) server. It exposes every Reeg
-verb as a tool, so any agent — Claude Code, Cursor, a custom agent, an IDE — can create, snapshot,
+verb as a tool, so any agent, Claude Code, Cursor, a custom agent, an IDE, can create, snapshot,
 restore, share, fork, retire, and **verify** agent environments, and everything it does is reeged
 (owned by you on Sui, data on Walrus, independently verifiable). This is the agent-facing surface of
 the architecture in [docs/03-engineering/agent-access.md](../../docs/03-engineering/agent-access.md).
 
 ## Tools
 
-**Read / verify — need no signer, read only public Sui + Walrus (work today, no infrastructure):**
+**Read / verify: need no signer, read only public Sui + Walrus (work today, no infrastructure):**
 
 | Tool | Does |
 |------|------|
@@ -18,7 +18,7 @@ the architecture in [docs/03-engineering/agent-access.md](../../docs/03-engineer
 | `reeg_audit` | Verify an evidence file; `anchor=true` also confirms it against live Sui. |
 | `reeg_list` | List the environments created/restored locally (the chain is authoritative). |
 
-**Write — sign with the operator's local-keystore key today** (the sponsored/delegated signer of
+**Write: sign with the operator's local-keystore key today** (the sponsored/delegated signer of
 agent-access.md slots in behind the same surface later):
 
 | Tool | Does |
@@ -90,10 +90,10 @@ claude mcp add reeg \
 ## Security
 
 - **The private key is never returned.** Write tools sign in memory from the local keystore; tool
-  results carry only object ids, digests, and hashes — never key material. The `reeg_checkpoint`
+  results carry only object ids, digests, and hashes, never key material. The `reeg_checkpoint`
   disaster-recovery backup key is deliberately not surfaced over MCP.
 - **Verification stays backend-free.** `reeg_verify` / `reeg_audit` read only public Sui (+ optional
-  Walrus), so an agent — or an auditor — proves a past run with every Reeg service stopped.
+  Walrus), so an agent, or an auditor, proves a past run with every Reeg service stopped.
 - **stdio is the protocol channel.** All logging goes to stderr; a stray stdout write would corrupt
   the JSON-RPC stream.
 
@@ -101,4 +101,4 @@ claude mcp add reeg \
 
 `reeg_verify`, `reeg_get`, and `reeg_list` are proven end to end against **live mainnet**. Write tools
 sign with the local keystore today; "Sign in with Reeg", sponsored gas, and sponsored storage are the
-next bricks — see [docs/03-engineering/agent-access.md](../../docs/03-engineering/agent-access.md).
+next bricks. See [docs/03-engineering/agent-access.md](../../docs/03-engineering/agent-access.md).

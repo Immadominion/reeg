@@ -9,8 +9,8 @@ on Sui, backed by your own content-addressed data on Walrus, encrypted with Seal
 hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui +
 Walrus data alone, no Reeg backend. The history cannot be rewritten and the environment is yours.
 Reeg is the layer over the sandbox you already use, not a sandbox, a server, or an OS: you run the
-work, Reeg versions and proves what it did. Agents are the wedge — the first place people felt the
-loss — but the same layer preserves, moves, and proves any environment you run.
+work, Reeg versions and proves what it did. Agents are the wedge, the first place people felt the
+loss, but the same layer preserves, moves, and proves any environment you run.
 
 The four pillars: **Own** what you run (an object you hold, not a row you rent). **Share** the live
 workspace, not a transcript. **Move** it (kill it here, bring it back there, identical). **Prove**
@@ -29,17 +29,17 @@ tier.
 
 ## The four pillars
 
-- **Own** — a Machine is an *owned* Sui object (fast path). `create` / `retire`; the
+- **Own**: a Machine is an *owned* Sui object (fast path). `create` / `retire`; the
   owner alone mutates it.
-- **Share** — checkpoints are Seal-encrypted client-side before they ever touch Walrus.
+- **Share**: checkpoints are Seal-encrypted client-side before they ever touch Walrus.
   A shared `AccessPolicy` holds grants; `grant` / `revoke` (allowlist + time-limited
   expiry) append GRANT/REVOKE entries to the provenance chain. The t-of-n Seal threshold
   is set at encryption time; revocation is forward-looking.
-- **Move** — `fork` a Machine from any checkpoint with provable on-chain lineage to the
+- **Move**: `fork` a Machine from any checkpoint with provable on-chain lineage to the
   parent; `restore` a checkpoint on *any* host byte-identically (content-addressed +
   deterministic). Cross-host, cross-runtime-tier portability.
-- **Prove** — a hash-chained, append-only, tamper-evident provenance head on the Machine
-  object, verified offline from public Sui + Walrus alone — plus the optional Nautilus
+- **Prove**: a hash-chained, append-only, tamper-evident provenance head on the Machine
+  object, verified offline from public Sui + Walrus alone, plus the optional Nautilus
   TEE attestation tier that proves *which code* produced a checkpoint.
 
 ---
@@ -105,12 +105,12 @@ tier.
 ## What's shipped
 
 - **On chain (Move 2024).** Machine objects, provenance head, AccessPolicy
-  grant/revoke, and the optional `attestation` module — live on **mainnet** and
+  grant/revoke, and the optional `attestation` module, live on **mainnet** and
   testnet. Move tests 40/40.
 - **Snapshot engine (Rust).** Content-addressed CAS keyed by BLAKE3, deterministic,
   byte-identical restore across hosts *and* runtime tiers (a canonical umask is pinned
   so file modes don't leak the ambient login umask). The Rust engine and TS client meet
-  at one artifact boundary — a manifest + content-addressed files; the engine never
+  at one artifact boundary: a manifest + content-addressed files; the engine never
   imports a chain/storage client.
 - **Runtime tiers (one `Runtime` trait, identical capture + verify path).** Local (dev,
   no isolation); OCI container tier (runc, read-only rootfs, per-session tmpfs,
@@ -122,7 +122,7 @@ tier.
   (~6.5MB `.eif`, identical PCRs across cache-cleared rebuilds) signs a checkpoint's
   manifest hash; `register_enclave` pins the PCRs + ed25519 key on chain, and an offline
   verifier (`@reeg/verify`) confirms the signature against the trusted reproducible
-  build. Strictly additive — a non-attested run is byte-identical. The enclave *attests*
+  build. Strictly additive. A non-attested run is byte-identical. The enclave *attests*
   results; it does not run the agent.
 - **Verification is offline.** `@reeg/verify` (54/54 tests) replays the provenance chain
   and validates attestations using only public Sui + Walrus data.
@@ -156,5 +156,5 @@ status and [data-model.md](02-architecture/data-model.md) for the object model.
    than no docs.
 3. The whitepaper and product vision are the only docs written for outsiders.
    Everything else assumes the reader is on the team.
-4. Keep the honest constraints honest — distinguish what is live on mainnet, proven on
+4. Keep the honest constraints honest: distinguish what is live on mainnet, proven on
    testnet, and aspirational positioning (e.g. EU AI Act framing).

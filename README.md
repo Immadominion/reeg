@@ -12,8 +12,8 @@ can preserve and move any environment.
 
 ## The problem
 
-An AI agent runs for hours and does real work — writes code, moves money, changes
-records. Then the session closes and the environment is **gone**. Not the chat log — the
+An AI agent runs for hours and does real work: writes code, moves money, changes
+records. Then the session closes and the environment is **gone**. Not the chat log, the
 actual working state. It was a row in a vendor's database, deleted on their schedule.
 
 You couldn't keep it, hand the live workspace to a teammate, move it off the vendor, or
@@ -23,27 +23,27 @@ That's the thing Reeg fixes.
 
 ## What you get
 
-Reeg is the layer **over** whatever sandbox you already run — not the sandbox, not a
+Reeg is the layer **over** whatever sandbox you already run, not the sandbox, not a
 server, not an OS. At each commit it snapshots the whole working state, encrypts it on
 your machine, and anchors a record to a Sui object only you control. Four things a folder
 or a vendor dashboard can't give you:
 
-- **Own** — every environment is a Sui `Machine` object you hold, plus your own data on
+- **Own**: every environment is a Sui `Machine` object you hold, plus your own data on
   Walrus. No vendor can change it, lock you out, or delete it.
-- **Share** — hand over the *live* workspace (not a transcript) under an on-chain
+- **Share**: hand over the *live* workspace (not a transcript) under an on-chain
   grant/revoke policy. Fork any good checkpoint to try two directions at once.
-- **Move** — kill it on one host, restore it **byte-identically** on another — across
+- **Move**: kill it on one host, restore it **byte-identically** on another, across
   machines *and* across runtime tiers (local, OCI, Firecracker).
-- **Prove** — an append-only, hash-chained history anyone can verify **offline**, from
+- **Prove**: an append-only, hash-chained history anyone can verify **offline**, from
   public Sui + Walrus data alone. GitHub history can be rewritten; this can't.
 
 ## How it works
 
 <p align="center">
-  <img src="docs/02-architecture/diagrams/system-context.png" alt="Reeg system context: you run the agent in any sandbox; Reeg snapshots the working state, Seal-encrypts it client-side, stores it on Walrus, and anchors the record to a Machine object on Sui — verifiable offline with no Reeg backend." width="840">
+  <img src="docs/02-architecture/diagrams/system-context.png" alt="Reeg system context: you run the agent in any sandbox; Reeg snapshots the working state, Seal-encrypts it client-side, stores it on Walrus, and anchors the record to a Machine object on Sui, verifiable offline with no Reeg backend." width="840">
 </p>
 
-You run the agent in whatever runner you like — Reeg's local engine, an OCI container, a
+You run the agent in whatever runner you like: Reeg's local engine, an OCI container, a
 Firecracker microVM, or a third-party cloud. Reeg waits at the commit boundary:
 
 **snapshot** → **Seal-encrypt** (on your machine) → **store on Walrus** (content-addressed
@@ -52,7 +52,7 @@ Firecracker microVM, or a third-party cloud. Reeg waits at the commit boundary:
 `restore` reverses it on any host. The capture is content-addressed (BLAKE3) and
 deterministic (canonical umask, neutralized timestamps and ownership), which is what makes
 a restore byte-identical across hosts and runtime tiers. **Nothing about verifying a past
-run requires a live or honest Reeg service** — the Console is static, the indexer is
+run requires a live or honest Reeg service**: the Console is static, the indexer is
 rebuildable, and `verify` reads only public Sui + Walrus.
 
 → Full walk-through, component by component:
@@ -100,19 +100,19 @@ reeg enclave register                                        # verify the enclav
 reeg checkpoint <machineId> --attest --enclave-config <id>   # enclave signs the checkpoint
 ```
 
-`@reeg/verify` confirms it offline — the on-chain signature plus PCRs matching the
+`@reeg/verify` confirms it offline: the on-chain signature plus PCRs matching the
 reproducible build. It's strictly additive: a checkpoint without `--attest` is
 byte-identical.
 
 ## Proof it's real
 
-- **Live on Sui mainnet** — package `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`
+- **Live on Sui mainnet**: package `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`
   (testnet `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`).
-- **Measured cost** — ~0.0099 SUI + ~0.0119 WAL per create + encrypted checkpoint (1 epoch,
+- **Measured cost**: ~0.0099 SUI + ~0.0119 WAL per create + encrypted checkpoint (1 epoch,
   incl. the Walrus upload-relay tip).
-- **Green in CI** — Move 40/40 (incl. attestation with a real ed25519 vector), `@reeg/verify`
+- **Green in CI**: Move 40/40 (incl. attestation with a real ed25519 vector), `@reeg/verify`
   54/54, `@reeg/chain` 21/21, `@reeg/crypto` 8/8 (cross-language vs the Move vector).
-- **Verified on a real AWS KVM host** (c8i.2xlarge) — Firecracker 8/8 + jailer, OCI 3/3,
+- **Verified on a real AWS KVM host** (c8i.2xlarge): Firecracker 8/8 + jailer, OCI 3/3,
   lib 11/11; Phase M hardening 19/19. Reproducible enclave: identical PCRs across
   cache-cleared rebuilds.
 
@@ -124,7 +124,7 @@ byte-identical.
 ## Repo layout
 
 A pnpm + Turborepo monorepo. The Rust engine and the TypeScript client meet at exactly one
-artifact boundary — a manifest plus content-addressed files — so the same captured
+artifact boundary (a manifest plus content-addressed files) so the same captured
 environment crosses hosts and runtime tiers byte-identically.
 
 | Path | What | Language |
@@ -138,10 +138,10 @@ environment crosses hosts and runtime tiers byte-identically.
 | [packages/verify/](packages/verify/) | the independent offline verifier (provenance + attestation) | TypeScript |
 | [packages/sdk/](packages/sdk/) | public SDK tying the adapters together | TypeScript |
 | [packages/cli/](packages/cli/) | the `reeg` CLI | TypeScript |
-| [packages/mcp/](packages/mcp/) | MCP server — drive Reeg from an agent | TypeScript |
+| [packages/mcp/](packages/mcp/) | MCP server: drive Reeg from an agent | TypeScript |
 | [apps/console/](apps/console/) | the Console, deployed as a static Walrus Site | TypeScript / React |
 | [apps/web/](apps/web/) | the marketing site ([reeg.xyz](https://reeg.xyz)) | TypeScript / Next.js |
-| [apps/api/](apps/api/) | Enoki-sponsored paymaster — gas-free zkLogin actions | TypeScript |
+| [apps/api/](apps/api/) | Enoki-sponsored paymaster: gas-free zkLogin actions | TypeScript |
 | [apps/indexer/](apps/indexer/) | display-only indexer, rebuildable from chain events | TypeScript |
 | [config/](config/) | per-network config (testnet, mainnet) | JSON |
 
@@ -161,16 +161,16 @@ sui move build --path move                       # the Move package
 
 ## Docs
 
-Everything — product, architecture, business, and the whitepaper — lives in
+Everything (product, architecture, business, and the whitepaper) lives in
 **[docs/](docs/README.md)**. Good places to start:
 
-- [Product vision](docs/00-overview/product-vision.md) — what Reeg is, who it's for, why it exists.
-- [System architecture](docs/02-architecture/system-architecture.md) — how it's built, with diagrams.
-- [Positioning](docs/00-overview/positioning.md) — the canonical one-liner and the four pillars.
-- [Whitepaper](docs/whitepaper/reeg-whitepaper.md) — the full technical and product case.
-- [Build roadmap](docs/03-engineering/build-roadmap.md) — the build sequence and what's done.
+- [Product vision](docs/00-overview/product-vision.md): what Reeg is, who it's for, why it exists.
+- [System architecture](docs/02-architecture/system-architecture.md): how it's built, with diagrams.
+- [Positioning](docs/00-overview/positioning.md): the canonical one-liner and the four pillars.
+- [Whitepaper](docs/whitepaper/reeg-whitepaper.md): the full technical and product case.
+- [Build roadmap](docs/03-engineering/build-roadmap.md): the build sequence and what's done.
 
 ---
 
 *Reeg is the layer over the sandbox you already use. You run the agent; Reeg versions and
-proves what it did — and the environment is yours, on no one's server.*
+proves what it did; and the environment is yours, on no one's server.*

@@ -1,4 +1,4 @@
-// The docs information architecture — client-safe (NO node:fs here, since the sidebar is a client
+// The docs information architecture: client-safe (NO node:fs here, since the sidebar is a client
 // component). The fs reader lives in docs-content.ts. Adding a page = an entry here + a
 // content/docs/<slug>.md file.
 export type DocPage = { slug: string; title: string; blurb?: string };

@@ -65,7 +65,7 @@ minimum period (at least six months for the high-risk classes).
 ## Honest limits
 
 - **Records, not a data-custody vault.** The compliance value is auditable, tamper-evident records
-  of work in a computing environment — agent runs are the first use case, but the same record covers
+  of work in a computing environment: agent runs are the first use case, but the same record covers
   any environment a regulated buyer must stand behind. Reeg is not a regulated PHI or classified-data
   custody vault; Seal is not designed for data whose mere existence is a breach. Say that plainly to
   compliance buyers.

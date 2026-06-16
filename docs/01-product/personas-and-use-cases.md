@@ -2,7 +2,7 @@
 
 Who Reeg is for, in their own words, and the concrete jobs they hire Reeg to do. Use these when writing copy, prioritizing features, or judging whether a request fits. Terms are defined in [glossary.md](../00-overview/glossary.md).
 
-Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. AI-agent operators lead here because they are the fastest-growing source of work worth keeping, sharing, and standing behind — that is the wedge, not the ceiling. Reeg versions and proves the environments it moves: the same own / share / move / prove holds for any environment you run — a CI run, an eval or research environment, a data pipeline, or any reproducible workspace worth keeping. The personas below put agents first; the [non-agent use cases](#non-agent-environments-same-layer) section carries the same jobs one layer wider.
+Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. AI-agent operators lead here because they are the fastest-growing source of work worth keeping, sharing, and standing behind: that is the wedge, not the ceiling. Reeg versions and proves the environments it moves: the same own / share / move / prove holds for any environment you run: a CI run, an eval or research environment, a data pipeline, or any reproducible workspace worth keeping. The personas below put agents first; the [non-agent use cases](#non-agent-environments-same-layer) section carries the same jobs one layer wider.
 
 ## Primary personas
 
@@ -84,10 +84,10 @@ Hits FR-4, FR-9, NFR-2. Proves the org-level value: no lock-in, evidence on dema
 
 Agents are first, not last. The layer underneath was never agent-specific: it snapshots, encrypts, anchors, and restores a working environment whether an agent, a CI job, an eval harness, or a person at a keyboard produced it. The same own / share / move / prove jobs carry to:
 
-- **CI / build runs** — own the exact environment a build happened in, restore it byte-identically to reproduce a failure on another host, and hand a verifier a tamper-evident record of what ran.
-- **Eval and research environments** — checkpoint a known-good experiment setup, fork it to run two directions at once, and prove to a reviewer the precise state a result came from.
-- **Data pipelines** — snapshot the working state at each stage, move it off one vendor to another host, and anchor an append-only history a downstream consumer can verify offline.
-- **Any reproducible workspace worth keeping** — a person at a keyboard, not just an agent. If the environment is worth keeping, sharing, moving, or standing behind, the same four pillars apply.
+- **CI / build runs**: own the exact environment a build happened in, restore it byte-identically to reproduce a failure on another host, and hand a verifier a tamper-evident record of what ran.
+- **Eval and research environments**: checkpoint a known-good experiment setup, fork it to run two directions at once, and prove to a reviewer the precise state a result came from.
+- **Data pipelines**: snapshot the working state at each stage, move it off one vendor to another host, and anchor an append-only history a downstream consumer can verify offline.
+- **Any reproducible workspace worth keeping**: a person at a keyboard, not just an agent. If the environment is worth keeping, sharing, moving, or standing behind, the same four pillars apply.
 
 These are the same FRs (FR-1 to FR-17) and the same C1–C4 claims; only the source of the work changes. Agents lead because they are where ephemeral work is exploding and where people first feel the loss.
 

@@ -13,7 +13,7 @@ fork it, hand it to a teammate, and move it byte-for-byte across hosts. The thin
 pays for is owning the place their work happened instead of renting it and losing it.
 Verifiable proof of what happened rides along for free, and becomes the thing compliance
 buyers pay extra for. We lead with agents because they're the fastest-growing source of work
-worth keeping, sharing, and standing behind — but the same own / share / move / prove sells
+worth keeping, sharing, and standing behind. But the same own / share / move / prove sells
 for any environment a customer runs: a CI run, an eval or research environment, a data
 pipeline, or any reproducible workspace worth keeping.
 
@@ -52,7 +52,7 @@ We do not monetize by holding the customer's data hostage. The record is owner-c
 
 Centralized sandbox vendors (for example Daytona, E2B, Blackbox) run agents, snapshot
 them, and restore them, and some market "audit logs" and "no black boxes." We do not
-compete with the sandbox — Reeg is the layer over it: infrastructure for portable
+compete with the sandbox. Reeg is the layer over it: infrastructure for portable
 computing environments that version-controls and proves the working state, agents first.
 Our line, repeated everywhere: their
 environment lives in their database and you rent it; Reeg's environment is an object you

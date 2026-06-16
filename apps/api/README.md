@@ -1,8 +1,8 @@
-# @reeg/api — the Reeg paymaster
+# @reeg/api: the Reeg paymaster
 
 The only privileged Reeg service. Today it sponsors **Sui gas** for Reeg's own package functions
 through Enoki's managed gas pool, so an end user or agent never holds SUI. Next: zkLogin helpers,
-sponsored **Walrus storage** (a server-held WAL signer), and metering/billing — see
+sponsored **Walrus storage** (a server-held WAL signer), and metering/billing. See
 [docs/03-engineering/agent-access.md](../../docs/03-engineering/agent-access.md).
 
 **It is privileged but not _trusted_.** Verification never depends on it: a past run still verifies
@@ -13,7 +13,7 @@ and is never returned to the client.
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
-| `GET` | `/health` | — | readiness + config echo (never the key) |
+| `GET` | `/health` | - | readiness + config echo (never the key) |
 | `POST` | `/sponsor` | `{ transactionKindBytes, sender }` | `{ bytes, digest }` |
 | `POST` | `/execute` | `{ digest, signature }` | `{ digest }` |
 
@@ -27,7 +27,7 @@ and is never returned to the client.
 3. The client signs `bytes` with its own (zkLogin) key → `signature`.
 4. `POST /execute` `{ digest, signature }` → Enoki executes and pays the gas; returns `{ digest }`.
 
-## Configuration (env — see `.env.example`)
+## Configuration (env, see `.env.example`)
 
 | Var | Meaning |
 |-----|---------|
@@ -50,5 +50,5 @@ pnpm --filter @reeg/api dev              # tsx watch, http://localhost:8787
 curl localhost:8787/health
 ```
 
-Deploy target (Railway / Vercel Functions / any Node host) is not wired yet — it's a plain
+Deploy target (Railway / Vercel Functions / any Node host) is not wired yet: it's a plain
 `@hono/node-server` app, portable to all three.

@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn';
 // Renders a docs markdown string in the Reeg design system. Every element is mapped to brand
 // tokens (orange accent, Clash Display headings via the base layer, hairline borders, mono code),
 // so docs read as native reeg.xyz, not a generic prose dump. Raw HTML (centered diagram images)
-// is allowed via rehype-raw — the content is our own, not user input.
+// is allowed via rehype-raw: the content is our own, not user input.
 const components: Components = {
   h1: ({ node, ...p }) => (
     <h1 className="mb-4 mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl" {...p} />

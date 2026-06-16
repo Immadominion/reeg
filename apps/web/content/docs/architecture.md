@@ -2,7 +2,7 @@
 
 How Reeg is built, component by component, and why a record it produces is provable offline from public data alone.
 
-Every important thing in computing became portable — files (Dropbox), code (Git), containers (Docker), data — but not the environment itself. Reeg makes environments portable. It is the layer *over* the sandbox you already use: you run the work, Reeg versions the whole working state and proves what it did. Agents are the wedge — they are the fastest-growing source of ephemeral work — but the system underneath can preserve and move any environment.
+Every important thing in computing became portable, files (Dropbox), code (Git), containers (Docker), data, but not the environment itself. Reeg makes environments portable. It is the layer *over* the sandbox you already use: you run the work, Reeg versions the whole working state and proves what it did. Agents are the wedge, they are the fastest-growing source of ephemeral work, but the system underneath can preserve and move any environment.
 
 Reeg is live on Sui mainnet. The mainnet Machine package is `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`; the testnet package is `0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2`. A measured create plus encrypted checkpoint (1 epoch, including the Walrus upload-relay tip) costs about 0.0099 SUI and 0.0119 WAL.
 
@@ -13,7 +13,7 @@ A real OS is a filesystem, processes, permissions, and persistent state. Reeg bu
 | OS concept | Built on | What you get |
 |---|---|---|
 | Disk / filesystem | Walrus blob | environment state as content-addressed data you own |
-| Kernel / permissions | Sui `Machine` object | who can read, fork, run, get paid — programmable |
+| Kernel / permissions | Sui `Machine` object | who can read, fork, run, get paid: programmable |
 | Encryption | Seal | encrypted on your machine before it leaves |
 | Processes | `Runtime` trait | one interface; the isolation tier is swappable |
 | Syscall log | Sui-anchored records | a verifiable log of what the env held and what ran |
@@ -33,9 +33,9 @@ Two concerns live here and they are deliberately decoupled: the isolation bounda
 
 <p align="center"><img src="/docs/diagrams/snapshot-restore-sequence.png" alt="Snapshot and restore sequence: capture the working directory into a BLAKE3 content-addressed store with a canonical manifest, Seal-encrypt, upload to Walrus, anchor blob_id and manifest_hash on Sui; restore pulls the blob, decrypts, and rebuilds the workdir byte-identically on any host." width="820"></p>
 
-The engine captures the filesystem workdir plus a manifest and command log, not live memory. Live process migration (CRIU-style) is fragile by nature — it needs identical libraries and paths on the target. Capturing the workdir is what makes restore portable.
+The engine captures the filesystem workdir plus a manifest and command log, not live memory. Live process migration (CRIU-style) is fragile by nature: it needs identical libraries and paths on the target. Capturing the workdir is what makes restore portable.
 
-- **Content-addressed store.** Capture the working directory — plus an optional agent memory dir, so `memory_pointer` round-trips — into a CAS keyed by BLAKE3, alongside a manifest (env vars, tool list, memory pointer, working-dir root hash). The manifest is serialized canonically with stable ordering and neutralized timestamps and uid/gid, so the same input always yields the same `manifest_hash`. A canonical umask is pinned so captured file modes don't leak the ambient login umask. That is what makes restore byte-identical across hosts *and* across runtime tiers.
+- **Content-addressed store.** Capture the working directory, plus an optional agent memory dir, so `memory_pointer` round-trips, into a CAS keyed by BLAKE3, alongside a manifest (env vars, tool list, memory pointer, working-dir root hash). The manifest is serialized canonically with stable ordering and neutralized timestamps and uid/gid, so the same input always yields the same `manifest_hash`. A canonical umask is pinned so captured file modes don't leak the ambient login umask. That is what makes restore byte-identical across hosts *and* across runtime tiers.
 - **Encrypt.** Seal-encrypts the snapshot on the client before it touches Walrus. The t-of-n threshold is chosen at encryption time (`--threshold t`).
 - **Store.** Writes to Walrus content-addressed blob storage via the resumable upload relay, receives a `blob_id`, and registers it against the Machine object.
 - **Restore / move.** On any host and any runtime tier, pull the blob, decrypt with Seal if policy approves, rebuild the workdir from the CAS, and resume byte-identically. Drift is reported against recorded hashes, never hidden.
@@ -52,27 +52,27 @@ The Firecracker, OCI, and jailer tiers are verified on a real AWS KVM host: `fir
 
 ### Machine package (Move)
 
-- **`Machine` object** — an owned Sui object (`AddressOwner`) holding `owner`, current `blob_id`, `manifest_hash`, `provenance_head`, `parent`, and a policy reference. The owner alone mutates it; `create` and `retire` bookend its lifecycle.
-- **`fork`** — clones a Machine from any checkpoint into a new Machine, recording the parent for provable on-chain lineage.
-- **`grant` / `revoke`** — an allowlist plus time-limited expiry, enforced through the Seal access policy. Each appends a `GRANT` or `REVOKE` entry to the provenance chain. Revocation is forward-looking; it cannot un-see data already decrypted.
-- **Provenance log** — append-only, hash-chained records whose head lives on the Machine object, so the chain is tamper-evident and on-chain timestamped.
+- **`Machine` object:** an owned Sui object (`AddressOwner`) holding `owner`, current `blob_id`, `manifest_hash`, `provenance_head`, `parent`, and a policy reference. The owner alone mutates it; `create` and `retire` bookend its lifecycle.
+- **`fork`:** clones a Machine from any checkpoint into a new Machine, recording the parent for provable on-chain lineage.
+- **`grant` / `revoke`:** an allowlist plus time-limited expiry, enforced through the Seal access policy. Each appends a `GRANT` or `REVOKE` entry to the provenance chain. Revocation is forward-looking; it cannot un-see data already decrypted.
+- **Provenance log:** append-only, hash-chained records whose head lives on the Machine object, so the chain is tamper-evident and on-chain timestamped.
 
 ### Seal access policy (Move)
 
 `seal_approve*` functions on a shared `AccessPolicy` object define who may decrypt a Machine's checkpoints: owner-only by default, allowlist for a shared Machine, time-limited expiry for a collaborator. Revoke takes effect because the policy stops approving, not because data is deleted. The Seal committee threshold is fixed per checkpoint at encryption time.
 
-### Attestation package (Move) — optional Nautilus tier
+### Attestation package (Move): optional Nautilus tier
 
 A strictly additive tier that proves *which code* produced a checkpoint. It changes nothing about the Machine layout or provenance head, so a non-attested run is byte-identical.
 
 - `register_enclave` verifies an AWS Nitro attestation document via `0x2::nitro_attestation` and pins the enclave's PCRs and ed25519 public key into a shared `EnclaveConfig`, once per reproducible build.
 - `register_attested_command` cheaply ed25519-verifies a per-checkpoint signature over the manifest hash and emits a `CommandAttested` event.
 
-This is live on testnet and mainnet; live `EnclaveConfig`s verify offline 4/4 on both networks. A tiny reproducible Nitro enclave (musl-static, about 6.5 MB `.eif`, identical PCRs across cache-cleared rebuilds) attests results — it does not run the agent. The agent stays in the Firecracker VM, which preserves portability and offline verification.
+This is live on testnet and mainnet; live `EnclaveConfig`s verify offline 4/4 on both networks. A tiny reproducible Nitro enclave (musl-static, about 6.5 MB `.eif`, identical PCRs across cache-cleared rebuilds) attests results. It does not run the agent. The agent stays in the Firecracker VM, which preserves portability and offline verification.
 
 ### Console (Walrus Site)
 
-A static React 19 + Vite site served from Walrus that reads Sui objects and Walrus blobs directly. It shows the provenance head and log, checkpoint detail, `blob_id` badges, the verify action, live grant/revoke, and fork lineage. It has no privileged backend — anything the Console can show, a third party can reproduce. That is what makes Reeg a neutral recorder rather than a vendor dashboard.
+A static React 19 + Vite site served from Walrus that reads Sui objects and Walrus blobs directly. It shows the provenance head and log, checkpoint detail, `blob_id` badges, the verify action, live grant/revoke, and fork lineage. It has no privileged backend. Anything the Console can show, a third party can reproduce. That is what makes Reeg a neutral recorder rather than a vendor dashboard.
 
 ## The verification chain (the moat)
 
@@ -95,7 +95,7 @@ verify(machine, walrus):
   # public Sui + Walrus data only, Reeg offline
 ```
 
-Tamper with the blob, the manifest, or any log event and at least one hash diverges, so verify fails. "It rejects a forged environment" is a demo beat, not a claim. Optionally, `@reeg/verify` also confirms the enclave's ed25519 signature and that the pinned PCRs match the trusted reproducible build — flagging all-zero debug-mode PCRs — which raises the bar from "this environment and history are authentic" to "this exact code produced this checkpoint."
+Tamper with the blob, the manifest, or any log event and at least one hash diverges, so verify fails. "It rejects a forged environment" is a demo beat, not a claim. Optionally, `@reeg/verify` also confirms the enclave's ed25519 signature and that the pinned PCRs match the trusted reproducible build, flagging all-zero debug-mode PCRs, which raises the bar from "this environment and history are authentic" to "this exact code produced this checkpoint."
 
 ## Trust boundaries
 

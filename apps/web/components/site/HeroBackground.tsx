@@ -1,14 +1,14 @@
-// Cinematic dark hero background — the "well/funnel" inspired by the Molithra web3 hero, recast in
+// Cinematic dark hero background: the "well/funnel" inspired by the Molithra web3 hero, recast in
 // Reeg's cool blue→indigo→violet tones. Pure CSS, no SVG, no JS, no assets.
 //
 // Technique ("css-perspective-grid"), three stacked decorative layers, back-to-front:
-//   1) The lit "rim/horizon" — layered radial gradients near the top sweep blue→indigo→violet so the
+//   1) The lit "rim/horizon": layered radial gradients near the top sweep blue→indigo→violet so the
 //      upper edge glows like light spilling over the lip of a pit.
-//   2) The receding floor — a single grid plane (repeating linear-gradients) tilted with
+//   2) The receding floor: a single grid plane (repeating linear-gradients) tilted with
 //      transform: perspective() rotateX() so the lines converge toward a vanishing point. A
 //      mask-image fades the plane out at the far edge and at both sides, so it reads as a floor
 //      dropping into darkness rather than a flat sheet, and never spills to cause h-scroll.
-//   3) The "pit" vignette — a central radial fade to near-black that keeps the headline area dark
+//   3) The "pit" vignette: a central radial fade to near-black that keeps the headline area dark
 //      enough for white text (WCAG AA) and visually swallows the grid as it recedes.
 //
 // Placement: drop inside a position:relative hero; content/panel render ABOVE it. Root is absolute
@@ -23,7 +23,7 @@ export function HeroBackground({ className }: { className?: string }) {
     >
       <style>{reegHeroBackgroundCss}</style>
 
-      {/* Layer 1 — the lit rim/horizon. Three offset elliptical glows (blue, indigo, violet) hug the
+      {/* Layer 1: the lit rim/horizon. Three offset elliptical glows (blue, indigo, violet) hug the
           top edge and bleed down a little. opacity keeps them as light, not paint. The wide negative
           insets let the glow originate just off-canvas so the rim feels lit from beyond the frame. */}
       <div className="reeg-hb-rim absolute inset-x-[-30%] top-[-22%] h-[78%] reeg-hb-drift">
@@ -50,14 +50,14 @@ export function HeroBackground({ className }: { className?: string }) {
         />
       </div>
 
-      {/* Layer 2 — the receding grid floor. The wrapper sets the 3D perspective; the inner plane is
+      {/* Layer 2: the receding grid floor. The wrapper sets the 3D perspective; the inner plane is
           rotated back so the parallel grid lines converge. Masked to fade at the far (top) edge and
           at both flanks so it dissolves into the dark instead of ending in a hard line. */}
       <div className="reeg-hb-stage absolute inset-x-0 bottom-0 top-[34%]">
         <div className="reeg-hb-grid reeg-hb-drift-slow absolute inset-x-[-50%] bottom-[-40%] top-0" />
       </div>
 
-      {/* Layer 3a — the central "pit": a radial vignette to near-black that keeps the headline band
+      {/* Layer 3a: the central "pit": a radial vignette to near-black that keeps the headline band
           (≈30–55% from top, centered) dark and legible, and deepens the funnel's throat. */}
       <div
         className="absolute inset-0"
@@ -67,7 +67,7 @@ export function HeroBackground({ className }: { className?: string }) {
         }}
       />
 
-      {/* Layer 3b — a focused dark core exactly under the headline, so white type always clears AA
+      {/* Layer 3b: a focused dark core exactly under the headline, so white type always clears AA
           regardless of where the rim glow lands. Multiply-free, just a soft near-black radial. */}
       <div
         className="absolute inset-0"
@@ -77,7 +77,7 @@ export function HeroBackground({ className }: { className?: string }) {
         }}
       />
 
-      {/* Layer 3c — bottom grounding fade so the floor melts cleanly into the page below. */}
+      {/* Layer 3c: bottom grounding fade so the floor melts cleanly into the page below. */}
       <div
         className="absolute inset-x-0 bottom-0 h-[40%]"
         style={{
@@ -134,7 +134,7 @@ const reegHeroBackgroundCss = `
   will-change: transform;
 }
 
-/* Ambient breathing — transform/opacity only, glacial and subtle, so the rim feels alive without
+/* Ambient breathing: transform/opacity only, glacial and subtle, so the rim feels alive without
    ever drawing attention. Disabled entirely under reduced-motion below. */
 @keyframes reeg-hb-breathe {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }

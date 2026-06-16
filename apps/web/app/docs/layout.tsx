@@ -5,7 +5,7 @@ import { Nav } from '@/components/site/Nav';
 import { Container } from '@/components/ui/Container';
 
 // The docs shell: the site nav on top, a sticky sidebar on desktop (a disclosure on mobile), the
-// page content, and the shared footer — so /docs reads as the same product as the rest of reeg.xyz.
+// page content, and the shared footer, so /docs reads as the same product as the rest of reeg.xyz.
 export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
     <>

@@ -6,14 +6,14 @@ Read [product-vision.md](../00-overview/product-vision.md) first for the why. Re
 
 ## 1. Problem statement, restated as requirements
 
-An AI agent does real work in a sandbox you don't own and can't keep. Today that sandbox is rented and gone when the session ends. The operator does not own the environment, cannot share or fork it as-is, cannot move it off the vendor, and nobody outside the vendor can prove what happened inside it. The loss is the same wearing many faces — you didn't own the environment. Reeg is infrastructure for portable computing environments (not the compute, not a server, not an OS): it sits over that sandbox and must make the environment owned and shareable, portable across hosts, and provable by any outsider. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment — that is the wedge. The same requirements hold for any environment you run: a CI run, an eval or research environment, a data pipeline, or any reproducible workspace worth keeping.
+An AI agent does real work in a sandbox you don't own and can't keep. Today that sandbox is rented and gone when the session ends. The operator does not own the environment, cannot share or fork it as-is, cannot move it off the vendor, and nobody outside the vendor can prove what happened inside it. The loss is the same wearing many faces: you didn't own the environment. Reeg is infrastructure for portable computing environments (not the compute, not a server, not an OS): it sits over that sandbox and must make the environment owned and shareable, portable across hosts, and provable by any outsider. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment: that is the wedge. The same requirements hold for any environment you run: a CI run, an eval or research environment, a data pipeline, or any reproducible workspace worth keeping.
 
-Four claims must hold, and every requirement traces back to one of them. They are the four pillars — own / share / move / prove. Lead with C1 and C2 (the adoption wedge); C3 and C4 are what ownership makes possible. Stated for AI agents first, but true of any environment you run:
+Four claims must hold, and every requirement traces back to one of them. They are the four pillars: own / share / move / prove. Lead with C1 and C2 (the adoption wedge); C3 and C4 are what ownership makes possible. Stated for AI agents first, but true of any environment you run:
 
 - C1 Owned: the operator controls the environment and who can read or run it, not Reeg. The environment is an object you hold, not a row you rent.
 - C2 Shareable: a whole environment can be handed to a teammate or forked from a checkpoint, because it is owned data, not a vendor row.
 - C3 Portable: a run can be checkpointed and restored byte-identically on a different host.
-- C4 Provable: an outsider can verify what happened with the Reeg server offline. It comes for free from C1, and it is the lead differentiator, the tamper-proof history GitHub and vendor logs cannot give you — Git history can be rewritten and this cannot.
+- C4 Provable: an outsider can verify what happened with the Reeg server offline. It comes for free from C1, and it is the lead differentiator, the tamper-proof history GitHub and vendor logs cannot give you. Git history can be rewritten and this cannot.
 
 ## 2. Functional requirements
 

@@ -1,4 +1,4 @@
-// The hero's atmosphere, lifted to page level so it sits BEHIND the (transparent) header — the body
+// The hero's atmosphere, lifted to page level so it sits BEHIND the (transparent) header. The body
 // reads as one continuous surface the header floats on. A soft, grainy multi-hue aurora (brand blue
 // anchored, with a quiet violet and rose) over a faint blueprint grid, finished with a film-grain
 // overlay so the gradient reads as textured "noise" rather than a flat wash. Self-contained
@@ -10,7 +10,7 @@ export function TopGlow() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[880px] overflow-hidden"
     >
-      {/* Aurora blooms — brand blue carries it; violet + rose add the soft colored "noise". */}
+      {/* Aurora blooms: brand blue carries it; violet + rose add the soft colored "noise". */}
       <div
         className="absolute left-1/2 top-[-150px] h-[560px] w-[1100px] max-w-[150vw] -translate-x-1/2 rounded-full opacity-[0.18] blur-[4px]"
         style={{ background: 'radial-gradient(closest-side, var(--accent), transparent)' }}
@@ -27,7 +27,7 @@ export function TopGlow() {
       {/* Faint blueprint grid, masked to fade out below the fold and at the edges. */}
       <div className="bg-grid absolute inset-0 opacity-[0.5] [mask-image:radial-gradient(ellipse_60%_56%_at_50%_0%,black,transparent)]" />
 
-      {/* Film grain — a tiny static feTurbulence tile that rasterizes once; turns the gradient into
+      {/* Film grain: a tiny static feTurbulence tile that rasterizes once; turns the gradient into
           textured noise and kills banding. */}
       <svg className="absolute inset-0 h-full w-full opacity-[0.04] mix-blend-soft-light">
         <title>grain</title>

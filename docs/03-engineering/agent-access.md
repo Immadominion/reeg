@@ -6,7 +6,7 @@ an agent at. None of it is built yet; this doc is the design and the provisionin
 
 Reeg is infrastructure for portable computing environments. We started with AI agents because they're
 the fastest-growing source of ephemeral work, but the underlying system can preserve and move any
-environment. Agents are the wedge for that broader category, not the ceiling — this doc covers the
+environment. Agents are the wedge for that broader category, not the ceiling. This doc covers the
 agent-access path specifically, but the same identity, delegation, and sponsorship model serves any
 environment a user runs.
 
@@ -80,7 +80,7 @@ existing `AccessPolicy` `revoke` still applies forward-looking.
 Two separate costs, two separate sponsors, both fronted by Reeg and billed back:
 
 - **Sui gas → Enoki gas station (sponsored transactions).** Enoki *manages* the sponsor key and gas
-  pool — there is no self-held sponsor wallet; Reeg funds a budget through the Enoki portal (fiat) and
+  pool: there is no self-held sponsor wallet; Reeg funds a budget through the Enoki portal (fiat) and
   allowlists *only its own package's functions* (`create`, `checkpoint` anchor, `grant`, `fork`, …).
   The agent signs the transaction kind; Enoki's sponsor signs and pays the gas. Allowlisting the
   package functions doubles as a spend guard: only Reeg operations are ever sponsored.
@@ -105,12 +105,12 @@ Reeg operations as tools. This is how "the agent does the work and it's reeged" 
 - `reeg_checkpoint`/`reeg_restore` still need the local engine binary (they pack/unpack the working
   directory); the MCP shells to it like the CLI does, and degrades to chain-only tools where it is absent.
 
-This is the **first buildable brick** — the read/verify tools work today with zero new infrastructure.
+This is the **first buildable brick**: the read/verify tools work today with zero new infrastructure.
 
 ## 5. Metering and billing
 
 Reeg meters what it sponsors (checkpoints, bytes, epochs, gas) and bills the customer in fiat/credits
-with margin — the usage-based model already in [../05-business/business-model.md](../05-business/business-model.md).
+with margin, the usage-based model already in [../05-business/business-model.md](../05-business/business-model.md).
 Customer pays Reeg dollars; Reeg pays the chain. Add per-account sponsorship caps to bound abuse.
 
 ## 6. The invariant boundary (load-bearing)
@@ -123,7 +123,7 @@ what an agent did. If a design ever makes verification depend on the Reeg backen
 
 ## 7. What you must provision (only you can do these)
 
-> **Plan note (verified 2026-06-13).** Enoki's **free (Sandbox) plan is testnet/devnet only** — no
+> **Plan note (verified 2026-06-13).** Enoki's **free (Sandbox) plan is testnet/devnet only**: no
 > mainnet apps, no mainnet sponsorship. Build and prove the whole flow on **testnet for free**; going
 > to mainnet is a billing step, not a rebuild: mainnet sign-in needs Enoki **Starter (~$69/mo)** and
 > sponsored mainnet gas needs **Professional (~$120/mo)** or the **sponsored-transactions bundle**.
@@ -133,23 +133,23 @@ what an agent did. If a design ever makes verification depend on the Reeg backen
    server env only). Configure the allowed package + functions on the private key.
 2. **OAuth client IDs** for zkLogin providers (at least Google: a "Web application" OAuth client),
    registered with Enoki under Auth Providers.
-3. **An Enoki budget for Sui gas** — Enoki *manages* the sponsor pool (no self-held keypair); you fund
+3. **An Enoki budget for Sui gas**: Enoki *manages* the sponsor pool (no self-held keypair); you fund
    a budget in the portal (mainnet = paid plan). Testnet gas is free.
-4. **A funded Reeg storage wallet** for Walrus — a real backend Ed25519 keypair (a server secret, not a
+4. **A funded Reeg storage wallet** for Walrus: a real backend Ed25519 keypair (a server secret, not a
    browser wallet) that signs blob writes, holding WAL (+ a little SUI). Testnet: fund free via faucet +
    `walrus get-wal`. Mainnet: buy WAL (DEX/CEX) and send it to the address.
 5. A minimal **backend host** for the paymaster + metering (the only privileged service; keep it small).
 
 ## 8. Build sequence
 
-1. ~~**Reeg MCP** (`@reeg/mcp`)~~ — **DONE.** All 13 verbs are MCP tools; `reeg_verify` / `reeg_get` /
+1. ~~**Reeg MCP** (`@reeg/mcp`)~~: **DONE.** All 13 verbs are MCP tools; `reeg_verify` / `reeg_get` /
    `reeg_list` are proven against **live mainnet** (backend offline), write tools sign with the local
    keystore today. See [`packages/mcp`](../../packages/mcp/README.md).
-2. **Sign in with Reeg** (Enoki zkLogin) in the Console — needs the Enoki public key + Google OAuth.
-3. **Sponsored gas** (Enoki gas station) for Reeg's package functions — needs the Enoki budget (paid on
+2. **Sign in with Reeg** (Enoki zkLogin) in the Console: needs the Enoki public key + Google OAuth.
+3. **Sponsored gas** (Enoki gas station) for Reeg's package functions: needs the Enoki budget (paid on
    mainnet) + the package-function allowlist.
-4. **Sponsored storage** (the paymaster signer for WAL) — needs the storage wallet + the small backend.
-5. **Agent credential issuance + metering/billing** — the scoped-key flow and the usage meter.
+4. **Sponsored storage** (the paymaster signer for WAL): needs the storage wallet + the small backend.
+5. **Agent credential issuance + metering/billing**: the scoped-key flow and the usage meter.
 
 Steps 2–5 depend on provisioning; step 1 is done. The MCP's write tools swap their local-keystore
 signer for the delegated/sponsored signer at steps 3–5 without changing any tool surface.
