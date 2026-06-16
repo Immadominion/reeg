@@ -67,44 +67,38 @@ verifiable with Reeg switched off.
 
 ---
 
-## Origin story (lore)
+## Origin story — the lineage
 
-### Long (~250 words)
+The lead narrative. Use it for the pitch, the demo cold-open, the about page. It's *for*
+something (an inevitability), not *against* a sandbox.
 
-We kept watching the same thing happen. An agent would run for hours and get somewhere
-real — set up a project, debug a system, build something that mattered — and the moment
-the session closed, the place it all happened was gone. Not the chat log. The
-environment. The actual working state where the work lived.
+### Long (~200 words)
 
-You never owned that place. It was a row in someone else's database, on a server you'd
-never see, deleted on their schedule, not yours. GitHub came close, but Git history can
-be rewritten. A vendor dashboard came closer, until the vendor changed a row, locked an
-account, or shut down.
+Every important thing in computing eventually became portable.
 
-Then we noticed the three things people kept asking for were the same thing wearing
-three faces. They couldn't keep the good run. They couldn't hand the live workspace to a
-teammate — only a transcript of it. And they couldn't prove to an outsider what actually
-happened inside. Keep it, share it, prove it. All of it came down to one missing piece:
-you didn't own the environment.
+Files became portable — Dropbox. Code became portable — Git. Containers became portable —
+Docker. Data, too. Each one, in its moment, looked like plumbing nobody asked for, right up
+until it was the ground everyone stood on.
 
-So we built the layer that gives it back. Not a sandbox, not a server, not an OS — the
-layer over them. You run the agent wherever you want; Reeg waits at the commit boundary,
-snapshots the whole working state, encrypts it before it leaves your machine, stores it
-as your own content-addressed data, and anchors an append-only record to a Sui object
-only you control. Determinism is pinned, so a restore is byte-identical on any host. It's
-live on Sui mainnet today. Agents are where ephemeral work is exploding right now — but
-the layer never cared what made the environment. It only cares that you own it, and that
-it's true.
+But one layer never moved: the environment. Not the blueprint a container ships — the *live*
+place the work actually happens: the files, the state, the memory, the work in progress. It
+runs for hours, the session ends, and it's gone. Unkeepable. Unmovable. Unprovable. The most
+valuable environment in computing has always been the one you can't take with you.
 
-### Short (~80 words)
+Reeg makes environments portable. Snapshot the whole working state, own it as an object on
+Sui, move it byte-identical to any machine, hand it to anyone under a policy you control, and
+prove its entire history from public data — with Reeg switched off. We started with AI agents
+because that's where ephemeral environments are exploding first. But the lineage was always
+heading here: environments are the last layer of computing to become portable, and this is how
+they finally do.
 
-We kept watching good work disappear. An agent would run for hours, get somewhere real,
-and then the sandbox closed — and all that was left was a transcript. You couldn't keep
-the run, hand the live workspace to a teammate, or prove what happened inside it. GitHub
-helped with the code, but Git history can be rewritten, and the environment was never
-yours. So we built the layer over the sandbox: snapshot the whole working state, encrypt
-it, and anchor it to a Sui object only you control. Own it, move it, prove it — with Reeg
-switched off.
+### Short (~70 words)
+
+Files became portable — Dropbox. Code — Git. Containers — Docker. Data, too. But never the
+environment: the live place the work happens has always been trapped on the machine it ran
+on. Reeg makes environments portable — own it, move it byte-identical to any host, share it,
+and prove it with Reeg switched off. We started with AI agents, where ephemeral environments
+are exploding first.
 
 ---
 

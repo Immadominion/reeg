@@ -7,7 +7,7 @@ export const site = {
   positioning:
     "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment.",
   appUrl: 'https://app.reeg.xyz', // the Console (separate deploy)
-  docsUrl: 'https://github.com/Immadominion/reeg/tree/main/docs', // GitHub docs until docs.reeg.xyz ships
+  docsUrl: '/docs', // the in-site docs (apps/web/app/docs), rendered in the brand style
   github: 'https://github.com/Immadominion/reeg',
   githubStars: '—', // TODO(launch): wire real star count
   email: {
