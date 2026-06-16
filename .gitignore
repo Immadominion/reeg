@@ -46,5 +46,8 @@ evidence-*.json
 # vercel link/local settings
 .vercel
 
+# local agent tooling (Claude Code settings/permissions; not part of the repo)
+.claude/
+
 # local UI screenshots (scratch)
 .ui-shots/
