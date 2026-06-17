@@ -14,14 +14,16 @@
    verify, is proven end-to-end *only on testnet*. Mainnet decrypt is currently blocked (no
    free public Seal key server), so a restore on mainnet **will fail on camera.** Use mainnet
    only as a read-only "it's real" explorer shot.
-2. **There is no `npm install`.** The `reeg` CLI is not published. The only way to get it is
-   build-from-the-monorepo (clone → `pnpm install` → build). Budget time for this.
+2. **There is no `npm install` yet.** The `reeg` CLI is not published, so you build it from the
+   repo (`pnpm install` → build), then make `reeg` a bare command with a shell **alias** pointing
+   at the built file (see A2 / Part B). It is not otherwise on your PATH.
 3. **You need TWO funded testnet addresses**: an **operator** (you, the owner) and a
    **grantee** (the teammate you share with). Both need a little testnet **SUI** (gas) **and**
    testnet **WAL** (storage), and both keys must live in your local Sui keystore.
-4. **"Different machines" are just different folders.** You don't need 3 laptops. Each "host"
-   is a separate `REEG_HOME` directory (`/tmp/host-a`, `/tmp/host-b`, `/tmp/host-c`). Restoring
-   into a fresh `REEG_HOME` *is* "bring it back on a machine that never saw it."
+4. **A "different machine" is a real teammate's laptop, or just a different folder.** With two
+   people, your teammate's machine genuinely never saw the environment. Solo, simulate hosts with
+   separate `REEG_HOME` directories (`/tmp/demo`, `/tmp/demo-b`, `/tmp/demo-c`): restoring into a
+   fresh `REEG_HOME` *is* "bring it back on a machine that never saw it."
 5. **`REEG_PACKAGE_ID` and `REEG_OPERATOR` are mandatory** for the on-chain commands: the CLI
    errors without them. They're in the export block below.
 6. **The "54/54" in the script is the test-suite count, not what `reeg verify` prints.** Live,
@@ -51,12 +53,14 @@ cargo build --manifest-path engine/Cargo.toml       # builds engine/target/debug
 pnpm -r build                                        # builds the CLI (packages/cli/dist/index.js) + the rest
 ```
 
-After this, the `reeg` command should be runnable. If `reeg` is **not** found on PATH on the
-day, use this exact fallback for every `reeg …` below:
+The build produces the CLI at `packages/cli/dist/index.js`. It is **not** on your PATH, so make
+`reeg` a bare command with an alias (cleanest on camera, so `reeg create` reads like a real install):
 
 ```sh
-pnpm --filter @reeg/cli exec reeg <verb>            # fallback if `reeg` isn't on PATH
+alias reeg="node $PWD/packages/cli/dist/index.js"   # run from the repo root; lasts this shell session
 ```
+
+(Fallback if you'd rather not alias: `pnpm --filter @reeg/cli exec reeg <verb>`.)
 
 ### A3. Create + fund the two testnet addresses
 
@@ -96,7 +100,8 @@ restores → revoke → denied). Run it once to prove your setup works before yo
 ```sh
 export REEG_OPERATOR=<OPERATOR>
 export REEG_GRANTEE=<GRANTEE>
-REEG_ENGINE=engine/target/debug/reeg-engine pnpm --filter @reeg/test run live:acceptance
+export REEG_ENGINE="$PWD/engine/target/debug/reeg-engine"   # absolute path; run this from the repo root
+pnpm --filter @reeg/test run live:acceptance
 ```
 
 If that passes, every manual step below will work. (It throws a clear message if either
@@ -104,23 +109,31 @@ address isn't set/funded.) You can even film *this* as a clean, fast "it just wo
 
 ---
 
-## Part B: set the environment for filming
+## Part B: set up your filming shell
 
-Open your terminal recording. Paste this block once (fill in your two addresses). `REEG_HOME`
-is what makes a folder act like a separate "host."
+Open your terminal recording and paste this once, **from the repo root** (so the alias and `$PWD`
+paths resolve). `reeg` becomes a bare command; `REEG_HOME` is where the environment's files live.
 
 ```sh
-export REEG_ENGINE=engine/target/debug/reeg-engine
+alias reeg="node $PWD/packages/cli/dist/index.js"          # `reeg` as a bare command
+export REEG_ENGINE=$PWD/engine/target/debug/reeg-engine    # absolute, so it works from any folder
 export REEG_NETWORK=testnet
-export REEG_PACKAGE_ID=0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2
-export REEG_OPERATOR=<OPERATOR>          # your address
-export REEG_GRANTEE=<GRANTEE>            # the teammate address
-export REEG_HOME=/tmp/host-a            # "Host A"
+export REEG_PACKAGE_ID=0x4c86e0c440c07c83c0b8372b90918f35380dc0a9ec830c77e0f172ff232b6f28
+export REEG_OPERATOR=<OPERATOR>          # your address (key in the Sui keystore, funded SUI + WAL)
+export REEG_GRANTEE=<GRANTEE>            # the teammate you'll share with
+export REEG_HOME=/tmp/demo               # the environment lives in $REEG_HOME/machines/<id>/work
 ```
 
-> **⚠ Package id:** the value above is testnet from `config/testnet.json`. Ignore the different
-> (stale) id in `MANUAL-TEST.local.md`. Confirm it's live with a quick `reeg verify` of any
-> known testnet machine before the shoot.
+After you define the alias and absolute paths once from the repo root, you can run `reeg …` from
+any directory for the rest of the session. (Fresh terminal = paste the block again.)
+
+> **⚠ Package id — use the ORIGINAL (v1) package, not the upgraded one.** The testnet package was
+> published as `0x4c86e0c4…` (v1) and later upgraded to `0x8f2faf0b…` (v2, which added Nautilus).
+> **Seal encrypts under a package's *first* version and rejects an upgraded id** (`checkpoint`
+> fails with *"Package 0x8f2faf0b… is not the first version"*). v1 already contains the full
+> own/share/move/prove modules, so the whole demo loop works on it. Use the `0x4c86e0c4…` id above
+> for filming. (`config/testnet.json` currently pins v2; set it to v1 too if you run
+> `live:acceptance`, since that script reads the file.)
 
 ---
 
@@ -133,19 +146,43 @@ export REEG_HOME=/tmp/host-a            # "Host A"
 
 ```sh
 reeg create
+export M=0x…                              # the "Created environment 0x…" id it printed
+W="$REEG_HOME/machines/$M/work"           # the environment's folder — what gets snapshotted
 ```
-**You'll see:** `Created environment 0x…` + `policy:`, `workdir:`, `tx:` lines. Copy the id →
-`export M=0x…`.
+**You'll see:** `Created environment 0x…` + `policy:`, `workdir:`, `tx:`. The `workdir:` line is `$W`.
 **On screen:** a Machine minted on-chain to *your* key. You own it.
+**Two-person:** paste `$M` to your teammate now, it's public and it's all they need to restore.
 
-### Beat 2: work happens *(state accumulates)*
+### Beat 2: fill the environment *(the real "directory" you'll move)*
 
+Reeg snapshots the environment's **own folder** — `$W` (`$REEG_HOME/machines/$M/work`, the
+`workdir:` from Beat 1), **not** the directory your shell is in. So "snapshot my real project"
+means: put a real project **into `$W`**, then checkpoint.
+
+> **⚠ Checkpoint captures `$W` byte-for-byte, there is no `.reegignore`.** Whatever is in that
+> folder goes into the (encrypted) snapshot and travels to anyone you grant. **Keep it small and
+> clean:** no `node_modules`, no `.git`, no real `.env`/secrets, no `target/`/`dist`. A few KB to a
+> few MB of real source is perfect; a full repo with `node_modules` would be hundreds of MB, slow
+> to upload, and would stall on camera. (Your shell's project and your `~/.sui` keystore are never
+> captured unless you copy them into `$W` yourself.)
+
+**Option A, drop a real (small, clean) project in** (best for "it's my actual directory"):
 ```sh
-reeg run $M -- sh -c 'echo "owned, shareable, portable" > notes.md && mkdir -p src/lib && printf "a\nb\nc\n" > src/lib/data.txt && echo done > src/STATUS'
+rsync -a --exclude node_modules --exclude .git --exclude .env --exclude dist --exclude target \
+  ~/path/to/a/small/project/  "$W/"
 ```
-**You'll see:** the command runs in the machine's workdir and exits 0. Files now exist under
-`/tmp/host-a/machines/$M/work`. (This is purely local, no chain.)
-**On screen:** an agent/environment doing real work; state building up.
+
+**Option B, build a believable project with a couple of clear commands** (no secrets at all):
+```sh
+reeg run $M -- bash -c 'echo "# Portable Environment Demo" > README.md'
+reeg run $M -- bash -c 'mkdir -p src && printf "export const hello = () => \"this whole environment is portable\";\n" > src/index.ts'
+```
+
+Then show what you're about to snapshot:
+```sh
+ls -R "$W"
+```
+**On screen:** a real working directory, the environment your agent built up. (Filling it is local, no chain.)
 
 ### Beat 3: checkpoint *(snapshot → encrypt → Walrus → anchor on Sui)*
 
@@ -156,57 +193,55 @@ reeg checkpoint $M --epochs 1
 **cost** line, and `decryption: requires 1-of-1 Seal key server`. Spends a little testnet SUI + WAL.
 **Caption the cost:** *~0.0099 SUI + ~0.0119 WAL per create + encrypted checkpoint (1 epoch).*
 
-### Beat 4: Move it *(kill this host, restore on another, byte-identical)*
+### Beat 4: Move it *(restore on a fresh host, byte-identical)*
+
+Restoring into a fresh `REEG_HOME` proves the environment comes back on a host that never saw it.
+Killing the original is optional drama, the restore is the proof.
 
 ```sh
-# kill Host A: the environment no longer lives on this machine
-rm -rf "/tmp/host-a/machines/$M/work"
-
-# Host B — a fresh host that never saw it; restore from Sui + Walrus alone
-export REEG_HOME=/tmp/host-b
+cp -r "$W" /tmp/baseline                 # keep a copy so you can show a literal diff
+rm -rf "$W"                              # (optional) the environment is now gone from this host
+export REEG_HOME=/tmp/demo-b             # a fresh host
 reeg restore $M --dest /tmp/restored-b
 ```
-**You'll see:** `Restored 0x… into /tmp/restored-b` + a `manifest:`/`root:` that matches the
-checkpoint. The files reappear, byte-identical.
+**You'll see:** `Restored 0x… into /tmp/restored-b` + a `manifest:`/`root:` matching the checkpoint.
+The files reappear, byte-identical.
 **Prove it on camera (the green "IDENTICAL"):**
 ```sh
-# if you kept a copy of host-a's work, diff it; otherwise the matching root hash is the proof
-diff -r /tmp/restored-b /tmp/restored-b && echo IDENTICAL    # replace first path with a saved baseline if you have one
+diff -r /tmp/baseline /tmp/restored-b && echo IDENTICAL
 ```
-> Practical note: you deleted host-a's work, so to show a literal `diff`, copy the workdir to
-> a baseline (`cp -r`) *before* the `rm` in a rehearsal, or just let the **matching root hash**
-> from the restore output be the proof. The automated `live:acceptance` does this with a
-> deterministic tree hash.
+> Or skip the diff and let the **matching root hash** from the restore output be the proof (what
+> `live:acceptance` verifies with a deterministic tree hash).
 
 ### Beat 5: Share it *(grant a second address, they restore on their own host; then revoke)*
 
 ```sh
-# as the owner (still on Host B), grant the grantee restore rights
+# you (the owner) grant your teammate restore rights
 reeg grant $M $REEG_GRANTEE --role restore        # add --until 7d for a time-limited share
-
-# the grantee restores on THEIR fresh host, with their own key
-export REEG_HOME=/tmp/host-c
-export REEG_OPERATOR=$REEG_GRANTEE
-reeg restore $M --dest /tmp/restored-c
 ```
-**You'll see:** `Granted restore access…`, then the grantee's `Restored…` with the **same root
-hash**: a second person, second machine, same environment.
+**You'll see:** `Granted restore access…`.
+
+Then **your teammate restores on their own machine** (their setup from "Two-person" above, with
+the `$M` you sent them):
+```sh
+reeg restore $M --dest ./restored                 # a second person, a second machine, same environment
+```
+> **One-machine fallback:** simulate the teammate with `export REEG_OPERATOR=$REEG_GRANTEE; export REEG_HOME=/tmp/demo-c` then `reeg restore $M --dest /tmp/restored-c`.
 
 **The punchline: revoke and watch them get denied:**
 ```sh
-export REEG_OPERATOR=<OPERATOR>; export REEG_HOME=/tmp/host-b
+export REEG_OPERATOR=<OPERATOR>; export REEG_HOME=/tmp/demo-b
 reeg revoke $M $REEG_GRANTEE
-
-export REEG_OPERATOR=$REEG_GRANTEE; export REEG_HOME=/tmp/host-c
-reeg restore $M --dest /tmp/restored-c2          # this now FAILS: access denied
 ```
+Then the teammate's next restore **fails** with a clean access-denied error (one-machine sim:
+`export REEG_OPERATOR=$REEG_GRANTEE; export REEG_HOME=/tmp/demo-c; reeg restore $M --dest /tmp/restored-c2`).
 **You'll see:** `Revoked access…`, then the grantee's restore fails with a clean
 `error: …` access-denied line. (Revoke is forward-looking.)
 
 ### Beat 6: Prove it, Reeg switched off *(the hero shot)*
 
 ```sh
-export REEG_OPERATOR=<OPERATOR>; export REEG_HOME=/tmp/host-b
+export REEG_OPERATOR=<OPERATOR>; export REEG_HOME=/tmp/demo-b
 reeg verify $M
 ```
 **You'll see:** `Verified: 0x…` then named checks, `ok  provenance-head …`,
@@ -235,7 +270,7 @@ Pair with the green-CI montage: Move 40/40, `@reeg/verify` 54/54, Firecracker 8/
 ## Pre-shoot checklist (tick these the day before)
 
 - [ ] Sui CLI 1.73.x and Walrus CLI installed and on PATH.
-- [ ] `reeg` runs (or you've confirmed the `pnpm --filter @reeg/cli exec reeg` fallback).
+- [ ] `reeg` runs as a bare command (the `alias reeg="node $PWD/packages/cli/dist/index.js"` from Part B).
 - [ ] Both addresses created, **both funded** with SUI **and** WAL (`sui client gas` shows coins for each).
 - [ ] A **working** testnet faucet confirmed (the one likely snag).
 - [ ] `live:acceptance` passes end-to-end (proves the whole story works on your machine).
@@ -247,8 +282,12 @@ Pair with the green-CI montage: Move 40/40, `@reeg/verify` 54/54, Firecracker 8/
 
 - **`error: a package id is required`** → `REEG_PACKAGE_ID` not exported (Part B).
 - **`error: an operator address is required`** → `REEG_OPERATOR` not exported.
-- **`no Ed25519 key for <address>`** → that address's key isn't in `~/.sui/sui_config/sui.keystore` (re-create/import it).
+- **`no Ed25519 key for <address>`** → that address's key isn't in `~/.sui/sui_config/sui.keystore` (re-create/import it). Also check you copied the **full** 66-char address (`0x` + 64 hex), not a truncated one.
+- **`InvalidPackageError: … is not the first version`** (at `checkpoint`, inside `SealClient.encrypt`) → you're using the **upgraded** package id. Seal requires the package's **original/first** id. Use the v1 id `0x4c86e0c4…` (Part B) for both `REEG_PACKAGE_ID` and `config/testnet.json`.
 - **`reeg: command not found`** → use `pnpm --filter @reeg/cli exec reeg <verb>`.
 - **restore fails on mainnet** → expected; film restore on **testnet** only.
-- **`reeg-engine not found`** → `export REEG_ENGINE=engine/target/debug/reeg-engine` (and build it).
+- **`reeg-engine not found`** (even after building it) → the path is **relative**, and `pnpm --filter`
+  runs the script from the `test/` sub-package, so `engine/…` resolves to the wrong folder. Use an
+  **absolute** path from the repo root: `export REEG_ENGINE="$PWD/engine/target/debug/reeg-engine"`
+  (and build it first with `cargo build --manifest-path engine/Cargo.toml`).
 - Set `REEG_DEBUG=1` to see full stack traces while rehearsing.

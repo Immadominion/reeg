@@ -28,7 +28,7 @@ If `reeg` isn't on your `PATH` afterward, run any command below as `pnpm --filte
 `REEG_ENGINE` points at the engine binary; `REEG_PACKAGE_ID` and `REEG_OPERATOR` are required for every on-chain command.
 
 ```sh
-export REEG_ENGINE=engine/target/debug/reeg-engine
+export REEG_ENGINE="$PWD/engine/target/debug/reeg-engine"   # absolute path (run from the repo root)
 export REEG_NETWORK=testnet
 export REEG_PACKAGE_ID=0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2
 export REEG_OPERATOR=<your testnet address>
@@ -56,7 +56,8 @@ The end-to-end acceptance test creates and checkpoints on one host, deletes it, 
 ```sh
 export REEG_OPERATOR=<funded testnet address>
 export REEG_GRANTEE=<second funded testnet address>
-REEG_ENGINE=engine/target/debug/reeg-engine pnpm --filter @reeg/test run live:acceptance
+export REEG_ENGINE="$PWD/engine/target/debug/reeg-engine"   # must be absolute: pnpm runs the script from a sub-package dir
+pnpm --filter @reeg/test run live:acceptance
 ```
 
 ## Next
