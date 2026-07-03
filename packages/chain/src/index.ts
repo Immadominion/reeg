@@ -10,6 +10,7 @@ export { NotAnAccessPolicyError, parseAccessPolicyFields, readAccessPolicy } fro
 export { buildRegisterAttestedCommand, buildRegisterEnclave } from './attestation';
 export type { Machine } from './machine';
 export { parseMachineFields, readMachine } from './machine';
+export { originalPackageId } from './packages';
 export type { CheckpointArgs } from './transactions';
 export {
   addRegisterCheckpoint,

@@ -6,20 +6,34 @@
 // (build-roadmap phase G).
 
 import { Command } from 'commander';
+import { Agent, setGlobalDispatcher } from 'undici';
+import { registerDoctor } from './commands/doctor';
 import { registerEnclave } from './commands/enclave';
 import { registerAudit, registerEvidence } from './commands/evidence';
 import { registerCreate, registerFork, registerRetire } from './commands/lifecycle';
+import { registerSelftest } from './commands/selftest';
 import { registerCheckpoint, registerRestore, registerRun } from './commands/session';
 import { registerGrant, registerRevoke } from './commands/sharing';
 import { registerVerify } from './commands/verify';
+
+// Force fresh HTTP connections before any command runs a network call. @mysten/walrus + sui reuse
+// undici keep-alive sockets that can go stale across the multi-step Seal + Walrus round-trip inside a
+// checkpoint, surfacing as `read ECONNRESET` mid-run. A short keep-alive timeout drops idle sockets
+// so the next request opens a clean connection. (This was a sourced preload in the local env-setup script; now built in.)
+setGlobalDispatcher(new Agent({ keepAliveTimeout: 10, keepAliveMaxTimeout: 10, connections: 128 }));
 
 const program = new Command();
 
 program
   .name('reeg')
-  .description('GitHub for AI agents. Own it, share it, move it, prove it.')
+  .description('version control for environments. Own it, share it, move it, prove it.')
   .version('0.0.0');
 
+// doctor is a read-only preflight; it needs no signer and helps a first run not fail late.
+registerDoctor(program);
+// selftest proves the whole loop (create -> checkpoint -> restore -> verify -> retire) works
+// from this machine, with a tiny throwaway environment.
+registerSelftest(program);
 registerCreate(program);
 registerRun(program);
 registerCheckpoint(program);

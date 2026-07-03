@@ -18,6 +18,7 @@
   },
   "reeg": {
     "packageId": "0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e",
+    "originalPackageId": "0xf3e012521c4180154d452665826ca96f8b38b167d5e3d4d8af605f0528dc84f3",
     "machinePolicyId": "0x0"
   }
 }

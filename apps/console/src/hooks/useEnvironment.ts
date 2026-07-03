@@ -6,11 +6,12 @@ import { loadAccess } from '../lib/access';
 import { CONFIG, hasPackageConfigured, readClient } from '../lib/config';
 import { loadEnvironment } from '../lib/environment';
 
-/** Load an environment for display. Keyed by id so navigation between environments is cached. */
+/** Load an environment for display. Keyed by id so navigation between environments is cached.
+ *  Provenance events are tagged with the DEFINING (original) package id, hence originalPackageId. */
 export function useEnvironment(id: string) {
   return useQuery({
     queryKey: ['environment', id],
-    queryFn: () => loadEnvironment(readClient, CONFIG.packageId, id),
+    queryFn: () => loadEnvironment(readClient, CONFIG.originalPackageId, id),
     enabled: id.length > 0,
   });
 }
@@ -23,7 +24,7 @@ export function useEnvironment(id: string) {
 export function useVerification(id: string) {
   return useQuery({
     queryKey: ['verify', id],
-    queryFn: () => verifyFromChain(readClient, CONFIG.packageId, id),
+    queryFn: () => verifyFromChain(readClient, CONFIG.originalPackageId, id),
     enabled: false,
     gcTime: 0,
   });
@@ -43,7 +44,7 @@ export function useOwnedMachines() {
     queryFn: async (): Promise<Machine[]> => {
       const res = await readClient.getOwnedObjects({
         owner: address as string,
-        filter: { StructType: `${CONFIG.packageId}::machine::Machine` },
+        filter: { StructType: `${CONFIG.originalPackageId}::machine::Machine` },
         options: { showType: true },
       });
       const ids = res.data.map((o) => o.data?.objectId).filter((id): id is string => Boolean(id));
@@ -73,8 +74,8 @@ export function useAttestation(id: string) {
  *  provenance chain). Read straight from Sui. */
 export function useRetired(id: string) {
   return useQuery({
-    queryKey: ['retired', id, CONFIG.packageId],
-    queryFn: () => isRetired(readClient, CONFIG.packageId, id),
+    queryKey: ['retired', id, CONFIG.originalPackageId],
+    queryFn: () => isRetired(readClient, CONFIG.originalPackageId, id),
     enabled: id.length > 0 && hasPackageConfigured(),
   });
 }

@@ -19,6 +19,11 @@ export interface CheckpointBundle {
 export interface CheckpointContext {
   machineId: string;
   packageId: string;
+  /** The package's ORIGINAL (first-published) id, used for the Seal encryption identity. Seal
+   *  namespaces by the first version of a package and rejects an upgraded id, so on an upgraded
+   *  package this differs from {@link packageId} (which the on-chain moveCall uses). Defaults to
+   *  packageId (a never-upgraded package is its own first version). */
+  sealPackageId?: string;
   /** The Machine's shared AccessPolicy id. When set, the checkpoint is encrypted under the
    *  shareable identity (policyId ++ machineId) so grantees can decrypt; omit for owner-only. */
   policyId?: string;
@@ -59,7 +64,8 @@ export async function checkpoint(
 ): Promise<CheckpointResult> {
   const { ciphertext, backupKey } = await clients.crypto.encrypt({
     data: bundle.data,
-    packageId: context.packageId,
+    // Seal requires the first-published package id; the anchor moveCall below uses the latest.
+    packageId: context.sealPackageId ?? context.packageId,
     machineId: context.machineId,
     policyId: context.policyId,
     threshold: context.threshold,

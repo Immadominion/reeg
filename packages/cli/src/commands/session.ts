@@ -14,7 +14,12 @@ import { buildRegisterAttestedCommand, readMachine } from '@reeg/chain';
 import { checkpoint, restore } from '@reeg/sdk';
 import type { Command } from 'commander';
 import { buildClients, loadKeypair } from '../lib/clients';
-import { type CommonOptions, loadConfig, requireOperator } from '../lib/config';
+import {
+  type CommonOptions,
+  loadConfig,
+  requireEncryptionConfig,
+  requireOperator,
+} from '../lib/config';
 import { engineAttestSign, engineCheckpoint, engineRestore, engineRun } from '../lib/engine';
 import { addChainOptions } from '../lib/options';
 import { isRetiredOrFalse } from '../lib/retired';
@@ -83,6 +88,9 @@ export function registerCheckpoint(program: Command): void {
     ) => {
       const config = loadConfig(options);
       const operator = requireOperator(config);
+      // A checkpoint is encrypted before it touches Walrus; refuse to run if no key servers are
+      // configured rather than silently upload plaintext (the mainnet-without-env footgun).
+      requireEncryptionConfig(config);
       const machine = getMachine(machineId);
 
       // The committee threshold is fixed when the ciphertext is sealed (it cannot be changed by a
@@ -98,12 +106,15 @@ export function registerCheckpoint(program: Command): void {
         return;
       }
 
-      const { sui, crypto, storage } = buildClients(config);
+      // Do not destructure crypto/storage here: buildClients constructs Walrus and Seal lazily,
+      // and eager access would fail on networks without them before the checks below can answer.
+      const clients = buildClients(config);
+      const sui = clients.sui;
       // A retired environment is concluded: decline further checkpoints (the on-chain record stays
       // verifiable, but adding to a retired run would muddy its end-of-life marker). isRetiredOrFalse
       // fails open, so a transient RPC/indexer hiccup never blocks a legitimate checkpoint; only a
       // confirmed retirement declines.
-      if (await isRetiredOrFalse(sui, config.packageId, machineId)) {
+      if (await isRetiredOrFalse(sui, config.originalPackageId, machineId)) {
         console.error(`error: ${machineId} is retired; it cannot be checkpointed again`);
         process.exitCode = 1;
         return;
@@ -128,19 +139,32 @@ export function registerCheckpoint(program: Command): void {
         );
         const bundleBytes = readFileSync(bundlePath);
 
+        // Walrus testnet's upload relay times out on large blobs; a snapshot that swept in build
+        // artifacts is the usual cause. Warn before the upload so a failure reads as understood, not
+        // mysterious. (Non-blocking: a funded run may legitimately be large.)
+        const TESTNET_BLOB_WARN_BYTES = 8 * 1024 * 1024;
+        if (config.network === 'testnet' && info.bundleBytes > TESTNET_BLOB_WARN_BYTES) {
+          console.warn(
+            `warning: snapshot is ${(info.bundleBytes / 1024 / 1024).toFixed(1)} MB; Walrus testnet often times out above ~5-8 MB. If the upload fails, exclude build artifacts (node_modules, dist, build, .next, target, ...) from the workdir and retry.`,
+          );
+        }
+
         const signer = loadKeypair(operator);
         const result = await checkpoint(
           { data: bundleBytes, manifestHash: fromHex(info.manifestHashHex) },
           {
             machineId,
             packageId: config.packageId,
+            // Seal rejects an upgraded package id; encrypt under the original (first-published) id
+            // while the anchor moveCall stays on the latest.
+            sealPackageId: config.originalPackageId,
             // A shareable Machine encrypts under its policy identity so grantees can decrypt.
             policyId: machine.policyId,
             threshold,
             epochs: Number(options.epochs ?? '1'),
             payloadHash: fromHex(info.payloadHashHex),
           },
-          { crypto, storage, sui, signer },
+          { crypto: clients.crypto, storage: clients.storage, sui, signer },
         );
 
         const epochs = Number(options.epochs ?? '1');
@@ -244,13 +268,27 @@ export function registerRestore(program: Command): void {
       return;
     }
 
-    const { sui, crypto, storage } = buildClients(config);
+    const clients = buildClients(config);
     const signer = loadKeypair(operator);
     // A Seal key server's fullnode can briefly lag a just-mutated shared policy (right after a
     // grant or revoke), so a legitimate restore may transiently fail; retry those. A definitive
-    // NoAccess (the policy denied this caller) is final, so fail fast on it.
+    // NoAccess (the policy denied this caller) is final, so fail fast on it. The getters forward
+    // (not spread) so Walrus/Seal stay unconstructed until the SDK actually needs them; a machine
+    // with no checkpoint then fails with its real reason on any network.
     const bundle = await withSealRetry(() =>
-      restore({ machineId, packageId: config.packageId }, { sui, storage, crypto, signer }),
+      restore(
+        { machineId, packageId: config.packageId, sealPackageId: config.originalPackageId },
+        {
+          sui: clients.sui,
+          signer,
+          get storage() {
+            return clients.storage;
+          },
+          get crypto() {
+            return clients.crypto;
+          },
+        },
+      ),
     );
 
     // `bundle` is decrypted PLAINTEXT. Stage it in a fresh owner-only temp dir (mkdtemp is mode

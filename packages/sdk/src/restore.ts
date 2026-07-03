@@ -28,7 +28,7 @@ export interface RestoreClients {
  * Reads only public data plus the caller's own decryption right; no Reeg backend.
  */
 export async function restore(
-  context: { machineId: string; packageId: string; ttlMin?: number },
+  context: { machineId: string; packageId: string; sealPackageId?: string; ttlMin?: number },
   clients: RestoreClients,
 ): Promise<Uint8Array> {
   const machine = await readMachine(clients.sui, context.machineId);
@@ -37,18 +37,19 @@ export async function restore(
   }
   const ciphertext = await clients.storage.readByU256(machine.currentBlobId);
 
+  // Seal namespaces the identity, the SessionKey, and the seal_approve dry run by the package's
+  // ORIGINAL (first-published) id and rejects an upgraded id; a never-upgraded package is its own
+  // first version. The seal_approve modules ship in the original publish, so the dry-run call
+  // targets it directly.
+  const sealPackageId = context.sealPackageId ?? context.packageId;
+
   // The seal_approve call is never executed; its bytes authorize decryption in a dry run.
-  const approveTx = await buildApprove(
-    clients.sui,
-    context.packageId,
-    machine.id,
-    machine.policyId,
-  );
+  const approveTx = await buildApprove(clients.sui, sealPackageId, machine.id, machine.policyId);
   const approveTxBytes = await approveTx.build({ client: clients.sui, onlyTransactionKind: true });
 
   const sessionKey = await createSessionKey({
     suiClient: clients.sui,
-    packageId: context.packageId,
+    packageId: sealPackageId,
     signer: clients.signer,
     ttlMin: context.ttlMin,
   });

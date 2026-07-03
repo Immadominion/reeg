@@ -8,7 +8,8 @@ import { attestationPreimage, verifyAttestationSignature } from './nautilus';
 // the client, the Move verifier, and (later) the enclave signer.
 const MACHINE = '0xab';
 const SEQ = 7n;
-const MANIFEST = new TextEncoder().encode('reeg-nautilus-manifest-hash-0007');
+// ASCII bytes of 'reeg-nautilus-manifest-hash-0007' (avoids a TextEncoder/node-types dependency).
+const MANIFEST = Uint8Array.from('reeg-nautilus-manifest-hash-0007', (c) => c.charCodeAt(0));
 const EXPECTED_PREIMAGE_HEX =
   '524545475f4e415554494c55535f4154544553545f563100000000000000000000000000000000000000000000000000000000000000ab0700000000000000726565672d6e617574696c75732d6d616e69666573742d686173682d30303037';
 const PUBKEY = fromHex('36ae6ba13e43892ec9c842c6ff252102825ba2ec1c94c980e1ae9b92a5385744');
@@ -32,7 +33,7 @@ describe('nautilus attestation preimage', () => {
   it('rejects a tampered signature', async () => {
     const preimage = attestationPreimage(MACHINE, SEQ, MANIFEST);
     const bad = Uint8Array.from(SIG);
-    bad[0] ^= 1;
+    bad[0] = (bad[0] ?? 0) ^ 1;
     expect(await verifyAttestationSignature(PUBKEY, bad, preimage)).toBe(false);
   });
 

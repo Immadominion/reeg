@@ -17,6 +17,7 @@ import {
   createShareableMachine,
   fork,
   grant,
+  originalPackageId,
   RIGHTS_RESTORE,
   RIGHTS_VIEW,
   readMachine,
@@ -117,7 +118,8 @@ export function buildServer(): McpServer {
         const config = resolveConfig(rest);
         const pkg = requirePackage(config);
         const sui = suiClient(config);
-        const report = await retry(() => verifyFromChain(sui, pkg, machineId));
+        // Events are tagged with the DEFINING (original) package id; an upgraded id finds nothing.
+        const report = await retry(() => verifyFromChain(sui, originalPackageId(pkg), machineId));
         return ok({ machineId, network: config.network, ok: report.ok, checks: report.checks });
       }),
   );
@@ -470,7 +472,7 @@ export function buildServer(): McpServer {
         const epochs = epochsArg ?? 1;
 
         const { sui, crypto, storage } = buildClients(config);
-        if (await isRetiredOrFalse(sui, pkg, machineId)) {
+        if (await isRetiredOrFalse(sui, originalPackageId(pkg), machineId)) {
           throw new Error(`${machineId} is retired; it cannot be checkpointed again`);
         }
 
@@ -495,6 +497,8 @@ export function buildServer(): McpServer {
             {
               machineId,
               packageId: pkg,
+              // Seal rejects an upgraded package id; encrypt under the first-published id.
+              sealPackageId: originalPackageId(pkg),
               policyId: machine.policyId,
               threshold,
               epochs,
@@ -551,7 +555,10 @@ export function buildServer(): McpServer {
         // A key server's fullnode can briefly lag a just-mutated shared policy; retry transient
         // failures but fail fast on a definitive NoAccess.
         const bundle = await withSealRetry(() =>
-          restore({ machineId, packageId: pkg }, { sui, storage, crypto, signer }),
+          restore(
+            { machineId, packageId: pkg, sealPackageId: originalPackageId(pkg) },
+            { sui, storage, crypto, signer },
+          ),
         );
 
         // Decrypted PLAINTEXT: stage in an owner-only temp dir with an owner-only, must-not-exist

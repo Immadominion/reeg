@@ -26,7 +26,8 @@
     "@reeg/storage": "workspace:*",
     "@reeg/verify": "workspace:*",
     "commander": "^15.0.0",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "undici": "^7.27.0"
   },
   "devDependencies": {
     "tsup": "^8.5.1",

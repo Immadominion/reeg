@@ -7,6 +7,7 @@
 // prints a summary; the read model is exported for use by a server or the Console's cache.
 
 import { getJsonRpcFullnodeUrl, SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
+import { originalPackageId } from '@reeg/chain';
 import { buildIndex } from './indexer';
 import { listEnvironments } from './read-model';
 
@@ -44,7 +45,8 @@ async function main() {
     network,
   });
 
-  const model = await buildIndex(client, packageId);
+  // Events are tagged with the DEFINING (original) package id; an upgraded id finds nothing.
+  const model = await buildIndex(client, originalPackageId(packageId));
   const environments = listEnvironments(model);
   console.log(`reeg indexer: ${environments.length} environment(s) on ${network}`);
   for (const env of environments) {

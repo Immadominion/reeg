@@ -15,6 +15,7 @@ export {
   buildGrant,
   buildRetire,
   buildRevoke,
+  originalPackageId,
   readAccessPolicy,
   readMachine,
 } from '@reeg/chain';

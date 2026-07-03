@@ -1,4 +1,5 @@
 import { getJsonRpcFullnodeUrl, SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
+import { originalPackageId } from '@reeg/sdk';
 
 export type SuiNetwork = 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 
@@ -23,8 +24,14 @@ const packageId = import.meta.env.VITE_REEG_PACKAGE_ID || PUBLISHED_PACKAGE[netw
  * Console configuration, from Vite env so networks differ only by build config (no hardcoded
  * endpoints in components). The Console reads Sui directly; verification needs no wallet and no
  * Reeg backend.
+ *
+ * `originalPackageId` is the package's FIRST-published id. Move struct and event types are tagged
+ * with the DEFINING package, so every type-filtered read (owned Machines, provenance events,
+ * verification, retirement) must use it; on an upgraded package the latest id silently finds
+ * nothing. Wallet transactions (create, grant, fork, retire) keep the latest `packageId`, and the
+ * attestation module ships in the upgrade, so attestation reads also keep the latest id.
  */
-export const CONFIG = { network, packageId };
+export const CONFIG = { network, packageId, originalPackageId: originalPackageId(packageId) };
 
 /** Convenience named exports used across the UI. */
 export const NETWORK: SuiNetwork = network;

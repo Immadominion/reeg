@@ -30,25 +30,41 @@ export function loadKeypair(address: string): Ed25519Keypair {
 
 export interface Clients {
   sui: SuiJsonRpcClient;
-  crypto: SealCrypto;
-  storage: WalrusBlobStore;
+  readonly crypto: SealCrypto;
+  readonly storage: WalrusBlobStore;
 }
 
 /** Construct the Sui, Walrus, and Seal clients from config. Walrus and Seal are only meaningful
- *  on testnet/mainnet; the network is narrowed accordingly. */
+ *  on testnet/mainnet, so they are built lazily on first access: chain-only commands (create,
+ *  fork, retire, grant, revoke) then work on any network, including localnet, where constructing
+ *  a Walrus client would fail. */
 export function buildClients(config: ReegConfig): Clients {
   const sui = new SuiJsonRpcClient({ url: config.rpcUrl, network: config.network });
-  const walrus = new WalrusClient({
-    network: config.network as 'mainnet' | 'testnet',
-    suiClient: sui,
-    uploadRelay: config.walrusUploadRelay
-      ? { host: config.walrusUploadRelay, sendTip: { max: 1000 } }
-      : undefined,
-  });
-  const seal = new SealClient({
-    suiClient: sui,
-    serverConfigs: config.sealKeyServers.map((objectId) => ({ objectId, weight: 1 })),
-    verifyKeyServers: false,
-  });
-  return { sui, crypto: new SealCrypto(seal), storage: new WalrusBlobStore(walrus) };
+  let crypto: SealCrypto | undefined;
+  let storage: WalrusBlobStore | undefined;
+  return {
+    sui,
+    get crypto(): SealCrypto {
+      crypto ??= new SealCrypto(
+        new SealClient({
+          suiClient: sui,
+          serverConfigs: config.sealKeyServers.map((objectId) => ({ objectId, weight: 1 })),
+          verifyKeyServers: false,
+        }),
+      );
+      return crypto;
+    },
+    get storage(): WalrusBlobStore {
+      storage ??= new WalrusBlobStore(
+        new WalrusClient({
+          network: config.network as 'mainnet' | 'testnet',
+          suiClient: sui,
+          uploadRelay: config.walrusUploadRelay
+            ? { host: config.walrusUploadRelay, sendTip: { max: 1000 } }
+            : undefined,
+        }),
+      );
+      return storage;
+    },
+  };
 }

@@ -7,18 +7,20 @@ import type { Machine } from '@reeg/chain';
 import { genesisHead, type ProvenanceEntry, replayChain, toEvidence } from '@reeg/verify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-// The headline acceptance demo (build-roadmap phase J) lives in test/live/acceptance.ts and runs
+// The headline acceptance test lives in test/live/acceptance.ts and runs
 // on testnet (pnpm --filter @reeg/test run live:acceptance): run -> checkpoint -> kill host ->
 // restore on a fresh host -> verify with the Reeg backend offline -> grant -> revoke. It cannot
-// run in CI without funds, so this offline test guards the CLI surface that demo drives: every
+// run in CI without funds, so this offline test guards the CLI surface that test drives: every
 // operator command stays registered. It runs only when the CLI is built (the gate builds first).
 const CLI = fileURLToPath(new URL('../../packages/cli/dist/index.js', import.meta.url));
 const built = existsSync(CLI);
 
 describe('reeg CLI surface', () => {
-  it.runIf(built)('registers every operator command the acceptance demo uses', () => {
+  it.runIf(built)('registers every operator command the acceptance test uses', () => {
     const help = execFileSync('node', [CLI, '--help'], { encoding: 'utf8' });
     for (const command of [
+      'doctor',
+      'selftest',
       'create',
       'run',
       'checkpoint',
@@ -41,8 +43,8 @@ describe('reeg CLI surface', () => {
   );
 });
 
-// The compliance done-bar (phase L): an auditor verifies a run from an exported evidence file
-// alone, with no Reeg and no Console. This builds a real evidence file and runs `reeg audit`
+// Offline compliance: an auditor verifies a run from an exported evidence file alone, with no
+// Reeg and no Console. This builds a real evidence file and runs `reeg audit`
 // fully offline (no network), proving a good file passes and a tampered one fails.
 describe('reeg audit (offline evidence verification)', () => {
   const ID = `0x${'cd'.repeat(32)}`;
