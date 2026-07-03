@@ -99,7 +99,7 @@
 
 ### Slide 10: Shipped, measured, green
 
-**Not a demo. A real product, live today.**
+**A real product, live today.**
 
 - Live on Sui mainnet: pkg `0xfaa6…db241e`. **~0.0099 SUI + ~0.0119 WAL** per create + encrypted checkpoint.
 - CI green: Move **40/40**, offline verifier **54/54**, chain **21/21**, crypto cross-language **8/8**.
@@ -149,7 +149,7 @@
 
 ### Slide 15: Close
 
-**Reeg is Dropbox for AI agent environments.**
+**Git tracks code. Reeg tracks the environment where the work happened.**
 
 - Live on Sui mainnet. No account needed to open and verify a shared environment.
 - Try it, or verify a shared run yourself, with Reeg switched off.

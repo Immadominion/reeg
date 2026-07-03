@@ -7,7 +7,7 @@ version a team could run, live on Sui mainnet. Later phases add depth, scale, an
 enterprise features; they do not turn a fake into a real thing. When this doc defers
 something, it is deferring scope, never deferring "build a real product."
 
-Reeg's hook: **Reeg is Dropbox for AI agent environments.** Category: **infrastructure for portable computing environments.** We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Snapshot the whole working state, version and prove it, share it, and move it byte-for-byte to any host.
+Reeg's hook: **Git tracks code. Reeg tracks the environment where the work happened.** Category: **version control for environments.** We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Snapshot the whole working state, version and prove it, share it, and move it byte-for-byte to any host.
 
 ## Current status (as of 2026-06-11)
 
@@ -75,8 +75,7 @@ Done when: the snapshot/restore data model is settled and an internal dry run ca
 
 ## Phase 1: The product, end to end (done)
 
-Goal: ship a real, usable Reeg that does the full loop, own, share, fork, move, and prove, not a
-scripted demo.
+Goal: ship a real, usable Reeg that does the full loop, own, share, fork, move, and prove.
 
 Shipped:
 
@@ -89,12 +88,11 @@ Shipped:
 Done when: a real user can run an agent, snapshot it, share or fork the environment,
 kill a host, restore on another, and have an outsider verify the whole run in the
 Console with our backend stopped. That is the acceptance bar in
-[requirements-analysis.md](requirements-analysis.md), and it is the product, not a demo of one. **Met.**
+[requirements-analysis.md](requirements-analysis.md), and it is the product itself. **Met.**
 
 ## Phase 2: Mainnet and daily-driver polish (done)
 
-Goal: make Reeg something a team reaches for every day, on mainnet, which also
-triggers the 100% upfront payout.
+Goal: make Reeg something a team reaches for every day, on mainnet.
 
 Shipped:
 

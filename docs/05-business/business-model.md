@@ -1,6 +1,6 @@
 # Business Model
 
-How Reeg becomes a business, not a hackathon project. Honest and early; numbers here are directional and will be replaced by real ones as we learn. Strategy context is in [swot.md](../01-product/swot.md) and [product-vision.md](../00-overview/product-vision.md).
+How Reeg becomes a business. Honest and early; numbers here are directional and will be replaced by real ones as we learn. Strategy context is in [swot.md](../01-product/swot.md) and [product-vision.md](../00-overview/product-vision.md).
 
 ## What we sell
 
@@ -43,7 +43,7 @@ We do not monetize by holding the customer's data hostage. The record is owner-c
 
 ## Go-to-market
 
-- Wedge: portability and crash-survival for teams running long agent jobs. Concrete, immediate pain, easy to demo.
+- Wedge: portability and crash-survival for teams running long agent jobs. Concrete, immediate pain that is easy to show in a product walkthrough.
 - Land: a single team adopts Reeg to stop losing runs and to prove work to one demanding customer.
 - Expand: that customer becomes a second user (the verifier), and compliance needs pull in the platform lead.
 - Ecosystem: be a flagship real use of Walrus + Seal + on-chain provenance on Sui, which opens grants, co-marketing, and partnerships (O4 in [swot.md](../01-product/swot.md)).
@@ -60,10 +60,6 @@ own, so you can share it, fork it, move it off them, and let anyone verify it wi
 servers offline. A competitor can copy any feature except letting you own the
 environment, and ownership is what makes the rest possible (T1 in
 [swot.md](../01-product/swot.md)).
-
-## The grant/prize context
-
-For the Overflow track: $35k for 1st, with a 50/50 payout structure, and 100% upfront if we reach mainnet by Aug 27 (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)). That funds the move from demo to a usable product, but the business does not depend on prize money; it depends on B2B teams paying for evidence and portability.
 
 ## Honest risks to the model
 

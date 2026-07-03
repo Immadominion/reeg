@@ -2,6 +2,8 @@
 
 Create an environment, do work in it, checkpoint it, move it to another machine byte-identical, share it, and prove its history: all from the `reeg` CLI.
 
+**Zero-setup first look:** open a [live environment in the Console](https://app.reeg.xyz/#/env/0x6b0bbfc228d50360322b4fe091349f0af8e0e834afa4c589a78cb704478fb500) and click **Verify independently**. The full provenance verification runs in your browser from public Sui + Walrus data alone, with no wallet, no install, and no Reeg backend in the trust path.
+
 > **Use testnet to run the whole loop.** The full checkpoint → restore → verify path is proven end-to-end on testnet. On mainnet today, encryption, storage, anchoring, and offline verify work, but the decrypt step of a restore waits on a provider Seal key server.
 
 ## Prerequisites
@@ -33,6 +35,18 @@ export REEG_NETWORK=testnet
 export REEG_PACKAGE_ID=0x8f2faf0b89e248f498cb0bc4b0ef98511613c4d7884e8ce41f0bc255246ca1d2
 export REEG_OPERATOR=<your testnet address>
 ```
+
+## Check your setup, then prove the loop
+
+Two commands take the guesswork out of a first run:
+
+```sh
+reeg doctor      # preflight: keystore, engine binary, funds, RPC reachability, encryption config
+reeg selftest    # prove the full loop from THIS machine in about a minute:
+                 # create -> encrypted checkpoint -> byte-identical restore (memory included) -> verify -> retire
+```
+
+`doctor` names anything missing with a remedy; `selftest` runs the real code paths against the network and reports each step pass/fail. If selftest is green, everything below will work.
 
 ## The loop
 

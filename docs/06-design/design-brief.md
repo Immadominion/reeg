@@ -12,7 +12,7 @@ tone. This brief covers what to design and how it should feel.
 
 Reeg is infrastructure for portable computing environments. We started with AI agents
 because they're the fastest-growing source of ephemeral work, but the underlying system
-can preserve and move any environment. **Reeg is Dropbox for AI agent environments.** Your agent runs in a sandbox you don't own
+can preserve and move any environment. **Git tracks code. Reeg tracks the environment where the work happened.** Your agent runs in a sandbox you don't own
 and can't keep; Reeg is the layer over it. A real workspace you can own, share, fork,
 move to another machine, and prove what happened inside. An agent (or a container, a
 microVM, someone else's cloud) works in an environment, and the user can snapshot it,
@@ -97,7 +97,7 @@ Screens:
 
 A developer-tool landing page. Sections, in order:
 
-1. Hero: the headline ("Reeg is Dropbox for AI agent environments."), a sharp subhead ("Your
+1. Hero: the headline ("Git tracks code. Reeg tracks the environment where the work happened."), a sharp subhead ("Your
    agent runs in a sandbox you don't own and can't keep. Reeg is the layer over it:
    snapshot the whole working state, prove exactly what happened, then share it live,
    fork it, or restore it byte-for-byte on any host. You own it, on no one's server,

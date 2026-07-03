@@ -1,6 +1,6 @@
 # Reeg
 
-**Reeg is Dropbox for AI agent environments.**
+**Git tracks code. Reeg tracks the environment where the work happened.**
 
 Reeg is infrastructure for portable computing environments. We started with AI agents
 because they're the fastest-growing source of ephemeral work, but the underlying system
@@ -60,6 +60,18 @@ rebuildable, and `verify` reads only public Sui + Walrus.
 
 ## Try it
 
+### Verify a real run right now (no wallet, no install)
+
+Open a live environment in the Console and click **Verify independently**:
+
+> [app.reeg.xyz/#/env/0x6b0b…b500](https://app.reeg.xyz/#/env/0x6b0bbfc228d50360322b4fe091349f0af8e0e834afa4c589a78cb704478fb500)
+
+That re-runs the full provenance verification in your browser from public Sui + Walrus
+data alone — no Reeg backend in the trust path, no account, no setup. The timeline shows
+the checkpoint (with captured agent memory) and the access grant that produced it.
+
+### Run the loop yourself
+
 The whole operator loop runs from the `reeg` CLI. Point `REEG_ENGINE` at the built Rust
 binary and run:
 
@@ -68,6 +80,11 @@ cargo build --manifest-path engine/Cargo.toml          # builds the reeg-engine 
 export REEG_ENGINE=engine/target/debug/reeg-engine
 export REEG_NETWORK=testnet                             # or mainnet
 export REEG_OPERATOR=<your address>                     # signs; must hold SUI + WAL
+
+reeg doctor                                             # preflight: keystore, engine, funds, RPC, encryption
+reeg selftest                                           # prove the full loop from THIS machine in ~1 min:
+                                                        #   create -> encrypted checkpoint -> byte-identical
+                                                        #   restore (memory included) -> verify -> retire
 
 reeg create                                             # mint a Machine you own  -> <machineId>
 reeg run      <machineId> -- sh -c 'echo hi > note.txt' # run a command, captured in the log
@@ -82,7 +99,7 @@ reeg audit    evidence.json                             # verify that record off
 ```
 
 Every `reeg` command is a thin wrapper over [@reeg/sdk](packages/sdk), so the same
-operations are callable from TypeScript. The end-to-end acceptance demo creates and
+operations are callable from TypeScript. The end-to-end acceptance test creates and
 checkpoints on host A, deletes host A, restores byte-identically on a fresh host B that
 never saw it, verifies offline, shares to a grantee who restores on a third host, then
 revokes:

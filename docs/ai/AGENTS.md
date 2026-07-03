@@ -26,7 +26,7 @@ agent's brain. Domain reeg.xyz. Support <support@reeg.xyz>.
 
 ## 2. The claims (memorize these)
 
-Every decision serves one of these. If a feature serves none, it waits. Lead the pitch
+Every decision serves one of these. If a feature serves none, it waits. Lead the positioning
 with the use case (snapshot and prove what your agent did): C4 (a provable, tamper-proof
 history) is the differentiator GitHub and vendor logs cannot match, and C1 (owned) is
 what makes it possible.
@@ -90,13 +90,9 @@ We deliberately do not build everything in one language. Pick the best tool per 
 
 Reproducible snapshot/restore of live runtime state. We constrain captured state to the filesystem workdir plus a command/event log so restore is reproducible and therefore verifiable. If reproducibility is uncertain, narrow the runtime surface rather than weaken verification.
 
-## 8. The Overflow context
+## 8. The acceptance test
 
-- Track: Walrus track, framed as the verifiable data and memory layer.
-- Prizes: $35k for 1st, 50/50 payout, 100% upfront if mainnet by Aug 27.
-- Build deadline for the demo: June 21.
-- Judging weights: RWA 50%, Product 20%, Technical 20%, Presentation 10%.
-- The acceptance demo: run an agent, checkpoint, kill the host, restore on another host, and have an outsider verify the whole run in the Console with the Reeg backend stopped. If any of that needs a live Reeg backend to be believable, the demo failed its own thesis.
+The acceptance test: run an agent, checkpoint, kill the host, restore on another host, and have an outsider verify the whole run in the Console with the Reeg backend stopped. If any of that needs a live Reeg backend to be believable, the product has failed its own thesis.
 
 ## 9. How to behave when working on Reeg
 

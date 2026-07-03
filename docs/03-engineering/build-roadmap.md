@@ -7,7 +7,7 @@ order from the easiest, most certain work to the hardest. It contains no code. I
 the standard we will not build below: each phase names a goal, what it produces, the
 **done bar** that says it is finished, and the requirements and claims it advances.
 
-We are building the whole product, not an MVP and not a scripted demo. Phases late in
+We are building the whole product, not an MVP. Phases late in
 this list are real features real users will want, sequenced after the ones they depend
 on, never deferred because the product is incomplete without them.
 
@@ -27,7 +27,7 @@ Each phase header below carries its own **Status** line; this is the summary:
 
 - ✅ **A–H**: foundation, snapshot engine, OCI tier, Move/provenance, client adapters, verifier, CLI/SDK, Console/indexer
 - ✅ **I**: owner-only + allowlist + time-lock done; committee t-of-n surfaced via `reeg checkpoint --threshold t` (threshold pinned at encryption time)
-- ✅ **J**: cross-host acceptance demo (run → checkpoint → kill → restore → verify → grant → revoke)
+- ✅ **J**: cross-host acceptance test (run → checkpoint → kill → restore → verify → grant → revoke)
 - 🟡 **K**: memory seam done (`REEG_MEMORY_DIR`, `memory_pointer` round-trips, captured/verified with the workdir); MemWal as an optional backend remains
 - ✅ **M**: Firecracker tier hardened + verified on AWS KVM, **19/19** including **#14 jailer** (chroot + dropped privileges + cgroup v2)
 - ✅ **N**: Nautilus TEE attestation tier **live on testnet and mainnet**; reproducible enclave, on-chain PCR registration, offline-verifiable, strictly additive
@@ -72,7 +72,7 @@ loop is proven on **testnet**.
 
 ## The four pillars
 
-Every phase below serves one of four pillars, and the headline demo proves all four at once:
+Every phase below serves one of four pillars, and the headline acceptance test proves all four at once:
 
 - **OWN**: a Machine is an **owned** Sui object on the fast path. `create` / `retire`. The
   owner alone mutates it.
@@ -90,7 +90,7 @@ Every phase below serves one of four pillars, and the headline demo proves all f
 
 ## The sacred path through the phases
 
-The single demo that proves the thesis runs through phases B, C, E, F, H, and J: run
+The single end-to-end flow that proves the thesis runs through phases B, C, E, F, H, and J: run
 an agent, checkpoint it, kill the host, restore on another, and have an outsider verify
 the whole run with the Reeg backend stopped. Every phase either builds part of that
 path or hardens and widens it. Keep that sequence working end to end as early as
@@ -343,10 +343,10 @@ Advances: C2 (shareable) deepened, FR-11, FR-12, FR-16.
 
 ## Phase J - Cross-host portability hardening
 
-**Status: ✅ done**: `test/live/acceptance.ts` runs the scripted kill-host → restore-elsewhere →
-verify-offline → grant → revoke demo end to end.
+**Status: ✅ done**: `test/live/acceptance.ts` runs the kill-host → restore-elsewhere →
+verify-offline → grant → revoke acceptance test end to end.
 
-Goal: make the kill-and-restore-elsewhere story robust, not just demoable once.
+Goal: make the kill-and-restore-elsewhere story robust, not just runnable once.
 
 Produces:
 
@@ -354,11 +354,11 @@ Produces:
 - Reproducibility across heterogeneous hosts **and runtime tiers**: pinned libraries, the
   canonical umask, and a standardized restore environment so a restore on a different
   machine (or a different tier) still matches the recorded hashes.
-- The full acceptance demo scripted and rehearsed until it is boring: run, checkpoint,
+- The full acceptance test, automated and repeatable: run, checkpoint,
   kill, restore, verify-with-backend-down, grant, revoke.
 
 Done when: a run checkpointed on host A restores on a clean host B with the working
-directory matching the recorded hashes, and the scripted acceptance demo passes cleanly
+directory matching the recorded hashes, and the acceptance test passes cleanly
 end to end. This is the product's headline acceptance bar (C1 through C4 together).
 
 Advances: C3 (portable) hardened, FR-4, NFR-2, NFR-8.

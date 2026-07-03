@@ -1,8 +1,8 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { docsNav } from '@/lib/docs';
 import { cn } from '@/lib/cn';
+import { docsNav } from '@/lib/docs';
 
 // The docs navigation. Sections with their pages; the current page is highlighted off the path.
 // Reused by the desktop sidebar and the mobile disclosure (onNavigate closes the mobile menu).

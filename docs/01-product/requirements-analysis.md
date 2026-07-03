@@ -1,6 +1,6 @@
 # Requirements Analysis
 
-Status: living document. Scope: the Overflow build (target demo June 21) plus the near-term product. Anything not needed to prove the core claim is marked Later.
+Status: living document. Scope: the current shipped product plus the near-term roadmap. Anything not needed to prove the core claim is marked Later.
 
 Read [product-vision.md](../00-overview/product-vision.md) first for the why. Read [sui-tech-reference.md](../02-architecture/sui-tech-reference.md) for the verified platform facts behind every "how."
 
@@ -17,7 +17,7 @@ Four claims must hold, and every requirement traces back to one of them. They ar
 
 ## 2. Functional requirements
 
-Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
+Priority key: P0 must ship in the core product, P1 strong follow-on, P2 later.
 
 ### Machine lifecycle
 
@@ -46,7 +46,7 @@ Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
 - FR-14 (P0) Verify button: runs the independent verification in the browser and shows pass/fail with the evidence.
 - FR-15 (P1) Restore and fork from the Console.
 - FR-16 (P1) Grant/revoke from the Console.
-- FR-17 (P0) The Console is a Walrus Site with no privileged backend, so the demo has no hidden server doing the trusting.
+- FR-17 (P0) The Console is a Walrus Site with no privileged backend, so there is no hidden server doing the trusting.
 
 ### Memory
 
@@ -54,7 +54,7 @@ Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
 
 ## 3. Non-functional requirements
 
-- NFR-1 Verifiability without trust (C4): verification must require zero secrets held only by Reeg. If Reeg vanished, every past run stays checkable. This is a non-negotiable guarantee, and it is now central to the pitch (the differentiator), not just an internal invariant.
+- NFR-1 Verifiability without trust (C4): verification must require zero secrets held only by Reeg. If Reeg vanished, every past run stays checkable. This is a non-negotiable guarantee, and it is now central to the positioning (the differentiator), not just an internal invariant.
 - NFR-2 Portability (C3): restore must work on a clean host that never saw the original. No host-local hidden state.
 - NFR-3 Honest latency: checkpoints happen on commit boundaries, not on every keystroke, because Walrus is durable storage, not a low-latency database (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)). The product must never imply real-time mirroring.
 - NFR-4 Confidentiality: checkpoint contents are encrypted before they leave the client. Walrus blobs are public, so Seal encryption is mandatory, not optional. Reeg never sees plaintext keys.
@@ -66,7 +66,6 @@ Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
 
 ## 4. Constraints
 
-- Build window: working demo by June 21; mainnet by Aug 27 triggers 100% upfront payout (track terms, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)).
 - Platform maturity: Nautilus (verifiable off-chain compute, TEE) is on mainnet now. Treat any TEE-attested compute as a P2 differentiator sequenced by scope, not a P0 dependency.
 - Seal committee mode is GA now; owner-only and allowlist policies remain the dependable P0/P1 path by integration risk.
 - Move has no inheritance or dynamic dispatch; design data with explicit objects and capabilities, not class hierarchies.
@@ -78,9 +77,9 @@ Priority key: P0 must ship for the demo, P1 strong follow-on, P2 later.
 - Regulated PHI / classified data custody: Seal explicitly is not positioned for that (see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md)). Reeg records and protects the app layer, it is not a compliance vault.
 - A general-purpose agent framework: Reeg is the environment and the record, not the agent's brain.
 
-## 6. Acceptance criteria for the demo
+## 6. Acceptance criteria
 
-The demo passes if, live:
+The acceptance test passes if, live:
 
 1. An agent runs in a Machine and produces a result (FR-1, FR-2).
 2. We checkpoint, then fully kill the host (FR-3).
@@ -88,5 +87,5 @@ The demo passes if, live:
 4. An auditor verifies the whole run in the Console with the Reeg server stopped (FR-8, FR-14, NFR-1).
 5. Access is owner-gated and a grant to the auditor is shown and then revoked (FR-10, FR-11).
 
-If any of 1-4 needs a running Reeg backend to be believable, the demo has failed its own thesis.
+If any of 1-4 needs a running Reeg backend to be believable, the product has failed its own thesis.
 </content>

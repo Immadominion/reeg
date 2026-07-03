@@ -1,6 +1,6 @@
 # Reeg: Market Data (sourced evidence)
 
-> The citable backbone for the pitch deck, demo, and any external claim. Every figure
+> The citable backbone for the pitch deck and any external claim. Every figure
 > here was gathered and **adversarially re-verified** against a named source with a year.
 > Rule: only numbers that survived verification appear here. Product numbers (costs, test
 > counts) live in [positioning.md](../00-overview/positioning.md); this file is the

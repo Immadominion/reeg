@@ -16,7 +16,7 @@ export function Hero() {
       <Container className="relative z-10 flex flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
         <Reveal>
           <h1 className="max-w-3xl text-balance text-[2.5rem] font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            Reeg is Dropbox for AI agent environments.
+            Git tracks code. Reeg tracks the environment where the work happened.
           </h1>
         </Reveal>
 

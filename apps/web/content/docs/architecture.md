@@ -95,7 +95,7 @@ verify(machine, walrus):
   # public Sui + Walrus data only, Reeg offline
 ```
 
-Tamper with the blob, the manifest, or any log event and at least one hash diverges, so verify fails. "It rejects a forged environment" is a demo beat, not a claim. Optionally, `@reeg/verify` also confirms the enclave's ed25519 signature and that the pinned PCRs match the trusted reproducible build, flagging all-zero debug-mode PCRs, which raises the bar from "this environment and history are authentic" to "this exact code produced this checkpoint."
+Tamper with the blob, the manifest, or any log event and at least one hash diverges, so verify fails: a forged environment is rejected. Optionally, `@reeg/verify` also confirms the enclave's ed25519 signature and that the pinned PCRs match the trusted reproducible build, flagging all-zero debug-mode PCRs, which raises the bar from "this environment and history are authentic" to "this exact code produced this checkpoint."
 
 ## Trust boundaries
 

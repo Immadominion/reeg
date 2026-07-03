@@ -2,28 +2,31 @@
 
 > This file is the canonical positioning for Reeg. Every other doc, the marketing
 > site, the deck, and social copy defer to it. When they disagree with this file,
-> this file wins. The **hook/tagline** is "Reeg is Dropbox for AI agent environments"
-> (lands instantly; deliberately caps at agents/environments, accepted for now). The
-> **supporting line**, used verbatim, carries the breadth: **"Reeg is infrastructure for
-> portable computing environments. We started with AI agents because they're the
-> fastest-growing source of ephemeral work, but the underlying system can preserve and move
-> any environment."** Use both as written. Agents are the wedge; any environment is the ceiling.
+> this file wins. The **hook/tagline** is "Git tracks code. Reeg tracks the environment where
+> the work happened." The **category** is "version control for environments." The audience is
+> **developers and AI agents** (not agents-only). The **supporting line**, used verbatim, is:
+> **"Reeg lets developers and AI agents checkpoint, restore, share, fork, and verify complete
+> computing environments. Every checkpoint is encrypted before it leaves your machine, stored on
+> Walrus, and anchored on Sui, allowing environments to be restored byte-identically on any host
+> and independently verified without trusting Reeg."** Use both as written. Retired, do not use:
+> "Dropbox for AI agent environments," "GitHub for AI agents."
 
 ---
 
 ## The category
 
-**Reeg is infrastructure for portable computing environments. We started with AI agents
-because they're the fastest-growing source of ephemeral work, but the underlying system
-can preserve and move any environment.**
+**Reeg is version control for environments, for developers and AI agents.** Git tracks code;
+Reeg tracks the environment where the work happened. We started with AI agents because they're
+the fastest-growing source of ephemeral work, but the underlying system can preserve and move
+any environment.
 
 Not a sandbox. Not a server. Not an OS. The layer over them. You run the work; Reeg
 versions and proves what it did. Agents are the wedge; any environment is the ceiling.
 
 ## Positioning statement (canonical)
 
-Reeg is infrastructure for portable computing environments. We started with AI agents
-because they're the fastest-growing source of ephemeral work, but the underlying system
+Reeg is version control for environments, for developers and AI agents. We started with AI
+agents because they're the fastest-growing source of ephemeral work, but the underlying system
 can preserve and move any environment. You run the work (your agent, your container,
 your microVM, someone else's cloud) and at every commit Reeg snapshots the whole
 working state, encrypts it client-side, stores it as data you own on Walrus, and
@@ -38,14 +41,14 @@ Reeg switched off.
 
 ## Hero headline
 
-**Reeg is Dropbox for AI agent environments.**
+**Git tracks code. Reeg tracks the environment where the work happened.**
 
-This is the hook. It lands instantly. It deliberately caps the framing at AI agents and
-environments; that's a known limitation the team accepts for now, because the breadth is
-carried by the infrastructure line right under it. Pair the headline with the supporting
-copy verbatim: *Reeg is infrastructure for portable computing environments. We started with
-AI agents because they're the fastest-growing source of ephemeral work, but the underlying
-system can preserve and move any environment.*
+This is the hook. Category: version control for environments. Audience: developers and AI
+agents. Pair the headline with the supporting copy verbatim: *Reeg lets developers and AI
+agents checkpoint, restore, share, fork, and verify complete computing environments. Every
+checkpoint is encrypted before it leaves your machine, stored on Walrus, and anchored on Sui,
+allowing environments to be restored byte-identically on any host and independently verified
+without trusting Reeg.*
 
 ### Subhead
 
@@ -69,7 +72,7 @@ verifiable with Reeg switched off.
 
 ## Origin story: the lineage
 
-The lead narrative. Use it for the pitch, the demo cold-open, the about page. It's *for*
+The lead narrative. Use it for the about page and any long-form intro. It's *for*
 something (an inevitability), not *against* a sandbox.
 
 ### Long (~200 words)
@@ -121,7 +124,7 @@ The first force wins users; the second makes the position hard to leave.
 
 ## Proof points (measured, use as written)
 
-- **Live on Sui mainnet today** (not a testnet demo), and on testnet: mainnet package id
+- **Live on Sui mainnet today** (and on testnet): mainnet package id
   `0xfaa6b4af63a639c06e5d02c969c28111db5f01caea1067132c789fa7ebdb241e`.
 - **Measured on a real funded run:** ~0.0099 SUI + ~0.0119 WAL per create + encrypted
   checkpoint (1 epoch, including the Walrus upload-relay tip). Package publish ~0.047 SUI;
@@ -182,39 +185,37 @@ caveat rather than hide it.
 
 ## Analogy verdict
 
-**The hook is "Reeg is Dropbox for AI agent environments."** It lands instantly, so it's the
-headline/tagline. The team accepts that it caps the framing at AI agents and environments
-(a known limitation, fine for now) because the infrastructure line carries the real breadth
-right under it.
+**The hook is "Git tracks code. Reeg tracks the environment where the work happened."** The
+category is version control for environments, for developers and AI agents.
 
-- ✅ Hook / tagline / headline: **"Reeg is Dropbox for AI agent environments."**
-- ✅ Supporting line (verbatim): "Reeg is infrastructure for portable computing
-  environments. We started with AI agents because they're the fastest-growing source of
-  ephemeral work, but the underlying system can preserve and move any environment."
-- ✅ Also fine as a *mechanic*: "version control for the whole environment, not just the
-  code," with *GitHub history can be rewritten; this cannot.*
-- ❌ Still out: "GitHub for AI agents" (caps us at agents without the instant recognition the
-  Dropbox line buys).
+- ✅ Hook / tagline / headline: **"Git tracks code. Reeg tracks the environment where the work happened."**
+- ✅ Category line: **"version control for environments."**
+- ✅ Supporting line (verbatim): "Reeg lets developers and AI agents checkpoint, restore,
+  share, fork, and verify complete computing environments. Every checkpoint is encrypted before
+  it leaves your machine, stored on Walrus, and anchored on Sui, allowing environments to be
+  restored byte-identically on any host and independently verified without trusting Reeg."
+- ✅ Also fine as a *mechanic*: *GitHub history can be rewritten; this cannot.*
+- ❌ Retired, do not use: "Dropbox for AI agent environments," "GitHub for AI agents," "GitHub
+  but better," "Own the place your work happened."
 
-Lead with the Dropbox hook; let the infrastructure line carry the breadth underneath.
+Lead with the hook; let the supporting line carry the breadth underneath.
 
 ---
 
 ## X / social bio
 
-Lead option (146 chars):
+Lead option:
 
-> Reeg is Dropbox for AI agent environments. We started with AI agents, the fastest-growing
-> source of ephemeral work, but it works for any environment.
+> Git tracks code. Reeg tracks the environment where the work happened. Version control for
+> environments, for developers and AI agents.
 
 Alternates:
-- *(155)* Infrastructure for portable computing environments. We started with AI agents, the
-  fastest-growing source of ephemeral work, but it works for any environment.
-- *(150)* Reeg is infrastructure for portable computing environments. Own any run, move it
-  byte-for-byte to any host, prove its history with Reeg switched off. Agents first.
+- Version control for environments. Own any run, move it byte-for-byte to any host, and prove
+  its history with Reeg switched off. For developers and AI agents.
+- Reeg lets you checkpoint, restore, share, fork, and verify complete computing environments,
+  owned by you and verifiable without trusting Reeg.
 
-Retired bio (do not reuse): "GitHub for AI agents." ("Dropbox for AI agent environments" is
-now the approved hook, see Hero headline.)
+Retired bios (do not reuse): "Dropbox for AI agent environments," "GitHub for AI agents."
 
 See [social-and-bio.md](../05-business/social-and-bio.md) for the full social kit.
 
@@ -235,9 +236,9 @@ See [social-and-bio.md](../05-business/social-and-bio.md) for the full social ki
 - Use "whole working state" / "whole environment." Never imply live kernel or process
   state is captured: it's the working directory plus an optional agent-memory dir.
 - **Banned words:** unlock, seamless, revolutionize, empower, supercharge, game-changing,
-  "in today's world," "the future of." **Lead with the hook verbatim** ("Reeg is Dropbox
-  for AI agent environments"), then the infrastructure line as written. Short sentences,
-  concrete nouns.
+  "in today's world," "the future of." **Lead with the hook verbatim** ("Git tracks code.
+  Reeg tracks the environment where the work happened"), then the supporting line as written.
+  Short sentences, concrete nouns.
 - Don't hide the mainnet Seal key-server caveat, and don't dwell on it. It belongs on a
   longer page or FAQ, never in the hero or bio.
 - Use only the measured numbers as written; never invent figures. When in doubt, cite the

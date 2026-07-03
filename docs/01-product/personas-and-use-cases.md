@@ -1,6 +1,6 @@
 # Personas and Use Cases
 
-Who Reeg is for, in their own words, and the concrete jobs they hire Reeg to do. Use these when writing copy, prioritizing features, or judging whether a request fits. Terms are defined in [glossary.md](../00-overview/glossary.md).
+Who Reeg is for, in their own words, and the concrete jobs they hire Reeg to do. Use these when writing copy, prioritizing features, or deciding whether a request fits. Terms are defined in [glossary.md](../00-overview/glossary.md).
 
 Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. AI-agent operators lead here because they are the fastest-growing source of work worth keeping, sharing, and standing behind: that is the wedge, not the ceiling. Reeg versions and proves the environments it moves: the same own / share / move / prove holds for any environment you run: a CI run, an eval or research environment, a data pipeline, or any reproducible workspace worth keeping. The personas below put agents first; the [non-agent use cases](#non-agent-environments-same-layer) section carries the same jobs one layer wider.
 
@@ -32,7 +32,7 @@ Reeg is infrastructure for portable computing environments. We started with AI a
 
 ## Secondary personas
 
-- P4 The Sui/Walrus ecosystem reviewer: judges and grant committees who want to see real, correct use of Walrus + Seal + on-chain provenance. They care that the verification is genuine, not theater.
+- P4 The Sui/Walrus ecosystem reviewer: a technical evaluator (grant committee, partner, or integrator) who wants to see real, correct use of Walrus + Seal + on-chain provenance. They care that the verification is genuine, not theater.
 - P5 The teammate: a colleague Aria grants read or restore rights to, so they can pick up or inspect a run. Exercises grant/revoke.
 
 ## Core use cases
@@ -53,7 +53,7 @@ Hits FR-1 to FR-4 in [requirements-analysis.md](requirements-analysis.md). Prove
 3. The Console reads Sui + Walrus and confirms the checkpoint chain and state hashes, with Reeg's server offline.
 4. Ben sees a pass and the evidence behind it.
 
-Hits FR-7, FR-8, FR-13, FR-14. Proves verifiability without trust (C2). This is the demo's centerpiece.
+Hits FR-7, FR-8, FR-13, FR-14. Proves verifiability without trust (C2). This is the product's centerpiece.
 
 ### UC-3 Grant and revoke access (Aria + Ben)
 

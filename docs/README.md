@@ -1,8 +1,6 @@
 # Reeg Documentation
 
-**Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing
-environments. We started with AI agents because they're the fastest-growing source of ephemeral
-work, but the underlying system can preserve and move any environment.** You run the work (your agent, your container, your microVM, someone
+**Git tracks code. Reeg tracks the environment where the work happened.** Reeg is version control for environments. Reeg lets developers and AI agents checkpoint, restore, share, fork, and verify complete computing environments. Every checkpoint is encrypted before it leaves your machine, stored on Walrus, and anchored on Sui, allowing environments to be restored byte-identically on any host and independently verified without trusting Reeg. You run the work (your agent, your container, your microVM, someone
 else's cloud) and at every commit Reeg snapshots the whole working state, encrypts it client-side,
 and anchors a tamper-proof record of what happened. The environment is a **Machine** object you own
 on Sui, backed by your own content-addressed data on Walrus, encrypted with Seal, with a
@@ -16,7 +14,7 @@ The four pillars: **Own** what you run (an object you hold, not a row you rent).
 workspace, not a transcript. **Move** it (kill it here, bring it back there, identical). **Prove**
 the whole history to anyone, with Reeg switched off. GitHub history can be rewritten; this cannot.
 
-Domain: [reeg.xyz](https://reeg.xyz) · Track: Sui Overflow 2026, Walrus · Status:
+Domain: [reeg.xyz](https://reeg.xyz) · Status:
 **LIVE on Sui mainnet** (and testnet), including the optional Nautilus TEE attestation
 tier.
 
@@ -50,7 +48,7 @@ tier.
 |----------------------------------------|------------|
 | A teammate joining the build           | [00-overview/product-vision.md](00-overview/product-vision.md), then [ai/AGENTS.md](ai/AGENTS.md) |
 | A non-technical person ("what is this")| [00-overview/product-vision.md](00-overview/product-vision.md) |
-| An investor / judge                    | [whitepaper/reeg-whitepaper.md](whitepaper/reeg-whitepaper.md), [05-business/business-model.md](05-business/business-model.md) |
+| An investor                            | [whitepaper/reeg-whitepaper.md](whitepaper/reeg-whitepaper.md), [05-business/business-model.md](05-business/business-model.md) |
 | An engineer about to write code        | [02-architecture/system-architecture.md](02-architecture/system-architecture.md), [03-engineering/engineering-standards.md](03-engineering/engineering-standards.md) |
 | An AI agent working on this repo       | [ai/AGENTS.md](ai/AGENTS.md) |
 
@@ -68,7 +66,7 @@ tier.
 - [requirements-analysis.md](01-product/requirements-analysis.md) - functional and non-functional requirements, prioritized.
 - [swot.md](01-product/swot.md) - strengths, weaknesses, opportunities, threats.
 - [personas-and-use-cases.md](01-product/personas-and-use-cases.md) - who uses it and for what.
-- [roadmap.md](01-product/roadmap.md) - phases from hackathon to product, no code.
+- [roadmap.md](01-product/roadmap.md) - product phases and direction, no code.
 
 ### 02 - Architecture
 

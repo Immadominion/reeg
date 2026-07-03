@@ -1,18 +1,18 @@
-# Reeg demo setup — SOURCE this once before filming (do NOT execute it):
+# Reeg environment setup: SOURCE this once to configure a testnet snapshot session (do NOT execute it):
 #
 #     cd <your reeg clone>
 #     export REEG_OPERATOR=0x<your address>      # owner; key in your Sui keystore, funded SUI+WAL
 #     export REEG_GRANTEE=0x<teammate address>   # who you'll share with
-#     export DEMO_SRC="/path/to/project/you/snapshot"   # optional; omit for a tiny sample
-#     source scripts/demo-setup.sh
+#     export REEG_SRC="/path/to/project/you/snapshot"   # optional; omit for a tiny sample
+#     source scripts/env-setup.sh
 #
-# ON CAMERA you then type only short commands:
+# Then run the short command sequence:
 #     reeg create
 #     export M=0x<id it printed>
 #     seed $M
 #     reeg checkpoint $M --epochs 1
 #     reeg verify $M
-#   (teammate, on their machine:)  reeg restore $M --dest ./restored
+#   (on another machine:)  reeg restore $M --dest ./restored
 
 REEG_DIR="${REEG_DIR:-$PWD}"
 
@@ -35,20 +35,20 @@ export REEG_ENGINE="$REEG_DIR/engine/target/debug/reeg-engine"
 export REEG_NETWORK=testnet
 export REEG_PACKAGE_ID=0x4c86e0c440c07c83c0b8372b90918f35380dc0a9ec830c77e0f172ff232b6f28
 export REEG_RPC_URL=https://fullnode.testnet.sui.io:443
-export REEG_HOME=/tmp/demo
+export REEG_HOME=/tmp/reeg-session
 export REEG_OPERATOR="${REEG_OPERATOR:-PUT-YOUR-OPERATOR-ADDRESS-HERE}"
 export REEG_GRANTEE="${REEG_GRANTEE:-PUT-TEAMMATE-ADDRESS-HERE}"
 
-# What to snapshot. Set DEMO_SRC=<your project> before sourcing; else a tiny sample is scaffolded.
-if [ -z "${DEMO_SRC:-}" ]; then
-  DEMO_SRC="$HOME/reeg-demo-project"
-  mkdir -p "$DEMO_SRC/src"
-  printf '# Portable Environment Demo\n\nThis whole working environment moves with one command.\n' > "$DEMO_SRC/README.md"
-  printf 'export const hello = () => "this environment is portable";\n' > "$DEMO_SRC/src/index.ts"
+# What to snapshot. Set REEG_SRC=<your project> before sourcing; else a tiny sample is scaffolded.
+if [ -z "${REEG_SRC:-}" ]; then
+  REEG_SRC="$HOME/reeg-sample-project"
+  mkdir -p "$REEG_SRC/src"
+  printf '# Portable Environment Demo\n\nThis whole working environment moves with one command.\n' > "$REEG_SRC/README.md"
+  printf 'export const hello = () => "this environment is portable";\n' > "$REEG_SRC/src/index.ts"
 fi
-export DEMO_SRC
+export REEG_SRC
 
-# seed <machineId>: copy DEMO_SRC into the environment's workdir, MINUS build artifacts + secrets.
+# seed <machineId>: copy REEG_SRC into the environment's workdir, MINUS build artifacts + secrets.
 # Walrus testnet can't take large blobs, so keep the snapshot small (aim < 5 MB).
 seed() {
   local dest="$REEG_HOME/machines/$1/work"
@@ -60,12 +60,12 @@ seed() {
     --exclude '*.dill' --exclude '*.wasm' --exclude '*.jar' --exclude '*.symbols' \
     --exclude '*.keystore' --exclude '*.jks' --exclude '*.p12' --exclude '*.p8' \
     --exclude '*.mobileprovision' --exclude local.properties --exclude '*.log' \
-    "$DEMO_SRC/" "$dest/"
-  echo "seeded $1 from: $DEMO_SRC  ($(du -sh "$dest" | cut -f1))"
-  echo "   if that's more than ~5MB, point DEMO_SRC at a smaller subfolder (Walrus testnet struggles with big blobs)."
+    "$REEG_SRC/" "$dest/"
+  echo "seeded $1 from: $REEG_SRC  ($(du -sh "$dest" | cut -f1))"
+  echo "   if that's more than ~5MB, point REEG_SRC at a smaller subfolder (Walrus testnet struggles with big blobs)."
 }
 
 case "$REEG_OPERATOR" in
   PUT-*) echo "set REEG_OPERATOR and REEG_GRANTEE to your funded testnet addresses, then re-source." ;;
-  *) echo "ready. snapshotting: $DEMO_SRC"; echo "on camera:  reeg create -> export M=<id> -> seed \$M -> reeg checkpoint \$M --epochs 1 -> reeg verify \$M" ;;
+  *) echo "ready. snapshotting: $REEG_SRC"; echo "run:  reeg create -> export M=<id> -> seed \$M -> reeg checkpoint \$M --epochs 1 -> reeg verify \$M" ;;
 esac

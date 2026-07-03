@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 // Floating glassy cards that frame the headline (like the Mindset Health reference) but tell a
-// coherent Reeg story for the "Dropbox for AI agent environments" positioning: an agent commits a snapshot, it is
+// coherent Reeg story for the "version control for environments" positioning: an agent commits a snapshot, it is
 // shared with a teammate, and an auditor verifies it independently. Desktop-only (xl+), where the
 // margins beside the centered headline have room; on smaller screens the hero stays clean. Entrance
 // fades in, then a slow opacity-safe vertical drift gives it life. All disabled under reduced motion.

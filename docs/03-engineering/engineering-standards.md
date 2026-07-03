@@ -7,7 +7,7 @@ How we write, review, and ship code on Reeg. The point is that a new contributor
 - Build only what is requested or clearly necessary. No speculative abstractions, no helpers for a single caller.
 - Validate at boundaries (user input, network, chain reads), not everywhere. Do not add error handling for cases that cannot happen.
 - The verification path is sacred: never introduce a dependency that makes verifying a past run require a live Reeg service.
-- Honest behavior over impressive demos. If something is checkpoint-boundary and not real-time, the code and the copy both say so.
+- Honest behavior over impressive appearances. If something is checkpoint-boundary and not real-time, the code and the copy both say so.
 
 ## Language and structure
 

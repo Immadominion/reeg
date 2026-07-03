@@ -9,7 +9,7 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://reeg.xyz'),
   title: {
-    default: 'Reeg: Dropbox for AI agent environments',
+    default: 'Reeg: version control for environments',
     template: '%s · Reeg',
   },
   description:
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://reeg.xyz',
     siteName: 'Reeg',
-    title: 'Reeg: Dropbox for AI agent environments',
+    title: 'Reeg: version control for environments',
     description:
       "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Live on Sui mainnet.",
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reeg: Dropbox for AI agent environments',
+    title: 'Reeg: version control for environments',
     description:
       "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Live on Sui mainnet.",
   },

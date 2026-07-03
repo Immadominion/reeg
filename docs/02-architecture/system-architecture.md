@@ -174,8 +174,8 @@ with no Reeg backend in the loop. See [data-model.md](data-model.md) for the exa
    Walrus data only**. Match means the environment and its history are exactly what was
    claimed; `restore()` then mounts it.
 6. **Adversarial guarantee:** tamper with the blob, the manifest, or any log event
-   and at least one hash diverges, so verify fails. "It rejects a forged environment"
-   is a demo beat, not a claim.
+   and at least one hash diverges, so verify fails. Rejecting a forged environment is
+   a tested property, not a marketing claim.
 7. **Optional attestation check:** `@reeg/verify` additionally confirms the enclave's
    ed25519 signature and that the pinned PCRs match the trusted reproducible build, and
    flags all-zero debug-mode PCRs. This raises the bar from "this environment and history

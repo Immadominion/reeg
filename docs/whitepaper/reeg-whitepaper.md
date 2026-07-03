@@ -1,8 +1,8 @@
 # Reeg Whitepaper
 
-Version: Sui Overflow 2026. This document stands on its own; you can share it with someone who has read nothing else. For the verified platform details behind every technical claim, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
+This document stands on its own; you can share it with someone who has read nothing else. For the verified platform details behind every technical claim, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
 
-Tagline: **Reeg is Dropbox for AI agent environments.** Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment.
+Tagline: **Git tracks code. Reeg tracks the environment where the work happened.** Reeg is version control for environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment.
 
 Contact: <hello@reeg.xyz>. Security disclosures: <security@reeg.xyz>.
 
@@ -266,7 +266,7 @@ and let anyone verify it offline. We do what the fast boxes do, on top of the on
 they cannot: real ownership of the place your agents work. It is live on Sui mainnet
 today.
 
-Reeg is Dropbox for AI agent environments. Own it, share it, move it, prove it.
+Git tracks code. Reeg tracks the environment where the work happened. Own it, share it, move it, prove it.
 
 Learn more: reeg.xyz. Contact: <hello@reeg.xyz>.
 </content>

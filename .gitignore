@@ -52,5 +52,5 @@ evidence-*.json
 # local UI screenshots (scratch)
 .ui-shots/
 
-# generated per-machine by scripts/demo-setup.sh (hardcodes a local undici path)
+# generated per-machine by the local env-setup script (hardcodes a local undici path)
 scripts/fresh-conn.mjs

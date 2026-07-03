@@ -49,7 +49,7 @@ function Hero() {
         Live on Sui testnet
       </span>
       <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-        GitHub for AI agents.
+        Git tracks code. Reeg tracks the environment where the work happened.
       </h1>
       <p className="mx-auto mt-5 max-w-xl text-pretty text-lg text-muted-foreground">
         Snapshot, prove, share, and move what your agents do. Every run is an environment you own,

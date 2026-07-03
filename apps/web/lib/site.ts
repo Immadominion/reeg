@@ -3,7 +3,7 @@
 // complete without implying a page is live. Update the marked entries as surfaces come online.
 export const site = {
   name: 'Reeg',
-  tagline: 'Reeg is Dropbox for AI agent environments.',
+  tagline: 'Git tracks code. Reeg tracks the environment where the work happened.',
   positioning:
     "Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment.",
   appUrl: 'https://app.reeg.xyz', // the Console (separate deploy)

@@ -2,7 +2,7 @@
   "name": "reeg",
   "version": "0.0.0",
   "private": true,
-  "description": "Reeg: GitHub for AI agents. Snapshot, prove, share, and move what your agents do.",
+  "description": "Reeg: version control for environments. Git tracks code. Reeg tracks the environment where the work happened.",
   "type": "module",
   "packageManager": "pnpm@10.33.1",
   "engines": {

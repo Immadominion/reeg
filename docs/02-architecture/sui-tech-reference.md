@@ -25,6 +25,10 @@ SDK**. Pin these versions; treat anything newer as an upgrade to evaluate, not a
 | Nautilus | (Move + TEE) | custom PCR verification | **live on Sui mainnet (2026)** | docs.sui.io/concepts/cryptography/nautilus |
 | MemWal | MemWal SDK | beta (Mar 25 2026) | public beta | docs.memwal.ai, github.com/MystenLabs/MemWal |
 
+MemWal (Walrus Memory) is a shipped public-beta SDK for verifiable, available, portable,
+shareable agent memory, with semantic search and Vercel AI SDK integration
+(github.com/MystenLabs/MemWal).
+
 Version pins are config, not code (see [engineering-standards.md](../03-engineering/engineering-standards.md)). Re-verify before mainnet cutover.
 
 ---
@@ -217,35 +221,7 @@ launch blocker, and do not imply the core product needs a TEE.
 
 ---
 
-## 5. Sui Overflow 2026 Walrus track (the target)
-
-**Source:** Sui Overflow 2026 participant handbook (mystenlabs.notion.site).
-
-- Track ask: "Build AI agents and agentic workflows powered by Walrus as a
-  **verifiable data and memory layer**."
-- Prizes: 1st **$35,000**, 2nd $15,000, 3rd $7,500, 4th $5,000, plus $7,500 across
-  honorable mentions.
-- Payout: 50% on winner announcement, 50% after successful mainnet deployment.
-  **100% upfront if already on mainnet by the Aug 27 announcement.**
-- Timeline (Pacific): build through **June 21** (submission deadline), shortlist July
-  8, Demo Day **July 20-21**, winners **Aug 27** (pitched at Sui Basecamp 2026).
-- Submission: public GitHub repo (public during judging), demo video <=5 min (YouTube
-  preferred), testnet or mainnet deploy at shortlisting, package ID if on-chain.
-- Judging: **Real-World Application 50%**, Product & UX 20%, Technical 20%,
-  Presentation & Vision 10%.
-- Official Walrus resources include **MemWal (Walrus Memory), docs.memwal.ai**, with
-  a sanctioned Walrus Memory workshop. Walrus mentor for office hours: Abner. As of
-  late March 2026 MemWal is a **shipped public-beta SDK** (verifiable, available,
-  portable, shareable agent memory; semantic search; Vercel AI SDK integration;
-  github.com/MystenLabs/MemWal), not a future promise.
-- **Confirm the live timeline and prize figures against the official handbook before
-  relying on them.** Dates and amounts above are from the handbook snapshot we hold;
-  some third-party trackers list different submission/demo dates. The handbook is
-  authoritative; re-check it, do not trust secondary sources.
-
----
-
-## 6. Source index
+## 5. Source index
 
 - Sui object model / Move / PTBs: <https://docs.sui.io> , <https://www.sui.io/move> ,
   sui-types `Owner` enum (github.com/MystenLabs/sui).
@@ -256,5 +232,4 @@ launch blocker, and do not imply the core product needs a TEE.
   <https://blog.sui.io> , github.com/MystenLabs/nautilus , Move bootcamp K4.
 - MemWal: <https://docs.memwal.ai> , github.com/MystenLabs/MemWal .
 - SDK versions: npmjs.com/package/@mysten/sui , /@mysten/walrus , /@mysten/seal .
-- Track: Sui Overflow 2026 handbook (mystenlabs.notion.site/overflow-2026-handbook).
 </content>

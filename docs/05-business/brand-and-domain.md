@@ -76,7 +76,7 @@ borrowed a brand to do it. We kept agents as the wedge (the fastest-growing sour
 work worth keeping) and broadened the category to computing environments. Git survives
 only as a mechanic, never the handle: "version control for the whole environment, not
 just the code," paired with the one thing GitHub cannot match, "GitHub history can be
-rewritten; this cannot." The headline is now "Reeg is Dropbox for AI agent environments."
+rewritten; this cannot." The headline is now "Git tracks code. Reeg tracks the environment where the work happened." and the category is "version control for environments."
 
 ## What the brand is not
 

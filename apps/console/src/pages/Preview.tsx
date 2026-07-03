@@ -435,7 +435,8 @@ function HomePopulated() {
       <section className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Your environments</h1>
         <p className="text-sm text-muted-foreground">
-          GitHub for AI agents. Open one to see its history and verify it yourself.
+          Git tracks code. Reeg tracks the environment where the work happened. Open one to see its
+          history and verify it yourself.
         </p>
       </section>
       <ul className="space-y-2">

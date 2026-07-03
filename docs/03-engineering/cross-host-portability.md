@@ -1,7 +1,7 @@
 # Cross-host portability (build-roadmap Phase J)
 
 Moving a run to a host that never saw it, and proving the moved copy is the same one. This records
-what restore-on-a-fresh-host guarantees, how the acceptance demo proves it, and the honest limits.
+what restore-on-a-fresh-host guarantees, how the acceptance test proves it, and the honest limits.
 The headline acceptance bar is C1 through C4 together: own, share, move, prove.
 
 ## What a fresh host needs
@@ -29,7 +29,7 @@ host. `reeg verify`, reading only public Sui + Walrus, then confirms the restore
 one the chain pinned and that the provenance chain replays to the on-chain head, with no Reeg
 service involved (NFR-1).
 
-The acceptance demo ([test/live/acceptance.ts](../../test/live/acceptance.ts),
+The acceptance test ([test/live/acceptance.ts](../../test/live/acceptance.ts),
 `pnpm --filter @reeg/test run live:acceptance`) proves this end to end: host A creates and
 checkpoints, host A is then deleted, a fresh host B restores from Sui + Walrus alone and its
 working directory hashes identically to A's, verify passes offline, a grantee on a third host C

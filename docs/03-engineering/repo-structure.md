@@ -27,7 +27,7 @@ reeg/
     console/                 # Console web app, deployed as a Walrus Site
     indexer/                 # off-chain indexer of Machine + provenance events
   config/                    # network configs (testnet, mainnet): RPC, aggregators, key servers
-  scripts/                   # deploy, publish-package, seed-demo
+  scripts/                   # deploy, publish-package
   test/                      # cross-package integration + end-to-end tests
 ```
 

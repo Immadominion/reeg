@@ -8,22 +8,48 @@ export const docsNav: DocSection[] = [
   {
     title: 'Get started',
     pages: [
-      { slug: 'introduction', title: 'Introduction', blurb: 'What Reeg is, and why environments are the last thing in computing to become portable.' },
-      { slug: 'quickstart', title: 'Quickstart', blurb: 'Create, checkpoint, move, share, and prove an environment from the CLI.' },
+      {
+        slug: 'introduction',
+        title: 'Introduction',
+        blurb:
+          'What Reeg is, and why environments are the last thing in computing to become portable.',
+      },
+      {
+        slug: 'quickstart',
+        title: 'Quickstart',
+        blurb: 'Create, checkpoint, move, share, and prove an environment from the CLI.',
+      },
     ],
   },
   {
     title: 'Concepts',
     pages: [
-      { slug: 'how-it-works', title: 'How it works', blurb: 'The commit boundary, the snapshot, and verification with Reeg switched off.' },
-      { slug: 'architecture', title: 'Architecture', blurb: 'The Machine package, the snapshot engine, runtime tiers, and the verification chain.' },
+      {
+        slug: 'how-it-works',
+        title: 'How it works',
+        blurb: 'The commit boundary, the snapshot, and verification with Reeg switched off.',
+      },
+      {
+        slug: 'architecture',
+        title: 'Architecture',
+        blurb:
+          'The Machine package, the snapshot engine, runtime tiers, and the verification chain.',
+      },
     ],
   },
   {
     title: 'Reference',
     pages: [
-      { slug: 'cli-reference', title: 'CLI reference', blurb: 'Every reeg verb, its flags, and the environment variables.' },
-      { slug: 'faq', title: 'FAQ', blurb: 'Honest answers: trust, encryption, mainnet vs testnet, and cost.' },
+      {
+        slug: 'cli-reference',
+        title: 'CLI reference',
+        blurb: 'Every reeg verb, its flags, and the environment variables.',
+      },
+      {
+        slug: 'faq',
+        title: 'FAQ',
+        blurb: 'Honest answers: trust, encryption, mainnet vs testnet, and cost.',
+      },
     ],
   },
 ];

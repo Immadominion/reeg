@@ -2,7 +2,7 @@
 
 ## The one line
 
-**Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing environments: AI-agent runs first.**
+**Git tracks code. Reeg tracks the environment where the work happened.** Reeg is version control for environments, for developers and AI agents.
 
 Reeg is infrastructure for portable computing environments. We started with AI agents
 because they're the fastest-growing source of ephemeral work, but the underlying system

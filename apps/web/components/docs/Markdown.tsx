@@ -10,7 +10,10 @@ import { cn } from '@/lib/cn';
 // is allowed via rehype-raw: the content is our own, not user input.
 const components: Components = {
   h1: ({ node, ...p }) => (
-    <h1 className="mb-4 mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl" {...p} />
+    <h1
+      className="mb-4 mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl"
+      {...p}
+    />
   ),
   h2: ({ node, ...p }) => (
     <h2
@@ -22,7 +25,10 @@ const components: Components = {
     <h3 className="mt-8 mb-3 scroll-mt-24 text-lg font-semibold tracking-tight" {...p} />
   ),
   h4: ({ node, ...p }) => (
-    <h4 className="mt-6 mb-2 scroll-mt-24 text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground" {...p} />
+    <h4
+      className="mt-6 mb-2 scroll-mt-24 text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+      {...p}
+    />
   ),
   p: ({ node, ...p }) => <p className="my-4 leading-7 text-foreground/90" {...p} />,
   a: ({ node, ...p }) => (

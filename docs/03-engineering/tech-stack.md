@@ -2,7 +2,7 @@
 
 What Reeg is built with and why each piece is here. For background on the underlying Sui/Walrus/Seal primitives, see [sui-tech-reference.md](../02-architecture/sui-tech-reference.md).
 
-> Reeg is Dropbox for AI agent environments. Reeg is infrastructure for portable computing environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Snapshot, prove, share, and move it.
+> Git tracks code. Reeg tracks the environment where the work happened. Reeg is version control for environments. We started with AI agents because they're the fastest-growing source of ephemeral work, but the underlying system can preserve and move any environment. Snapshot, prove, share, and move it.
 
 Reeg is the layer **over** the sandbox you already run: your agent, your container, your microVM, someone else's cloud. It makes each environment a **Machine** object you own on Sui: at every commit the whole working state (filesystem and memory) is snapshotted to content-addressed blobs on Walrus, encrypted client-side with Seal, with a hash-chained provenance log anchored on Sui that anyone can verify **offline** from public Sui + Walrus data alone, no Reeg backend. It does not run your workload or hold your compute. We started with AI agents because they're the fastest-growing source of work worth keeping, sharing, and standing behind, but the same layer preserves, moves, and proves any environment you run. Reeg is **live on Sui mainnet**.
 
@@ -34,7 +34,7 @@ We pick the best language per layer instead of forcing one language everywhere. 
 - TypeScript for the Sui/Walrus/Seal client and glue layer, the public SDK, the CLI, the indexer, and the Console. The official `@mysten/sui`, `@mysten/seal`, and `@mysten/walrus` SDKs are TypeScript-first, so the chain, storage, and encryption integration is fastest and least error-prone in TS. The SDK and CLI live where our users already are (the JS/TS agent ecosystem), and the Console is a Walrus Site, so it must run in the browser, which forces TS there regardless.
 - The Rust engine and TS client meet at **one** artifact boundary (a manifest + content-addressed files). The engine produces and consumes a manifest (content hashes plus deltas) and content-addressed files; the TypeScript client encrypts, uploads to Walrus, and anchors on Sui. The engine never imports a chain/storage client, and neither side reaches into the other's internals, matching the adapter separation in [repo-structure.md](repo-structure.md).
 - The runtime surface is kept narrow on purpose so that restore can be reproducible enough for verification to mean something.
-- Console deployed as a Walrus Site (static, no privileged backend) so the demo has no hidden server doing the trusting.
+- Console deployed as a Walrus Site (static, no privileged backend) so there is no hidden server doing the trusting.
 - An off-chain indexer for Console responsiveness, rebuildable from chain events and never on the verification trust path.
 
 ## Snapshot engine (Rust)

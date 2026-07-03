@@ -16,8 +16,8 @@
 Alternates:
 - **(150)** Reeg is infrastructure for portable computing environments. Own any run, move it
   byte-for-byte to any host, prove its history with Reeg switched off. Agents first.
-- **(149)** We started with AI agents. We're building for every environment. Own the place
-  your work happened: move it anywhere, prove it with Reeg switched off.
+- **(149)** We started with AI agents. We're building for every environment. version control for environments:
+  move it anywhere, prove it with Reeg switched off.
 
 **Avoid:** "Dropbox for AI agent environments" and "GitHub for AI agents". Both cage us to
 agents and aren't the message.
@@ -36,11 +36,11 @@ switched off.
 
 ## Social card / OpenGraph
 
-- **OG / Twitter title:** Reeg: Dropbox for AI agent environments
+- **OG / Twitter title:** Reeg: version control for environments
 - **OG / Twitter description:** The version-control and proof layer over your sandbox.
   Snapshot a run, move it byte-identical to any host, and prove its whole history offline.
   Live on Sui mainnet. AI agents first.
-- **Card image line:** *Reeg is Dropbox for AI agent environments.*
+- **Card image line:** *Git tracks code. Reeg tracks the environment where the work happened.*
 
 ---
 
@@ -62,7 +62,7 @@ switched off.
 > it, prove it. Any environment you run.
 
 **The receipts**
-> Not a testnet demo. Live on Sui mainnet today (pkg 0xfaa6…db241e). Measured: ~0.0099 SUI +
+> Live on Sui mainnet today (pkg 0xfaa6…db241e). Measured: ~0.0099 SUI +
 > ~0.0119 WAL per create + encrypted checkpoint. Restore verified byte-identical across
 > hosts and runtime tiers on a real KVM box.
 
